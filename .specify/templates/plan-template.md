@@ -31,7 +31,13 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Verify against `.specify/memory/constitution.md`:
+
+- **Local-First**: Design supports local deployment (e.g., Docker Compose); no mandatory cloud egress.
+- **Observability-First**: Logs → queryable store; metrics derived and exposed; dashboards provisioned.
+- **Evidence-Backed AI**: Agent uses only approved tools; structured output; no production remediation.
+- **User Stories**: Feature is specified as independently testable user stories with acceptance criteria.
+- **Simplicity**: Scope within PRD; extra complexity documented in Complexity Tracking table below.
 
 ## Project Structure
 
