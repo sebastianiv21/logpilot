@@ -121,8 +121,8 @@
 
 **Purpose**: Documentation and validation
 
-- [ ] T038 [P] Update README with setup, env vars, and link to quickstart in specs/001-log-investigation-mvp/quickstart.md
-- [ ] T039 Run full quickstart.md flow (compose up, create session, upload, Grafana, ingest, generate report, export) and fix gaps
+- [x] T038 [P] Update README with setup, env vars, and link to quickstart in specs/001-log-investigation-mvp/quickstart.md
+- [x] T039 Run full quickstart.md flow (compose up, create session, upload, Grafana, ingest, generate report, export) and fix gaps
 
 ---
 

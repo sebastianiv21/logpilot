@@ -89,12 +89,15 @@ curl -X POST http://localhost:8000/knowledge/ingest -H "Content-Type: applicatio
 curl -X POST http://localhost:8000/sessions/SESSION_ID/reports/generate -H "Content-Type: application/json" -d '{"question":"Why did the service fail?"}'
 ```
 
-- List reports, then export (Markdown or PDF):
+- List reports. Report generation runs in the background; poll until content is present, then export (Markdown or PDF):
 
 ```bash
+# Poll until content is non-empty: GET .../reports/REPORT_ID
 curl -o report.md "http://localhost:8000/sessions/SESSION_ID/reports/REPORT_ID/export?format=markdown"
 curl -o report.pdf "http://localhost:8000/sessions/SESSION_ID/reports/REPORT_ID/export?format=pdf"
 ```
+
+(Export returns 409 until the report has content.)
 
 ---
 
