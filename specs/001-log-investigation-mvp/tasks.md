@@ -55,14 +55,14 @@
 
 **Independent Test**: Upload a valid compressed log archive, verify parsing summary (files_processed, lines_parsed, lines_rejected), then query by label and time range to retrieve log lines.
 
-- [ ] T014 [US1] Implement safe zip extraction with path traversal validation (pathlib.Path resolve, is_relative_to) in backend/app/lib/archive.py
-- [ ] T015 [US1] Implement log file pattern filter (.log, .csv, .json; optional .log.*, stdout, stderr) and archive size checks (100 MB compressed, 500 MB uncompressed) in backend/app/services/upload.py
-- [ ] T016 [US1] Implement log line parser: JSON parse first, then regex patterns with named groups (timestamp, level, message); normalized schema; preserve raw_message; report parsed/rejected counts in backend/app/services/log_parser.py
-- [ ] T017 [US1] Implement service/environment label derivation from archive path (path-based convention e.g. logs/<service>/<env>; fallback to single upload-scoped label) in backend/app/services/labels.py
-- [ ] T018 [US1] Implement upload pipeline: extract → filter → parse → normalize → push to Loki with session_id and labels; return upload result (status, files_processed, files_skipped, lines_parsed, lines_rejected, session_id, error) in backend/app/services/upload.py
-- [ ] T019 [US1] Implement session CRUD API: GET /sessions, POST /sessions, GET /sessions/{session_id}, PATCH /sessions/{session_id} in backend/app/api/sessions.py
-- [ ] T020 [US1] Add POST /sessions/{session_id}/logs/upload endpoint (multipart file; 413/400 on size or validation; 404 if session not found) in backend/app/api/upload.py
-- [ ] T021 [US1] Add POST /sessions/{session_id}/logs/query endpoint (time range, label filters; return log records with raw_message) in backend/app/api/logs.py
+- [x] T014 [US1] Implement safe zip extraction with path traversal validation (pathlib.Path resolve, is_relative_to) in backend/app/lib/archive.py
+- [x] T015 [US1] Implement log file pattern filter (.log, .csv, .json; optional .log.*, stdout, stderr) and archive size checks (100 MB compressed, 500 MB uncompressed) in backend/app/services/upload.py
+- [x] T016 [US1] Implement log line parser: JSON parse first, then regex patterns with named groups (timestamp, level, message); normalized schema; preserve raw_message; report parsed/rejected counts in backend/app/services/log_parser.py
+- [x] T017 [US1] Implement service/environment label derivation from archive path (path-based convention e.g. logs/<service>/<env>; fallback to single upload-scoped label) in backend/app/services/labels.py
+- [x] T018 [US1] Implement upload pipeline: extract → filter → parse → normalize → push to Loki with session_id and labels; return upload result (status, files_processed, files_skipped, lines_parsed, lines_rejected, session_id, error) in backend/app/services/upload.py
+- [x] T019 [US1] Implement session CRUD API: GET /sessions, POST /sessions, GET /sessions/{session_id}, PATCH /sessions/{session_id} in backend/app/api/sessions.py
+- [x] T020 [US1] Add POST /sessions/{session_id}/logs/upload endpoint (multipart file; 413/400 on size or validation; 404 if session not found) in backend/app/api/upload.py
+- [x] T021 [US1] Add POST /sessions/{session_id}/logs/query endpoint (time range, label filters; return log records with raw_message) in backend/app/api/logs.py
 
 **Checkpoint**: User Story 1 complete — upload and query logs by session
 

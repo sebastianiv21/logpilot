@@ -121,6 +121,7 @@ Contract tests validate API and agent tool schemas; see `specs/001-log-investiga
 ## Troubleshooting
 
 - **Upload 413 or "archive too large"**: Respect 100 MB compressed / 500 MB uncompressed limit.
+- **Upload returns NetworkError or request never appears in server logs**: If you open the API through a **tunnel** (e.g. Cursor port forwarding, cloud proxy), POST requests with a body are often dropped or not forwarded. Use **localhost** in the browser (`http://localhost:8000/docs`) when the browser and backend run on the same machine, or test upload with **curl** from the same host: `curl -X POST http://localhost:8000/sessions/SESSION_ID/logs/upload -F "file=@path/to/logs.zip"`.
 - **No logs in Grafana**: Confirm session_id in Loki labels; check upload response for `lines_parsed` > 0.
 - **Agent "knowledge not available"**: Run knowledge ingestion and ensure Qdrant is up.
 - **PDF export fails**: Ensure PDF dependency (e.g. weasyprint) is installed; see backend README.
