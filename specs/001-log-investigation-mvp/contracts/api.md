@@ -40,10 +40,10 @@ Public HTTP API surface for the backend. All endpoints are relative to a base UR
 - **Body**: `{ "name": "<string|null>", "external_link": "<string|null>" }` (partial; only provided fields updated)
 - **Response**: `200` — updated session object; `404` if not found.
 
-### Set current session (optional)
+### Set current session (optional, deferred for MVP)
 
-- **POST** `/sessions/current` or **Header** `X-Session-Id: <uuid>` on other endpoints.
-- Contract: at least one way to scope requests to a session (header or body param) for upload, query, and report generation.
+- **MVP**: Session scoping is **path-only**. All endpoints that need a session require `session_id` in the path (e.g. `POST /sessions/{session_id}/logs/upload`, `GET /sessions/{session_id}/reports`). Clients pass the session id in the URL for each request; no "current session" state is required.
+- **Post-MVP (optional)**: A future revision may add **POST** `/sessions/current` (body: `session_id`) or **Header** `X-Session-Id: <uuid>` so that clients can set a default session and call session-scoped endpoints without repeating the id in every path. Until then, the contract is satisfied by path-only session selection.
 
 ---
 
