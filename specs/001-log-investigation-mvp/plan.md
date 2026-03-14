@@ -51,18 +51,19 @@ specs/001-log-investigation-mvp/
 
 ```text
 backend/
-├── src/
+├── app/
 │   ├── models/          # Domain models, session, log record, report
 │   ├── services/        # Upload, parsing, ingestion, metrics, knowledge, agent
 │   ├── api/             # FastAPI routes: upload, sessions, reports, export
-│   └── lib/             # Shared utilities, Loki/Prometheus/Qdrant clients
+│   ├── lib/             # Shared utilities, Loki/Prometheus/Qdrant clients
+│   └── main.py          # FastAPI app entry (run: uv run fastapi dev app/main.py)
 └── tests/
     ├── contract/        # API and tool schema contracts
     ├── integration/
     └── unit/
 
 docker/                  # Dockerfile(s), Grafana provisioning configs
-compose.yaml             # Or docker-compose.yml at root: Loki, Prometheus, Grafana, Qdrant, backend
+docker-compose.yaml      # At root: Loki, Prometheus, Grafana, Qdrant, backend
 ```
 
 **Structure Decision**: Backend-focused Python service with Docker Compose for Loki, Prometheus, Grafana, and Qdrant. Grafana provides dashboard UI; backend API provides upload, session management, knowledge ingestion, agent invocation, and report export. Optional minimal web UI can be added later for upload/session/report without changing core architecture.

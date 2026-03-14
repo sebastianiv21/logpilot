@@ -13,8 +13,8 @@
 
 ## Path Conventions
 
-- **Backend**: `backend/src/`, `backend/tests/` (per plan.md)
-- **Infrastructure**: `compose.yaml` at repo root, `docker/` for Grafana provisioning
+- **Backend**: `backend/app/`, `backend/tests/` (per plan.md). Run dev server: `cd backend && uv run fastapi dev app/main.py`
+- **Infrastructure**: `docker-compose.yaml` at repo root, `docker/` for Grafana provisioning
 
 ---
 
@@ -22,11 +22,11 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create backend directory structure per plan.md: backend/src/models, backend/src/services, backend/src/api, backend/src/lib, backend/tests/contract, backend/tests/integration, backend/tests/unit
-- [ ] T002 Initialize Python 3.11+ project in backend/ with pyproject.toml (or requirements.txt) including FastAPI, httpx, uvicorn, openai, qdrant-client
-- [ ] T003 [P] Add compose.yaml at repo root with services: Loki, Prometheus, Grafana, Qdrant (ports per quickstart.md)
-- [ ] T004 Add backend service to compose.yaml (build from backend/, env from config, depends_on: Loki, Prometheus, Grafana, Qdrant; expose API port e.g. 8000) so full stack runs with one orchestration (FR-013)
-- [ ] T005 [P] Configure ruff and pytest in backend/ (pyproject.toml or setup.cfg)
+- [x] T001 Create backend directory structure per plan.md: backend/app/models, backend/app/services, backend/app/api, backend/app/lib, backend/tests/contract, backend/tests/integration, backend/tests/unit
+- [x] T002 Initialize Python 3.11+ project in backend/ with pyproject.toml (or requirements.txt) including FastAPI, httpx, uvicorn, openai, qdrant-client
+- [x] T003 [P] Add docker-compose.yaml at repo root with services: Loki, Prometheus, Grafana, Qdrant (ports per quickstart.md)
+- [x] T004 Add backend service to docker-compose.yaml (build from backend/, env from config, depends_on: Loki, Prometheus, Grafana, Qdrant; expose API port e.g. 8000) so full stack runs with one orchestration (FR-013)
+- [x] T005 [P] Configure ruff and pytest in backend/ (pyproject.toml or setup.cfg)
 
 ---
 
@@ -36,13 +36,13 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Create SQLite schema and initialization for sessions and reports tables in backend/src/lib/db.py (or backend/src/models/db.py)
-- [ ] T007 Implement application config from environment (LOKI_URL, PROMETHEUS_URL, QDRANT_URL, LLM_BASE_URL, LLM_API_KEY, LLM_MODEL, DATA_DIR) in backend/src/lib/config.py
-- [ ] T008 [P] Create Session model (id, name, external_link, created_at, updated_at) in backend/src/models/session.py
-- [ ] T009 [P] Create Report model (id, session_id, content, created_at) in backend/src/models/report.py
-- [ ] T010 Implement Session repository (CRUD) and Report repository (create, list by session, get by id) in backend/src/lib/repositories.py (or backend/src/services/session_repo.py and report_repo.py)
-- [ ] T011 Setup FastAPI app with router mounting and global exception handler returning structured detail (400/404/413/422) in backend/src/api/app.py
-- [ ] T012 Implement Loki push client (POST /loki/api/v1/push with labels and nanosecond timestamps) in backend/src/lib/loki_client.py
+- [ ] T006 Create SQLite schema and initialization for sessions and reports tables in backend/app/lib/db.py (or backend/app/models/db.py)
+- [ ] T007 Implement application config from environment (LOKI_URL, PROMETHEUS_URL, QDRANT_URL, LLM_BASE_URL, LLM_API_KEY, LLM_MODEL, DATA_DIR) in backend/app/lib/config.py
+- [ ] T008 [P] Create Session model (id, name, external_link, created_at, updated_at) in backend/app/models/session.py
+- [ ] T009 [P] Create Report model (id, session_id, content, created_at) in backend/app/models/report.py
+- [ ] T010 Implement Session repository (CRUD) and Report repository (create, list by session, get by id) in backend/app/lib/repositories.py (or backend/app/services/session_repo.py and report_repo.py)
+- [ ] T011 Setup FastAPI app with router mounting and global exception handler returning structured detail (400/404/413/422) in backend/app/api/app.py
+- [ ] T012 Implement Loki push client (POST /loki/api/v1/push with labels and nanosecond timestamps) in backend/app/lib/loki_client.py
 - [ ] T013 [P] Add contract test for sessions API (list, create, get, update) and upload response schema per specs/001-log-investigation-mvp/contracts/api.md in backend/tests/contract/test_api_sessions.py
 
 **Checkpoint**: Foundation ready — user story implementation can now begin
@@ -55,14 +55,14 @@
 
 **Independent Test**: Upload a valid compressed log archive, verify parsing summary (files_processed, lines_parsed, lines_rejected), then query by label and time range to retrieve log lines.
 
-- [ ] T014 [US1] Implement safe zip extraction with path traversal validation (pathlib.Path resolve, is_relative_to) in backend/src/lib/archive.py
-- [ ] T015 [US1] Implement log file pattern filter (.log, .csv, .json; optional .log.*, stdout, stderr) and archive size checks (100 MB compressed, 500 MB uncompressed) in backend/src/services/upload.py
-- [ ] T016 [US1] Implement log line parser: JSON parse first, then regex patterns with named groups (timestamp, level, message); normalized schema; preserve raw_message; report parsed/rejected counts in backend/src/services/log_parser.py
-- [ ] T017 [US1] Implement service/environment label derivation from archive path (path-based convention e.g. logs/<service>/<env>; fallback to single upload-scoped label) in backend/src/services/labels.py
-- [ ] T018 [US1] Implement upload pipeline: extract → filter → parse → normalize → push to Loki with session_id and labels; return upload result (status, files_processed, files_skipped, lines_parsed, lines_rejected, session_id, error) in backend/src/services/upload.py
-- [ ] T019 [US1] Implement session CRUD API: GET /sessions, POST /sessions, GET /sessions/{session_id}, PATCH /sessions/{session_id} in backend/src/api/sessions.py
-- [ ] T020 [US1] Add POST /sessions/{session_id}/logs/upload endpoint (multipart file; 413/400 on size or validation; 404 if session not found) in backend/src/api/upload.py
-- [ ] T021 [US1] Add POST /sessions/{session_id}/logs/query endpoint (time range, label filters; return log records with raw_message) in backend/src/api/logs.py
+- [ ] T014 [US1] Implement safe zip extraction with path traversal validation (pathlib.Path resolve, is_relative_to) in backend/app/lib/archive.py
+- [ ] T015 [US1] Implement log file pattern filter (.log, .csv, .json; optional .log.*, stdout, stderr) and archive size checks (100 MB compressed, 500 MB uncompressed) in backend/app/services/upload.py
+- [ ] T016 [US1] Implement log line parser: JSON parse first, then regex patterns with named groups (timestamp, level, message); normalized schema; preserve raw_message; report parsed/rejected counts in backend/app/services/log_parser.py
+- [ ] T017 [US1] Implement service/environment label derivation from archive path (path-based convention e.g. logs/<service>/<env>; fallback to single upload-scoped label) in backend/app/services/labels.py
+- [ ] T018 [US1] Implement upload pipeline: extract → filter → parse → normalize → push to Loki with session_id and labels; return upload result (status, files_processed, files_skipped, lines_parsed, lines_rejected, session_id, error) in backend/app/services/upload.py
+- [ ] T019 [US1] Implement session CRUD API: GET /sessions, POST /sessions, GET /sessions/{session_id}, PATCH /sessions/{session_id} in backend/app/api/sessions.py
+- [ ] T020 [US1] Add POST /sessions/{session_id}/logs/upload endpoint (multipart file; 413/400 on size or validation; 404 if session not found) in backend/app/api/upload.py
+- [ ] T021 [US1] Add POST /sessions/{session_id}/logs/query endpoint (time range, label filters; return log records with raw_message) in backend/app/api/logs.py
 
 **Checkpoint**: User Story 1 complete — upload and query logs by session
 
@@ -74,8 +74,8 @@
 
 **Independent Test**: Ingest logs with relevant fields; verify derived metrics are queryable and at least one dashboard shows error rate, request volume, error distribution, log volume.
 
-- [ ] T022 [US2] Implement metrics derivation from log events (errors_total, requests_total, error_rate, response_time distribution when latency present) in backend/src/services/metrics.py
-- [ ] T023 [US2] Expose or push derived metrics to Prometheus with session-scoped labels in backend/src/lib/prometheus_client.py
+- [ ] T022 [US2] Implement metrics derivation from log events (errors_total, requests_total, error_rate, response_time distribution when latency present) in backend/app/services/metrics.py
+- [ ] T023 [US2] Expose or push derived metrics to Prometheus with session-scoped labels in backend/app/lib/prometheus_client.py
 - [ ] T024 [US2] Add Grafana provisioning config for at least one default dashboard (error rate, request volume, error distribution, log volume) in docker/grafana/provisioning/dashboards/ or equivalent
 - [ ] T025 [US2] Ensure dashboard panels and datasource are scoped to session (or document session selector usage) in dashboard JSON
 
@@ -89,10 +89,10 @@
 
 **Independent Test**: Ingest markdown/text and source files; run semantic search; verify chunks returned with source_path and metadata.
 
-- [ ] T026 [US3] Implement chunking and embedding for docs/repo content (markdown, text, source) in backend/src/services/knowledge.py
-- [ ] T027 [US3] Implement Qdrant client: store chunks with content, embedding, source_path, document_type, metadata in backend/src/lib/qdrant_client.py
-- [ ] T028 [US3] Add POST /knowledge/ingest endpoint (sources from body or config; repeatable) in backend/src/api/knowledge.py
-- [ ] T029 [US3] Add POST /knowledge/search endpoint (query, limit; return chunks with content, source_path, metadata) in backend/src/api/knowledge.py
+- [ ] T026 [US3] Implement chunking and embedding for docs/repo content (markdown, text, source) in backend/app/services/knowledge.py
+- [ ] T027 [US3] Implement Qdrant client: store chunks with content, embedding, source_path, document_type, metadata in backend/app/lib/qdrant_client.py
+- [ ] T028 [US3] Add POST /knowledge/ingest endpoint (sources from body or config; repeatable) in backend/app/api/knowledge.py
+- [ ] T029 [US3] Add POST /knowledge/search endpoint (query, limit; return chunks with content, source_path, metadata) in backend/app/api/knowledge.py
 
 **Checkpoint**: User Story 3 complete — knowledge base ingest and search
 
@@ -104,14 +104,14 @@
 
 **Independent Test**: After logs, metrics, and knowledge are available, ask an incident question; verify agent uses tools and report has required sections; export report as Markdown and PDF.
 
-- [ ] T030 [US4] Implement configurable LLM client (OpenAI base_url + api_key from config) in backend/src/lib/llm_client.py
-- [ ] T031 [US4] Implement agent tools: query_logs, query_metrics, search_docs, search_repo with input validation and session/time scope per specs/001-log-investigation-mvp/contracts/agent-tools.md in backend/src/services/agent_tools.py
-- [ ] T032 [US4] Implement generate_incident_report and structured report schema (Incident Summary, Possible Root Cause, Supporting Evidence, Recommended Fix, next steps) in backend/src/services/agent.py
-- [ ] T033 [US4] Implement agent orchestration (question → tool calls → report; prompt injection resistance; store report in session) in backend/src/services/agent.py
-- [ ] T034 [US4] Add POST /sessions/{session_id}/reports/generate (body: question; store report; return report id and optional content) in backend/src/api/reports.py
-- [ ] T035 [US4] Add GET /sessions/{session_id}/reports and GET /sessions/{session_id}/reports/{report_id} in backend/src/api/reports.py
-- [ ] T036 [US4] Implement report export (Markdown: return content; PDF: weasyprint or reportlab) in backend/src/services/export.py
-- [ ] T037 [US4] Add GET /sessions/{session_id}/reports/{report_id}/export?format=markdown|pdf in backend/src/api/reports.py
+- [ ] T030 [US4] Implement configurable LLM client (OpenAI base_url + api_key from config) in backend/app/lib/llm_client.py
+- [ ] T031 [US4] Implement agent tools: query_logs, query_metrics, search_docs, search_repo with input validation and session/time scope per specs/001-log-investigation-mvp/contracts/agent-tools.md in backend/app/services/agent_tools.py
+- [ ] T032 [US4] Implement generate_incident_report and structured report schema (Incident Summary, Possible Root Cause, Supporting Evidence, Recommended Fix, next steps) in backend/app/services/agent.py
+- [ ] T033 [US4] Implement agent orchestration (question → tool calls → report; prompt injection resistance; store report in session) in backend/app/services/agent.py
+- [ ] T034 [US4] Add POST /sessions/{session_id}/reports/generate (body: question; store report; return report id and optional content) in backend/app/api/reports.py
+- [ ] T035 [US4] Add GET /sessions/{session_id}/reports and GET /sessions/{session_id}/reports/{report_id} in backend/app/api/reports.py
+- [ ] T036 [US4] Implement report export (Markdown: return content; PDF: weasyprint or reportlab) in backend/app/services/export.py
+- [ ] T037 [US4] Add GET /sessions/{session_id}/reports/{report_id}/export?format=markdown|pdf in backend/app/api/reports.py
 
 **Checkpoint**: User Story 4 complete — end-to-end investigation and export
 

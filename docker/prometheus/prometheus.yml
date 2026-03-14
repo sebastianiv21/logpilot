@@ -1,0 +1,6 @@
+# Minimal Prometheus config for LogPilot MVP
+# Add scrape configs for backend metrics when Phase 2 is ready
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]

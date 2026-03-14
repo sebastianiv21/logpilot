@@ -1,0 +1,30 @@
+# Python and env
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Git and IDE
+.git/
+.gitignore
+.idea/
+.vscode/
+*.md
+!README.md
+
+# Tests (optional: exclude from image for smaller build)
+# tests/
+
+# Local data
+data/
+*.db
+*.sqlite

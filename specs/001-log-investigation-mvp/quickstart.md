@@ -9,7 +9,7 @@ Minimal steps to run the full stack locally and validate the feature. Use this f
 ## Prerequisites
 
 - Docker and Docker Compose
-- Python 3.11+ (for local backend development)
+- Python 3.14+ (for local backend development)
 - LLM API key (OpenAI, OpenRouter, or any OpenAI-compatible endpoint) — set in environment
 
 ---
@@ -45,7 +45,13 @@ Backend can run in Docker or on the host (see below).
   - `QDRANT_URL` — e.g. `http://localhost:6333`
   - `DATA_DIR` — (optional) Directory for SQLite and temp extraction; default e.g. `./data`
 
-Create a session, then upload a log archive:
+From the repository root, start the backend dev server:
+
+```bash
+cd backend && uv run fastapi dev app/main.py
+```
+
+API base URL: `http://localhost:8000`. Then create a session and upload a log archive:
 
 ```bash
 # Create session
