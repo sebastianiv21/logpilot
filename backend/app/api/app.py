@@ -13,6 +13,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 
 from app.api.knowledge import router as knowledge_router
 from app.api.logs import router as logs_router
+from app.api.reports import router as reports_router
 from app.api.sessions import router as sessions_router
 from app.api.upload import router as upload_router
 from app.lib.prometheus_client import get_metrics
@@ -66,6 +67,7 @@ class RootResponse(BaseModel):
 app.include_router(sessions_router)
 app.include_router(upload_router)
 app.include_router(logs_router)
+app.include_router(reports_router)
 app.include_router(knowledge_router)
 
 

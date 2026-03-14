@@ -104,14 +104,14 @@
 
 **Independent Test**: After logs, metrics, and knowledge are available, ask an incident question; verify agent uses tools and report has required sections; export report as Markdown and PDF.
 
-- [ ] T030 [US4] Implement configurable LLM client (OpenAI base_url + api_key from config) in backend/app/lib/llm_client.py
-- [ ] T031 [US4] Implement agent tools: query_logs, query_metrics, search_docs, search_repo with input validation and session/time scope per specs/001-log-investigation-mvp/contracts/agent-tools.md in backend/app/services/agent_tools.py
-- [ ] T032 [US4] Implement generate_incident_report and structured report schema (Incident Summary, Possible Root Cause, Supporting Evidence, Recommended Fix, next steps) in backend/app/services/agent.py
-- [ ] T033 [US4] Implement agent orchestration (question → tool calls → report; prompt injection resistance; store report in session) in backend/app/services/agent.py
-- [ ] T034 [US4] Add POST /sessions/{session_id}/reports/generate (body: question; store report; return report id and optional content) in backend/app/api/reports.py
-- [ ] T035 [US4] Add GET /sessions/{session_id}/reports and GET /sessions/{session_id}/reports/{report_id} in backend/app/api/reports.py
-- [ ] T036 [US4] Implement report export (Markdown: return content; PDF: weasyprint or reportlab) in backend/app/services/export.py
-- [ ] T037 [US4] Add GET /sessions/{session_id}/reports/{report_id}/export?format=markdown|pdf in backend/app/api/reports.py
+- [x] T030 [US4] Implement configurable LLM client (OpenAI base_url + api_key from config) in backend/app/lib/llm_client.py
+- [x] T031 [US4] Implement agent tools: query_logs, query_metrics, search_docs, search_repo with input validation and session/time scope per specs/001-log-investigation-mvp/contracts/agent-tools.md in backend/app/services/agent_tools.py
+- [x] T032 [US4] Implement generate_incident_report and structured report schema (Incident Summary, Possible Root Cause, Supporting Evidence, Recommended Fix, next steps) in backend/app/services/agent.py
+- [x] T033 [US4] Implement agent orchestration (question → tool calls → report; prompt injection resistance; store report in session) in backend/app/services/agent.py
+- [x] T034 [US4] Add POST /sessions/{session_id}/reports/generate (body: question; store report; return report id and optional content) in backend/app/api/reports.py
+- [x] T035 [US4] Add GET /sessions/{session_id}/reports and GET /sessions/{session_id}/reports/{report_id} in backend/app/api/reports.py
+- [x] T036 [US4] Implement report export (Markdown: return content; PDF: weasyprint or reportlab) in backend/app/services/export.py
+- [x] T037 [US4] Add GET /sessions/{session_id}/reports/{report_id}/export?format=markdown|pdf in backend/app/api/reports.py
 
 **Checkpoint**: User Story 4 complete — end-to-end investigation and export
 

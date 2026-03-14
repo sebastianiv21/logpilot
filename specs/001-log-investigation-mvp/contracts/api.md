@@ -72,8 +72,7 @@ Public HTTP API surface for the backend. All endpoints are relative to a base UR
 
 - **POST** `/sessions/{session_id}/reports/generate`
 - **Body**: `{ "question": "<natural-language incident question>" }`
-- **Response**: `202` Accepted (async) or `200` (sync) with report id and optionally content.
-  - Body: `{ "id": "<uuid>", "session_id": "<uuid>", "created_at": "<ISO8601>", "content": "<markdown>|null" }`
+- **Response**: `202` Accepted. Body: `{ "id": "<uuid>", "session_id": "<uuid>", "created_at": "<ISO8601>", "content": null }`. Generation runs in the background; clients should poll **GET** `/sessions/{session_id}/reports/{report_id}` until `content` is non-empty (or an error message). Export returns `409` if content is not yet ready.
 - **Behavior**: Agent uses only approved tools; returns structured report; report stored in session.
 
 ### Get report

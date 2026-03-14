@@ -234,9 +234,15 @@ def ingest(sources: list[Path], *, replace: bool = True) -> dict[str, Any]:
     return {"chunks_ingested": len(chunks), "files_processed": files_count}
 
 
-def search_knowledge(query: str, limit: int = 10) -> list[dict[str, Any]]:
+def search_knowledge(
+    query: str,
+    limit: int = 10,
+    *,
+    document_type_filter: str | list[str] | None = None,
+) -> list[dict[str, Any]]:
     """
     Embed the query and run semantic search; return chunks with content, source_path, metadata.
+    document_type_filter: e.g. "source" for repo only, or ["markdown", "text"] for docs only.
     """
     if not query.strip():
         return []
@@ -247,4 +253,8 @@ def search_knowledge(query: str, limit: int = 10) -> list[dict[str, Any]]:
     vectors = _get_embeddings(texts)
     if not vectors:
         return []
-    return qdrant_search(vectors[0], limit=limit)
+    return qdrant_search(
+        vectors[0],
+        limit=limit,
+        document_type_filter=document_type_filter,
+    )

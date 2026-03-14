@@ -87,17 +87,38 @@ def search(
     *,
     content_key: str = "content",
     source_path_key: str = "source_path",
+    document_type_key: str = "document_type",
     metadata_key: str = "metadata",
+    document_type_filter: str | list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """
     Semantic search: return chunks with content, source_path, metadata.
+    If document_type_filter is set, only chunks with matching document_type are returned
+    (e.g. "source" for repo, or a list like ["markdown","text"] for docs).
     """
     ensure_collection()
     client = _client()
+    query_filter = None
+    if document_type_filter is not None:
+        if isinstance(document_type_filter, str):
+            query_filter = qmodels.Filter(
+                must=[qmodels.FieldCondition(
+                    key=document_type_key,
+                    match=qmodels.MatchValue(value=document_type_filter),
+                )]
+            )
+        else:
+            query_filter = qmodels.Filter(
+                must=[qmodels.FieldCondition(
+                    key=document_type_key,
+                    match=qmodels.MatchAny(any=document_type_filter),
+                )]
+            )
     response = client.query_points(
         collection_name=COLLECTION_NAME,
         query=query_embedding,
         limit=limit,
+        query_filter=query_filter,
     )
     results = response.points
     return [

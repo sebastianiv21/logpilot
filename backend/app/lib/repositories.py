@@ -192,3 +192,17 @@ class ReportRepository:
         finally:
             if self._own_conn and self._conn is None:
                 conn.close()
+
+    def update_content(self, report_id: str, session_id: str, content: str) -> bool:
+        """Update report content by id and session_id. Returns True if a row was updated."""
+        conn = self._connection()
+        try:
+            cur = conn.execute(
+                "UPDATE reports SET content = ? WHERE id = ? AND session_id = ?",
+                (content, report_id, session_id),
+            )
+            conn.commit()
+            return cur.rowcount > 0
+        finally:
+            if self._own_conn and self._conn is None:
+                conn.close()
