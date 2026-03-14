@@ -36,14 +36,14 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Create SQLite schema and initialization for sessions and reports tables in backend/app/lib/db.py (or backend/app/models/db.py)
-- [ ] T007 Implement application config from environment (LOKI_URL, PROMETHEUS_URL, QDRANT_URL, LLM_BASE_URL, LLM_API_KEY, LLM_MODEL, DATA_DIR) in backend/app/lib/config.py
-- [ ] T008 [P] Create Session model (id, name, external_link, created_at, updated_at) in backend/app/models/session.py
-- [ ] T009 [P] Create Report model (id, session_id, content, created_at) in backend/app/models/report.py
-- [ ] T010 Implement Session repository (CRUD) and Report repository (create, list by session, get by id) in backend/app/lib/repositories.py (or backend/app/services/session_repo.py and report_repo.py)
-- [ ] T011 Setup FastAPI app with router mounting and global exception handler returning structured detail (400/404/413/422) in backend/app/api/app.py
-- [ ] T012 Implement Loki push client (POST /loki/api/v1/push with labels and nanosecond timestamps) in backend/app/lib/loki_client.py
-- [ ] T013 [P] Add contract test for sessions API (list, create, get, update) and upload response schema per specs/001-log-investigation-mvp/contracts/api.md in backend/tests/contract/test_api_sessions.py
+- [x] T006 Create SQLite schema and initialization for sessions and reports tables in backend/app/lib/db.py (or backend/app/models/db.py)
+- [x] T007 Implement application config from environment (LOKI_URL, PROMETHEUS_URL, QDRANT_URL, LLM_BASE_URL, LLM_API_KEY, LLM_MODEL, DATA_DIR) in backend/app/lib/config.py
+- [x] T008 [P] Create Session model (id, name, external_link, created_at, updated_at) in backend/app/models/session.py
+- [x] T009 [P] Create Report model (id, session_id, content, created_at) in backend/app/models/report.py
+- [x] T010 Implement Session repository (CRUD) and Report repository (create, list by session, get by id) in backend/app/lib/repositories.py (or backend/app/services/session_repo.py and report_repo.py)
+- [x] T011 Setup FastAPI app with router mounting and global exception handler returning structured detail (400/404/413/422) in backend/app/api/app.py
+- [x] T012 Implement Loki push client (POST /loki/api/v1/push with labels and nanosecond timestamps) in backend/app/lib/loki_client.py
+- [x] T013 [P] Add contract test for sessions API (list, create, get, update) and upload response schema per specs/001-log-investigation-mvp/contracts/api.md in backend/tests/contract/test_api_sessions.py
 
 **Checkpoint**: Foundation ready — user story implementation can now begin
 
