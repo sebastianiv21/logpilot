@@ -1,0 +1,36 @@
+---
+description: Project Development Guidelines
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# logpilot Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2026-03-13
+
+## Active Technologies
+
+- Python 3.11+ (typed) + FastAPI, Loki client (e.g. promtail or push API), Prometheus client, Grafana provisioning API, Qdrant client, OpenAI-compatible LLM client (configurable base URL + API key) (001-log-investigation-mvp)
+
+## Project Structure
+
+```text
+backend/
+frontend/
+tests/
+```
+
+## Commands
+
+cd src [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLOGIES] pytest [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLOGIES] ruff check .
+
+## Code Style
+
+Python 3.11+ (typed): Follow standard conventions
+
+## Recent Changes
+
+- 001-log-investigation-mvp: Added Python 3.11+ (typed) + FastAPI, Loki client (e.g. promtail or push API), Prometheus client, Grafana provisioning API, Qdrant client, OpenAI-compatible LLM client (configurable base URL + API key)
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->
