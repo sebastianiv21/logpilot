@@ -8,8 +8,10 @@ from pathlib import Path
 from app.lib.archive import PathTraversalError, extract_zip_safe
 from app.lib.config import config
 from app.lib.loki_client import push_logs
+from app.lib.prometheus_client import record_metrics
 from app.services.labels import derive_labels_from_file_path
 from app.services.log_parser import parse_lines
+from app.services.metrics import derive_metrics
 
 # Limits per spec (MVP)
 MAX_COMPRESSED_BYTES = 100 * 1024 * 1024   # 100 MB
@@ -136,6 +138,16 @@ def run_upload_pipeline(
                 if records:
                     records.sort(key=lambda r: r.timestamp_ns)
                     push_logs([r.to_loki_entry() for r in records], labels)
+
+                    derived = derive_metrics(records)
+                    record_metrics(
+                        session_id=session_id,
+                        service=labels.get("service", "upload"),
+                        errors=derived.errors_total,
+                        total=derived.requests_total,
+                        rate=derived.error_rate,
+                        response_times=derived.response_times,
+                    )
 
         status = "partial" if (lines_rejected > 0 or files_skipped > 0) else "success"
         return UploadResult(

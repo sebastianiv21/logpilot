@@ -74,10 +74,10 @@
 
 **Independent Test**: Ingest logs with relevant fields; verify derived metrics are queryable and at least one dashboard shows error rate, request volume, error distribution, log volume.
 
-- [ ] T022 [US2] Implement metrics derivation from log events (errors_total, requests_total, error_rate, response_time distribution when latency present) in backend/app/services/metrics.py
-- [ ] T023 [US2] Expose or push derived metrics to Prometheus with session-scoped labels in backend/app/lib/prometheus_client.py
-- [ ] T024 [US2] Add Grafana provisioning config for at least one default dashboard (error rate, request volume, error distribution, log volume) in docker/grafana/provisioning/dashboards/ or equivalent
-- [ ] T025 [US2] Ensure dashboard panels and datasource are scoped to session (or document session selector usage) in dashboard JSON
+- [x] T022 [US2] Implement metrics derivation from log events (errors_total, requests_total, error_rate, response_time distribution when latency present) in backend/app/services/metrics.py
+- [x] T023 [US2] Expose or push derived metrics to Prometheus with session-scoped labels in backend/app/lib/prometheus_client.py
+- [x] T024 [US2] Add Grafana provisioning config for at least one default dashboard (error rate, request volume, error distribution, log volume) in docker/grafana/provisioning/dashboards/ or equivalent
+- [x] T025 [US2] Ensure dashboard panels and datasource are scoped to session (or document session selector usage) in dashboard JSON
 
 **Checkpoint**: User Story 2 complete — metrics and dashboard available
 
