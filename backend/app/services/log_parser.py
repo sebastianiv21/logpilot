@@ -109,6 +109,14 @@ LOG_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
             r"(?P<message>.+)$",
         ),
     ),
+    # Go default log format: "2026/03/13 12:44:49 message"
+    (
+        "go_log",
+        re.compile(
+            r"^(?P<timestamp>\d{4}/\d{2}/\d{2}\s+\d{2}:\d{2}:\d{2})\s+"
+            r"(?P<message>.+)$",
+        ),
+    ),
     # Level only at start (no timestamp)
     (
         "level_only",
@@ -145,6 +153,9 @@ def _parse_iso_timestamp(ts_str: str) -> int | None:
     """Parse ISO-like or bracket timestamp to nanoseconds since epoch."""
     try:
         s = ts_str.strip().strip("[]").replace(",", ".")
+        # Go default log format: "2026/03/13 12:44:49" → normalize to ISO
+        if len(s) >= 10 and s[4] == "/" and s[7] == "/":
+            s = s[:4] + "-" + s[5:7] + "-" + s[8:]
 
         normalized = s[:-1] + "+00:00" if s.endswith("Z") else s
         for tz_name in ("UTC", "GMT"):
@@ -284,21 +295,75 @@ def parse_line(
     )
 
 
+_CONTINUATION_RE = re.compile(
+    r"^(?:"
+    r"\s*at\s"          # stack trace ("at ..." or "    at ...")
+    r"|[\s\t]+"         # indented continuation
+    r"|[}\])]"          # closing brace/bracket
+    r"|Caused by[:\s]"  # Java chained exceptions
+    r")"
+)
+
+_STARTS_NEW_ENTRY_RE = re.compile(
+    r"^(?:"
+    r"\d{4}[-/]\d{2}[-/]\d{2}"     # ISO or Go timestamp start
+    r"|\[\d{4}[-/]"                 # bracketed timestamp "[2026-..."
+    r"|\w{3}\s+\d{1,2}\s+\d{2}:"   # RFC3164
+    r"|\{\""                        # JSON object (opening brace + quote)
+    rf"|(?:{_LEVEL_ALT})[\s:]"      # bare level prefix
+    r")",
+    re.IGNORECASE,
+)
+
+
+def _is_continuation(clean: str) -> bool:
+    """True if the line looks like a continuation of a previous multi-line log entry."""
+    if _CONTINUATION_RE.match(clean):
+        return True
+    if not _STARTS_NEW_ENTRY_RE.match(clean):
+        return True
+    return False
+
+
 def parse_lines(
     lines: list[str],
     *,
     source_file: str | None = None,
 ) -> tuple[list[ParsedLogRecord], int]:
     """
-    Parse multiple lines. Returns (parsed_records, rejected_count).
-    Rejected = unstructured lines (no JSON, no regex match); still ingested with ingest timestamp.
+    Parse multiple lines with multi-line folding. Returns (parsed_records, rejected_count).
+
+    Continuation lines (stack traces, indented text, lines without a leading
+    timestamp/level) are folded into the preceding structured record rather than
+    being emitted as separate rejected entries.
+
+    Rejected = unstructured lines that couldn't be folded; still ingested with
+    ingest timestamp.
     """
     base_ts = int(time.time() * 1_000_000_000)
     parsed: list[ParsedLogRecord] = []
     rejected = 0
+
+    prev_structured: ParsedLogRecord | None = None
+
     for i, line in enumerate(lines):
+        stripped = line.strip()
+        clean = ANSI_RE.sub("", stripped)
+
+        if not clean:
+            continue
+
+        raw_for_cont = ANSI_RE.sub("", line.rstrip())
+        if prev_structured is not None and _is_continuation(raw_for_cont):
+            prev_structured.raw_message += "\n" + clean
+            prev_structured.message += "\n" + clean
+            continue
+
         record = parse_line(line, source_file=source_file, default_ts_ns=base_ts + i)
         parsed.append(record)
-        if not record.structured:
+        if record.structured:
+            prev_structured = record
+        else:
             rejected += 1
+
     return parsed, rejected
