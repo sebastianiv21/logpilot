@@ -1,4 +1,5 @@
 """FastAPI app with router mounting and global exception handler."""
+
 import logging
 import time
 
@@ -10,6 +11,7 @@ from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import ASGIApp, Receive, Scope, Send
 
+from app.api.knowledge import router as knowledge_router
 from app.api.logs import router as logs_router
 from app.api.sessions import router as sessions_router
 from app.api.upload import router as upload_router
@@ -64,6 +66,7 @@ class RootResponse(BaseModel):
 app.include_router(sessions_router)
 app.include_router(upload_router)
 app.include_router(logs_router)
+app.include_router(knowledge_router)
 
 
 @app.get("/metrics", include_in_schema=False)

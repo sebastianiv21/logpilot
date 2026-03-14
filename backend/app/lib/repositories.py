@@ -1,4 +1,5 @@
 """Session and Report repositories (CRUD and list/get)."""
+
 import sqlite3
 import uuid
 from datetime import UTC, datetime

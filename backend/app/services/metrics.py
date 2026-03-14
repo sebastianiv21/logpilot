@@ -1,4 +1,5 @@
 """Derive metrics from parsed log events: errors, requests, error rate, response time."""
+
 from __future__ import annotations
 
 import json
@@ -34,7 +35,7 @@ def _extract_latency_from_json(raw: str) -> float | None:
     """Try to parse raw_message as JSON and extract a latency value in seconds."""
     try:
         obj = json.loads(raw)
-    except (json.JSONDecodeError, TypeError):
+    except json.JSONDecodeError, TypeError:
         return None
     if not isinstance(obj, dict):
         return None
@@ -44,7 +45,7 @@ def _extract_latency_from_json(raw: str) -> float | None:
             continue
         try:
             num = float(val)
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             continue
         if num < 0:
             continue

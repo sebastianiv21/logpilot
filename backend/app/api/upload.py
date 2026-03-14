@@ -1,4 +1,5 @@
 """POST /sessions/{session_id}/logs/upload — multipart file; 413/400/404 per contract."""
+
 from __future__ import annotations
 
 import asyncio

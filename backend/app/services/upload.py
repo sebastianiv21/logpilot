@@ -1,4 +1,5 @@
 """Upload pipeline: extract → filter → parse → push to Loki; log file patterns and size checks."""
+
 from __future__ import annotations
 
 import tempfile
@@ -14,7 +15,7 @@ from app.services.log_parser import parse_lines
 from app.services.metrics import derive_metrics
 
 # Limits per spec (MVP)
-MAX_COMPRESSED_BYTES = 100 * 1024 * 1024   # 100 MB
+MAX_COMPRESSED_BYTES = 100 * 1024 * 1024  # 100 MB
 MAX_UNCOMPRESSED_BYTES = 500 * 1024 * 1024  # 500 MB
 
 # Log file patterns: .log, .csv, .json; optional .log.*, stdout, stderr

@@ -8,7 +8,9 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
 COPY app ./app
-RUN uv sync --frozen --no-dev
+COPY entrypoint.sh /app/entrypoint.sh
+RUN uv sync --frozen --no-dev && chmod +x /app/entrypoint.sh
 
 EXPOSE 8000
+ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["uv", "run", "fastapi", "run", "app/main.py", "--port", "8000"]

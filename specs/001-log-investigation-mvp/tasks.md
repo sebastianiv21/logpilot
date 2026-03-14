@@ -89,10 +89,10 @@
 
 **Independent Test**: Ingest markdown/text and source files; run semantic search; verify chunks returned with source_path and metadata.
 
-- [ ] T026 [US3] Implement chunking and embedding for docs/repo content (markdown, text, source) in backend/app/services/knowledge.py
-- [ ] T027 [US3] Implement Qdrant client: store chunks with content, embedding, source_path, document_type, metadata in backend/app/lib/qdrant_client.py
-- [ ] T028 [US3] Add POST /knowledge/ingest endpoint (sources from body or config; repeatable) in backend/app/api/knowledge.py
-- [ ] T029 [US3] Add POST /knowledge/search endpoint (query, limit; return chunks with content, source_path, metadata) in backend/app/api/knowledge.py
+- [x] T026 [US3] Implement chunking and embedding for docs/repo content (markdown, text, source) in backend/app/services/knowledge.py
+- [x] T027 [US3] Implement Qdrant client: store chunks with content, embedding, source_path, document_type, metadata in backend/app/lib/qdrant_client.py
+- [x] T028 [US3] Add POST /knowledge/ingest endpoint (sources from body or config; repeatable) in backend/app/api/knowledge.py
+- [x] T029 [US3] Add POST /knowledge/search endpoint (query, limit; return chunks with content, source_path, metadata) in backend/app/api/knowledge.py
 
 **Checkpoint**: User Story 3 complete — knowledge base ingest and search
 

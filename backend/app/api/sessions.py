@@ -1,4 +1,5 @@
 """Sessions API: list, create, get, update."""
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -61,9 +62,7 @@ def get_session(session_id: str) -> SessionResponse:
 
 
 @router.patch("/{session_id}", response_model=SessionResponse)
-def update_session(
-    session_id: str, body: SessionUpdateBody | None = None
-) -> SessionResponse:
+def update_session(session_id: str, body: SessionUpdateBody | None = None) -> SessionResponse:
     """PATCH /sessions/{session_id} — partial update (name, external_link). 404 if not found."""
     body = body or SessionUpdateBody()
     session = _repo.update(session_id, name=body.name, external_link=body.external_link)

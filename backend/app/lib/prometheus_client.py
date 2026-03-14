@@ -1,4 +1,5 @@
 """Prometheus metrics registry and instrumentation for LogPilot."""
+
 from __future__ import annotations
 
 from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram, generate_latest

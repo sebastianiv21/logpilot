@@ -1,4 +1,5 @@
 """Log line parser: JSON first, then regex; normalized schema; preserve raw_message."""
+
 from __future__ import annotations
 
 import json
@@ -267,7 +268,7 @@ def parse_line(
                 source_file=source_file,
                 structured=True,
             )
-    except (json.JSONDecodeError, TypeError):
+    except json.JSONDecodeError, TypeError:
         pass
 
     for _name, pattern in LOG_PATTERNS:
@@ -297,20 +298,20 @@ def parse_line(
 
 _CONTINUATION_RE = re.compile(
     r"^(?:"
-    r"\s*at\s"          # stack trace ("at ..." or "    at ...")
-    r"|[\s\t]+"         # indented continuation
-    r"|[}\])]"          # closing brace/bracket
+    r"\s*at\s"  # stack trace ("at ..." or "    at ...")
+    r"|[\s\t]+"  # indented continuation
+    r"|[}\])]"  # closing brace/bracket
     r"|Caused by[:\s]"  # Java chained exceptions
     r")"
 )
 
 _STARTS_NEW_ENTRY_RE = re.compile(
     r"^(?:"
-    r"\d{4}[-/]\d{2}[-/]\d{2}"     # ISO or Go timestamp start
-    r"|\[\d{4}[-/]"                 # bracketed timestamp "[2026-..."
-    r"|\w{3}\s+\d{1,2}\s+\d{2}:"   # RFC3164
-    r"|\{\""                        # JSON object (opening brace + quote)
-    rf"|(?:{_LEVEL_ALT})[\s:]"      # bare level prefix
+    r"\d{4}[-/]\d{2}[-/]\d{2}"  # ISO or Go timestamp start
+    r"|\[\d{4}[-/]"  # bracketed timestamp "[2026-..."
+    r"|\w{3}\s+\d{1,2}\s+\d{2}:"  # RFC3164
+    r"|\{\""  # JSON object (opening brace + quote)
+    rf"|(?:{_LEVEL_ALT})[\s:]"  # bare level prefix
     r")",
     re.IGNORECASE,
 )

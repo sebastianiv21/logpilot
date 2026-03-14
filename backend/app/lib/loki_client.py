@@ -1,4 +1,5 @@
 """Loki push and query client: push with labels/nanosecond timestamps; query_range for logs."""
+
 from __future__ import annotations
 
 import httpx
@@ -68,9 +69,11 @@ def query_logs(
     for stream in data.get("data", {}).get("result", []):
         labels = stream.get("stream", {})
         for ts_ns, line in stream.get("values", []):
-            result.append({
-                "timestamp_ns": int(ts_ns),
-                "raw_message": line,
-                **labels,
-            })
+            result.append(
+                {
+                    "timestamp_ns": int(ts_ns),
+                    "raw_message": line,
+                    **labels,
+                }
+            )
     return result

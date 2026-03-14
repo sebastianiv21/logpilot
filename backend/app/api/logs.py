@@ -1,4 +1,5 @@
 """POST /sessions/{session_id}/logs/query — time range, label filters; return log records."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
@@ -89,6 +90,4 @@ def query_session_logs(
         limit=limit,
     )
 
-    return LogsQueryResponse(
-        logs=[LogRecordResponse.model_validate(r) for r in records]
-    )
+    return LogsQueryResponse(logs=[LogRecordResponse.model_validate(r) for r in records])

@@ -1,4 +1,5 @@
 """Report domain model."""
+
 from dataclasses import dataclass
 from typing import Any
 

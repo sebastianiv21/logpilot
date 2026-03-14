@@ -1,4 +1,5 @@
 """SQLite schema and initialization for sessions and reports (MVP metadata store)."""
+
 import sqlite3
 from pathlib import Path
 
