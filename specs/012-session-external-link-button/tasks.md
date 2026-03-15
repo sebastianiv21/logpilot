@@ -55,8 +55,8 @@
 
 **Purpose**: Validation and optional cleanup.
 
-- [ ] T003 Run `specs/012-session-external-link-button/quickstart.md` validation (manual steps 1–5) to confirm all acceptance scenarios and edge cases (validates SC-001–SC-004)
-- [ ] T004 [P] (Optional) Extract session title row (title + optional external link + session ID) into a presentational component under `frontend/src/components/` if desired for clarity; keep behavior unchanged per plan.md
+- [x] T003 Run `specs/012-session-external-link-button/quickstart.md` validation (manual steps 1–5) to confirm all acceptance scenarios and edge cases (validates SC-001–SC-004)
+- [x] T004 [P] (Optional) Extract session title row (title + optional external link + session ID) into a presentational component under `frontend/src/components/` if desired for clarity; keep behavior unchanged per plan.md
 
 ---
 
