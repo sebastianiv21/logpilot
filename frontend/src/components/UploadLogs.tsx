@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
+import { formatDistanceToNow, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import { Upload } from 'lucide-react';
 import { ApiError, getUploadSummary, uploadLogs } from '../services/api';
@@ -213,6 +214,19 @@ export function UploadLogs() {
                 ? 'Complete (some files or lines skipped/rejected)'
                 : 'Success'}
           </p>
+          {(resultForCurrentSession.uploaded_file_name ?? resultForCurrentSession.updated_at) && (
+            <p className="text-sm text-base-content/80 mt-1">
+              {resultForCurrentSession.uploaded_file_name && (
+                <span>File: {resultForCurrentSession.uploaded_file_name}</span>
+              )}
+              {resultForCurrentSession.uploaded_file_name && resultForCurrentSession.updated_at && ' · '}
+              {resultForCurrentSession.updated_at && (
+                <span>
+                  Uploaded {formatDistanceToNow(parseISO(resultForCurrentSession.updated_at), { addSuffix: true })}
+                </span>
+              )}
+            </p>
+          )}
           {resultForCurrentSession.status !== 'failed' ? (
             <>
               <UploadSummaryCharts result={resultForCurrentSession} />

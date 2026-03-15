@@ -59,10 +59,10 @@
 
 **Independent Test**: Upload a .zip file; summary shows its name (e.g. "my-logs.zip") and when the upload occurred (e.g. "2 hours ago" or date/time). After session switch, summary area shows loading then data with file name and upload time. New session shows loading then empty/neutral state.
 
-- [ ] T006 [P] [US2] Add optional `uploaded_file_name` and `updated_at` (z.string().nullable() or z.string().optional()) to UploadResultSchema in frontend/src/lib/schemas.ts
-- [ ] T007 [US2] Ensure getUploadSummary and uploadLogs response types and parsing include uploaded_file_name and updated_at in frontend/src/services/api.ts (implement after T006 so schema is available)
-- [ ] T008 [US2] Display uploaded file name and when the upload occurred (e.g. date/time or relative time like "2 hours ago" from updated_at) in the latest upload summary block when present in frontend/src/components/UploadLogs.tsx
-- [ ] T009 [US2] Show loading indicator (spinner or skeleton) in the upload summary area while upload-summary query is loading (isLoading/isFetching and no data); show empty/neutral state on 404 in frontend/src/components/UploadLogs.tsx
+- [x] T006 [P] [US2] Add optional `uploaded_file_name` and `updated_at` (z.string().nullable() or z.string().optional()) to UploadResultSchema in frontend/src/lib/schemas.ts
+- [x] T007 [US2] Ensure getUploadSummary and uploadLogs response types and parsing include uploaded_file_name and updated_at in frontend/src/services/api.ts (implement after T006 so schema is available)
+- [x] T008 [US2] Display uploaded file name and when the upload occurred (e.g. date/time or relative time like "2 hours ago" from updated_at) in the latest upload summary block when present in frontend/src/components/UploadLogs.tsx
+- [x] T009 [US2] Show loading indicator (spinner or skeleton) in the upload summary area while upload-summary query is loading (isLoading/isFetching and no data); show empty/neutral state on 404 in frontend/src/components/UploadLogs.tsx
 
 **Checkpoint**: User Story 2 is done; file name and upload time in summary and loading state work.
 
