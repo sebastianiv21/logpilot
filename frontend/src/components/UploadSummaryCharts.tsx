@@ -1,28 +1,70 @@
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
+  PieChart,
+  Pie,
+  Cell,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from 'recharts';
 import type { UploadResult } from '../lib/schemas';
 
-const BAR_COLORS = { Processed: 'hsl(var(--su))', Skipped: 'hsl(var(--wa))', Parsed: 'hsl(var(--su))', Rejected: 'hsl(var(--er))' };
+const COLORS = {
+  Processed: 'hsl(var(--su))',
+  Skipped: 'hsl(var(--wa))',
+  Parsed: 'hsl(var(--su))',
+  Rejected: 'hsl(var(--er))',
+} as const;
+
+/** Theme-aware tooltip so label and value are readable in light and dark mode */
+function ChartTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; color: string }>;
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div
+      className="bg-base-200 text-base-content border border-base-300 rounded-lg px-3 py-2 shadow-lg text-sm"
+      role="tooltip"
+    >
+      {label && <p className="font-medium mb-1">{label}</p>}
+      <ul className="space-y-0.5">
+        {payload.map((entry) => (
+          <li key={entry.name} className="flex items-center gap-2">
+            <span
+              className="inline-block w-2 h-2 rounded-full shrink-0"
+              style={{ backgroundColor: entry.color }}
+              aria-hidden
+            />
+            <span>{entry.name}:</span>
+            <span className="font-medium tabular-nums">{entry.value}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export function UploadSummaryCharts({ result }: { result: UploadResult | null }) {
   if (!result || result.status === 'failed') return null;
 
   const filesData = [
-    { name: 'Files', Processed: result.files_processed, Skipped: result.files_skipped },
-  ];
+    { name: 'Processed', value: result.files_processed, color: COLORS.Processed },
+    { name: 'Skipped', value: result.files_skipped, color: COLORS.Skipped },
+  ].filter((d) => d.value > 0);
+
   const linesData = [
-    { name: 'Lines', Parsed: result.lines_parsed, Rejected: result.lines_rejected },
-  ];
+    { name: 'Parsed', value: result.lines_parsed, color: COLORS.Parsed },
+    { name: 'Rejected', value: result.lines_rejected, color: COLORS.Rejected },
+  ].filter((d) => d.value > 0);
+
   const totalLines = result.lines_parsed + result.lines_rejected;
-  const coveragePct = totalLines > 0
-    ? Math.round((result.lines_parsed / totalLines) * 100)
-    : 0;
+  const coveragePct =
+    totalLines > 0 ? Math.round((result.lines_parsed / totalLines) * 100) : 0;
 
   return (
     <div
@@ -32,32 +74,66 @@ export function UploadSummaryCharts({ result }: { result: UploadResult | null })
     >
       <div>
         <p className="text-sm font-medium text-base-content/80 mb-1">Files</p>
-        <ResponsiveContainer width="100%" height={80}>
-          <BarChart data={filesData} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
-            <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-            <Tooltip
-              formatter={(value) => [value ?? 0, '']}
-              contentStyle={{ fontSize: 12 }}
+        <ResponsiveContainer width="100%" height={160}>
+          <PieChart>
+            <Pie
+              data={filesData.length ? filesData : [{ name: 'None', value: 1, color: 'hsl(var(--b3))' }]}
+              cx="50%"
+              cy="50%"
+              innerRadius={40}
+              outerRadius={60}
+              paddingAngle={2}
+              dataKey="value"
+              nameKey="name"
+            >
+              {filesData.length
+                ? filesData.map((entry, i) => (
+                    <Cell key={entry.name} fill={entry.color} />
+                  ))
+                : <Cell fill="hsl(var(--b3))" />}
+            </Pie>
+            <Tooltip content={<ChartTooltip />} />
+            <Legend
+              wrapperStyle={{ fontSize: 12 }}
+              formatter={(value, entry) => (
+                <span className="text-base-content">{value}</span>
+              )}
+              iconType="circle"
+              iconSize={8}
             />
-            <Bar dataKey="Processed" stackId="a" fill={BAR_COLORS.Processed} name="Processed" />
-            <Bar dataKey="Skipped" stackId="a" fill={BAR_COLORS.Skipped} name="Skipped" />
-          </BarChart>
+          </PieChart>
         </ResponsiveContainer>
       </div>
       <div>
         <p className="text-sm font-medium text-base-content/80 mb-1">Lines</p>
-        <ResponsiveContainer width="100%" height={80}>
-          <BarChart data={linesData} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
-            <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-            <Tooltip
-              formatter={(value) => [value ?? 0, '']}
-              contentStyle={{ fontSize: 12 }}
+        <ResponsiveContainer width="100%" height={160}>
+          <PieChart>
+            <Pie
+              data={linesData.length ? linesData : [{ name: 'None', value: 1, color: 'hsl(var(--b3))' }]}
+              cx="50%"
+              cy="50%"
+              innerRadius={40}
+              outerRadius={60}
+              paddingAngle={2}
+              dataKey="value"
+              nameKey="name"
+            >
+              {linesData.length
+                ? linesData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.color} />
+                  ))
+                : <Cell fill="hsl(var(--b3))" />}
+            </Pie>
+            <Tooltip content={<ChartTooltip />} />
+            <Legend
+              wrapperStyle={{ fontSize: 12 }}
+              formatter={(value) => (
+                <span className="text-base-content">{value}</span>
+              )}
+              iconType="circle"
+              iconSize={8}
             />
-            <Bar dataKey="Parsed" stackId="b" fill={BAR_COLORS.Parsed} name="Parsed" />
-            <Bar dataKey="Rejected" stackId="b" fill={BAR_COLORS.Rejected} name="Rejected" />
-          </BarChart>
+          </PieChart>
         </ResponsiveContainer>
       </div>
       <div className="sm:col-span-2">
