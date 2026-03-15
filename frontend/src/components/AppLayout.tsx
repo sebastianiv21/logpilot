@@ -18,54 +18,63 @@ export function AppLayout() {
   const isKnowledgePage = location.pathname === '/knowledge'
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col min-h-screen">
       <a
         href="#main-content"
         className="sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-content focus:rounded-lg focus:outline-none focus:w-auto focus:h-auto focus:m-0 focus:overflow-visible focus:[clip:auto]"
       >
         Skip to main content
       </a>
-      <aside className="w-64 bg-base-200 flex flex-col border-r border-base-300">
-        <div className="p-4 border-b border-base-300">
-          <h2 className="font-semibold text-base flex items-center gap-2">
-            <FolderOpen size={18} aria-hidden />
-            Sessions
-          </h2>
-          <p className="text-sm text-base-content/70 mt-1" aria-live="polite">
-            {currentSessionId
-              ? `Current: ${currentSessionId.slice(0, 8)}…`
-              : 'No session selected'}
-          </p>
-        </div>
-        <nav className="flex-1 overflow-auto flex flex-col p-2" aria-label="Session and app navigation">
-          <div className="mb-3">
-            <CreateSessionForm />
-          </div>
-          <SessionList onEditSession={setEditingSession} />
-        </nav>
-      </aside>
-      <main id="main-content" className="flex-1 flex flex-col min-w-0" tabIndex={-1}>
-        <nav
-          className="flex items-center justify-between gap-2 px-4 py-2 border-b border-base-300 bg-base-200/50"
-          aria-label="Main navigation"
-        >
+      <nav
+        className="w-full flex items-center justify-between gap-2 px-4 py-2 border-b border-base-300 bg-base-200/50 shrink-0"
+        aria-label="Main navigation"
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="font-semibold text-lg truncate" aria-hidden="true">LogPilot</span>
           {isKnowledgePage ? (
             <Link
               to="/"
-              className="link link-hover text-sm font-medium"
+              className="link link-hover text-sm font-medium shrink-0"
               aria-label="Back to home"
             >
               Back to home
             </Link>
           ) : (
-            <div className="flex-1" />
+            <span className="flex-1" aria-hidden="true" />
           )}
-          <HeaderKbLink />
-        </nav>
-        <div className="p-4 flex-1">
-          <Outlet />
         </div>
-      </main>
+        <div className="flex items-center gap-2 shrink-0">
+          <HeaderKbLink />
+        </div>
+      </nav>
+      <div className="flex flex-1 min-h-0">
+        {!isKnowledgePage && (
+          <aside className="w-64 bg-base-200 flex flex-col border-r border-base-300 shrink-0">
+            <div className="p-4 border-b border-base-300">
+              <h2 className="font-semibold text-base flex items-center gap-2">
+                <FolderOpen size={18} aria-hidden />
+                Sessions
+              </h2>
+              <p className="text-sm text-base-content/70 mt-1" aria-live="polite">
+                {currentSessionId
+                  ? `Current: ${currentSessionId.slice(0, 8)}…`
+                  : 'No session selected'}
+              </p>
+            </div>
+            <nav className="flex-1 overflow-auto flex flex-col p-2" aria-label="Session and app navigation">
+              <div className="mb-3">
+                <CreateSessionForm />
+              </div>
+              <SessionList onEditSession={setEditingSession} />
+            </nav>
+          </aside>
+        )}
+        <main id="main-content" className="flex-1 flex flex-col min-w-0 overflow-auto" tabIndex={-1}>
+          <div className="p-4 flex-1">
+            <Outlet />
+          </div>
+        </main>
+      </div>
 
       {editingSession && (
         <dialog open className="modal modal-open" id="edit-session-modal" aria-modal="true" aria-labelledby="edit-session-title">

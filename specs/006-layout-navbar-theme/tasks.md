@@ -23,8 +23,8 @@
 
 **Purpose**: Initialize theme-change for React and optionally prevent flash of wrong theme on first load.
 
-- [ ] T001 Initialize theme-change in `frontend/src/main.tsx`: import `themeChange` from `theme-change` and call `themeChange(false)` once before `createRoot(...)` so it runs before first paint (per theme-change React docs, `themeChange(false)` is required for React). Do not use `useEffect` for the initial call—calling before mount avoids a flash of default theme.
-- [ ] T002 [P] Add optional FART prevention in `frontend/index.html`: inline script before the root div that, when `localStorage.getItem('theme')` is null, sets `document.documentElement.setAttribute('data-theme', ...)` from `window.matchMedia('(prefers-color-scheme: dark)').matches` (use `'dark'` or `'light'`); otherwise set from localStorage. Ensures initial theme is applied before React hydrates (see research.md).
+- [x] T001 Initialize theme-change in `frontend/src/main.tsx`: import `themeChange` from `theme-change` and call `themeChange(false)` once before `createRoot(...)` so it runs before first paint (per theme-change React docs, `themeChange(false)` is required for React). Do not use `useEffect` for the initial call—calling before mount avoids a flash of default theme.
+- [x] T002 [P] Add optional FART prevention in `frontend/index.html`: inline script before the root div that, when `localStorage.getItem('theme')` is null, sets `document.documentElement.setAttribute('data-theme', ...)` from `window.matchMedia('(prefers-color-scheme: dark)').matches` (use `'dark'` or `'light'`); otherwise set from localStorage. Ensures initial theme is applied before React hydrates (see research.md).
 
 **Checkpoint**: Theme-change is active; first load uses system preference or stored theme without visible flash.
 
@@ -34,8 +34,8 @@
 
 **Purpose**: Conditional sidebar so knowledge page has no sessions panel; top bar structure ready for LogPilot and theme switcher. Unblocks US1, US2, US4.
 
-- [ ] T003 In `frontend/src/components/AppLayout.tsx`, render the left sidebar (`<aside>` with Sessions heading, CreateSessionForm, SessionList) only when `location.pathname !== '/knowledge'`. When on `/knowledge`, do not render the sidebar at all so only the main content and top bar are visible. Preserve skip-to-main-content and main landmark.
-- [ ] T004 In `frontend/src/components/AppLayout.tsx`, add "LogPilot" to the top bar (navbar): left side, before the conditional "Back to home" link (or before the flex spacer on home). Ensure the top bar has a clear left region (LogPilot + optional back link) and right region (HeaderKbLink + slot for theme switcher). In `frontend/src/App.tsx`, remove the "LogPilot" main heading from the home page content (HomePage): change or remove the `<h1>LogPilot</h1>` so the primary page title is not "LogPilot" (branding lives in the top bar only). Confirm the left sidebar does not display "LogPilot" (it currently shows "Sessions"; no change needed if it does not).
+- [x] T003 In `frontend/src/components/AppLayout.tsx`, render the left sidebar (`<aside>` with Sessions heading, CreateSessionForm, SessionList) only when `location.pathname !== '/knowledge'`. When on `/knowledge`, do not render the sidebar at all so only the main content and top bar are visible. Preserve skip-to-main-content and main landmark.
+- [x] T004 In `frontend/src/components/AppLayout.tsx`, add "LogPilot" to the top bar (navbar): left side, before the conditional "Back to home" link (or before the flex spacer on home). Ensure the top bar has a clear left region (LogPilot + optional back link) and right region (HeaderKbLink + slot for theme switcher). In `frontend/src/App.tsx`, remove the "LogPilot" main heading from the home page content (HomePage): change or remove the `<h1>LogPilot</h1>` so the primary page title is not "LogPilot" (branding lives in the top bar only). Confirm the left sidebar does not display "LogPilot" (it currently shows "Sessions"; no change needed if it does not).
 
 **Checkpoint**: Sidebar hidden on `/knowledge`; LogPilot appears in the top bar on all pages; home page main content no longer uses LogPilot as the primary heading.
 
