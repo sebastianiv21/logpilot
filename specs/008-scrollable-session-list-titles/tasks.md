@@ -58,9 +58,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T004 [US2] Derive currentSession (Session | null) in HomePage from useSessionsList().data?.sessions and useCurrentSession().currentSessionId in frontend/src/App.tsx
-- [ ] T005 [US2] Replace static "Logs & metrics" and "Reports" h2 with dynamic title (session name, or "Session " + id.slice(0,8), or "No session selected") in frontend/src/App.tsx
-- [ ] T006 [P] [US2] Add truncation (e.g. truncate class) and full name on hover (title attribute) for section titles when session name is too long to fit in frontend/src/App.tsx
+- [x] T004 [US2] Derive currentSession (Session | null) in HomePage from useSessionsList().data?.sessions and useCurrentSession().currentSessionId in frontend/src/App.tsx
+- [x] T005 [US2] Replace static "Logs & metrics" and "Reports" h2 with dynamic title (session name, or "Session " + id.slice(0,8), or "No session selected") in frontend/src/App.tsx
+- [x] T006 [P] [US2] Add truncation (e.g. truncate class) and full name on hover (title attribute) for section titles when session name is too long to fit in frontend/src/App.tsx
 
 **Checkpoint**: User Story 2 complete — section titles reflect current session; validate per quickstart §2–3
 

@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { FolderOpen, Pencil, ScrollText } from 'lucide-react'
-import { useCurrentSession } from '../contexts/SessionContext'
 import type { Session } from '../lib/schemas'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 import { SessionList } from './SessionList'
@@ -11,7 +10,6 @@ import { HeaderKbLink } from './HeaderKbLink'
 import { ThemeSwitcher } from './ThemeSwitcher'
 
 export function AppLayout() {
-  const { currentSessionId } = useCurrentSession()
   const location = useLocation()
   const [editingSession, setEditingSession] = useState<Session | null>(null)
   const editModalRef = useRef<HTMLDivElement>(null)
@@ -57,11 +55,6 @@ export function AppLayout() {
                 <FolderOpen size={18} aria-hidden />
                 Sessions
               </h2>
-              <p className="text-sm text-base-content/70 mt-1" aria-live="polite">
-                {currentSessionId
-                  ? `Current: ${currentSessionId.slice(0, 8)}…`
-                  : 'No session selected'}
-              </p>
             </div>
             <div className="shrink-0 p-2">
               <CreateSessionForm />

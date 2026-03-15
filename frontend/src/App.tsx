@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AppLayout } from './components/AppLayout'
@@ -8,23 +9,30 @@ import { ReportGenerate } from './components/ReportGenerate'
 import { ReportList } from './components/ReportList'
 import { UploadLogs } from './components/UploadLogs'
 import { useCurrentSession } from './contexts/SessionContext'
+import { useSessionsList } from './hooks/useSessions'
 
 function HomePage() {
+  const { data } = useSessionsList()
   const { currentSessionId } = useCurrentSession()
-  if (!currentSessionId) {
-    return (
-      <div className="space-y-6">
-        <p className="text-base-content/80">
-          Select or create a session to get started.
-        </p>
-      </div>
-    )
-  }
+
+  const sessionTitle = useMemo(() => {
+    if (!currentSessionId) return null
+    const sessions = data?.sessions ?? []
+    const session = sessions.find((s) => s.id === currentSessionId)
+    return session ? (session.name ?? `Session ${session.id.slice(0, 8)}`) : `Session ${currentSessionId.slice(0, 8)}`
+  }, [data?.sessions, currentSessionId])
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-      <div className="min-w-0">
-        <UploadLogs />
-      </div>
+    <div className="space-y-6">
+      {sessionTitle && (
+        <h1 className="text-2xl font-semibold truncate" title={sessionTitle}>
+          {sessionTitle}
+        </h1>
+      )}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+        <div className="min-w-0">
+          <UploadLogs />
+        </div>
       <div className="flex flex-col gap-6 min-w-0">
         <section className="space-y-2 border-t border-base-300 pt-6 lg:border-t-0 lg:pt-0" aria-labelledby="logs-metrics-heading">
           <h2 id="logs-metrics-heading" className="text-xl font-semibold">
@@ -42,6 +50,7 @@ function HomePage() {
           <ReportGenerate />
           <ReportList />
         </section>
+      </div>
       </div>
     </div>
   )
