@@ -5,6 +5,7 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Search } from 'lucide-react'
 import { useKnowledgeIngestStatus } from '../hooks/useKnowledgeIngest'
 import { useKnowledgeSearch } from '../hooks/useKnowledgeSearch'
 import {
@@ -58,7 +59,8 @@ export function KnowledgeSearch() {
 
   return (
     <section className="space-y-4" aria-labelledby="knowledge-search-heading">
-      <h2 id="knowledge-search-heading" className="text-xl font-semibold">
+      <h2 id="knowledge-search-heading" className="text-xl font-semibold flex items-center gap-2">
+        <Search size={18} aria-hidden />
         Search knowledge base
       </h2>
       <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3">
@@ -97,30 +99,35 @@ export function KnowledgeSearch() {
         </div>
         <button
           type="submit"
-          className="btn btn-primary"
+          className="btn btn-primary flex items-center gap-2"
           disabled={searchMutation.isPending}
           aria-busy={searchMutation.isPending}
           aria-label="Search knowledge base"
         >
+          {searchMutation.isPending ? (
+            <span className="loading loading-spinner loading-sm" aria-hidden />
+          ) : (
+            <Search size={18} aria-hidden />
+          )}
           {searchMutation.isPending ? 'Searching…' : 'Search'}
         </button>
       </form>
 
       {searchMutation.isError && (
         <div className="alert alert-error" role="alert">
-          <span>{searchMutation.error?.message ?? 'Search failed'}</span>
+          <span>{searchMutation.error?.message ?? 'Couldn\'t search'}</span>
         </div>
       )}
 
       {/* T033: empty state when no ingest run or no knowledge available */}
       {!hasIngestRun && !hasSearched && (
         <p className="text-base-content/70 text-sm">
-          Run ingestion first to populate the knowledge base, then search here.
+          Run ingestion first, then search.
         </p>
       )}
       {!hasIngestRun && hasSearched && isEmptyResult && (
         <p className="text-base-content/70 text-sm">
-          No knowledge available. Run ingestion first to index documentation and code.
+          No knowledge yet. Run ingestion first.
         </p>
       )}
       {hasIngestRun && hasSearched && isEmptyResult && (

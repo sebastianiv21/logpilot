@@ -14,6 +14,7 @@ import {
   type ReactNode,
 } from 'react';
 import { getReport } from '../services/api';
+import { notifyReportReady } from '../lib/reportReadyNotification';
 
 type ReportGenerationContextValue = {
   /** Session ID -> report ID that is currently generating (content empty). */
@@ -59,10 +60,12 @@ export function ReportGenerationProvider({ children }: { children: ReactNode }) 
     }
 
     const poll = async () => {
+      const generatingCount = entries.length;
       for (const [sessionId, reportId] of entries) {
         try {
           const report = await getReport(sessionId, reportId);
           if (report.content != null && report.content.trim().length > 0) {
+            notifyReportReady(sessionId, generatingCount);
             setState((prev) => {
               const next = { ...prev };
               if (next[sessionId] === reportId) delete next[sessionId];
@@ -100,6 +103,7 @@ export function ReportGenerationProvider({ children }: { children: ReactNode }) 
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- hook exported from same file as provider
 export function useReportGeneration(): ReportGenerationContextValue {
   const ctx = useContext(ReportGenerationContext);
   if (ctx == null) {

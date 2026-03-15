@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { Search } from 'lucide-react';
 import { queryLogs } from '../services/api';
 import { useCurrentSession } from '../contexts/SessionContext';
 import {
@@ -79,7 +80,7 @@ export function LogSearchForm({ onResult, disabled }: LogSearchFormProps) {
   return (
     <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3">
       <label className="form-control max-w-xs">
-        <span className="label-text">Start (ISO or leave empty for session start)</span>
+        <span className="label-text">Start (optional, ISO)</span>
         <input
           type="text"
           placeholder="e.g. 2025-01-01T00:00:00Z"
@@ -92,7 +93,7 @@ export function LogSearchForm({ onResult, disabled }: LogSearchFormProps) {
         )}
       </label>
       <label className="form-control max-w-xs">
-        <span className="label-text">End (ISO or leave empty for session end)</span>
+        <span className="label-text">End (optional, ISO)</span>
         <input
           type="text"
           placeholder="e.g. 2025-01-02T00:00:00Z"
@@ -150,11 +151,16 @@ export function LogSearchForm({ onResult, disabled }: LogSearchFormProps) {
       </label>
       <button
         type="submit"
-        className="btn btn-primary btn-sm"
+        className="btn btn-primary btn-sm flex items-center gap-2"
         disabled={disabled || mutation.isPending}
         aria-busy={mutation.isPending}
         aria-label="Search logs"
       >
+        {mutation.isPending ? (
+          <span className="loading loading-spinner loading-sm" aria-hidden />
+        ) : (
+          <Search size={18} aria-hidden />
+        )}
         {mutation.isPending ? 'Searching…' : 'Search'}
       </button>
     </form>

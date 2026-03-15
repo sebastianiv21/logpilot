@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Save } from 'lucide-react';
 import { EditSessionFormSchema, type EditSessionFormValues } from '../lib/schemas';
 import type { Session } from '../lib/schemas';
 import { usePatchSession } from '../hooks/useSessions';
@@ -79,11 +80,16 @@ export function EditSessionForm({ session, onSuccess, onCancel }: Props) {
       <div className="flex gap-2 pt-1">
         <button
           type="submit"
-          className="btn btn-primary btn-sm flex-1"
+          className="btn btn-primary btn-sm flex-1 flex items-center justify-center gap-2"
           disabled={patchSession.isPending}
           aria-busy={patchSession.isPending}
           aria-label="Save session changes"
         >
+          {patchSession.isPending ? (
+            <span className="loading loading-spinner loading-sm" aria-hidden />
+          ) : (
+            <Save size={18} aria-hidden />
+          )}
           {patchSession.isPending ? 'Saving…' : 'Save'}
         </button>
         {onCancel && (

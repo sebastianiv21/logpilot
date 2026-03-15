@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
+import { FileDown } from 'lucide-react';
 import { useReport } from '../hooks/useReports';
 import { useReportGeneration } from '../contexts/ReportGenerationContext';
 import { ApiError, exportReport, downloadBlob } from '../services/api';
@@ -16,7 +17,7 @@ type Props = {
   onClose?: () => void;
 };
 
-export function ReportView({ sessionId, reportId, onClose: _onClose }: Props) {
+export function ReportView({ sessionId, reportId }: Props) {
   const { data: report, isLoading, error } = useReport(sessionId, reportId, {
     refetchIntervalWhenEmpty: 2000,
   });
@@ -46,7 +47,7 @@ export function ReportView({ sessionId, reportId, onClose: _onClose }: Props) {
                 ? 'Export failed. Try again.'
                 : err.message)
             : 'Export failed. Try again.';
-      toast.error('Export failed', { description });
+      toast.error('Export failed', { description: description || 'Try again.' });
     } finally {
       setExporting(null);
     }
@@ -55,11 +56,18 @@ export function ReportView({ sessionId, reportId, onClose: _onClose }: Props) {
   return (
     <div className="flex flex-col flex-1 min-h-0 mt-2">
       {isLoading && !report && (
-        <p className="text-base-content/70 text-sm">Loading report…</p>
+        <p
+          className="flex items-center gap-2 text-base-content/70 text-sm"
+          role="status"
+          aria-busy="true"
+        >
+          <span className="loading loading-spinner loading-sm" aria-hidden />
+          Loading report…
+        </p>
       )}
       {error && (
         <p className="text-error text-sm" role="alert">
-          Failed to load report: {error.message}
+          Couldn't load report.
         </p>
       )}
       {report && (
@@ -67,30 +75,32 @@ export function ReportView({ sessionId, reportId, onClose: _onClose }: Props) {
           <div className="flex flex-wrap gap-2 mb-3">
             <button
               type="button"
-              className="btn btn-sm btn-outline"
+              className="btn btn-sm btn-outline flex items-center gap-2"
               onClick={() => handleExport('markdown')}
               disabled={!hasContent || exporting !== null}
               aria-busy={exporting === 'markdown'}
               aria-describedby={!hasContent ? 'export-disabled-reason' : undefined}
               aria-label="Export report as Markdown"
             >
+              <FileDown size={18} aria-hidden />
               {exporting === 'markdown' ? 'Exporting…' : 'Export Markdown'}
             </button>
             <button
               type="button"
-              className="btn btn-sm btn-outline"
+              className="btn btn-sm btn-outline flex items-center gap-2"
               onClick={() => handleExport('pdf')}
               disabled={!hasContent || exporting !== null}
               aria-busy={exporting === 'pdf'}
               aria-describedby={!hasContent ? 'export-disabled-reason' : undefined}
               aria-label="Export report as PDF"
             >
+              <FileDown size={18} aria-hidden />
               {exporting === 'pdf' ? 'Exporting…' : 'Export PDF'}
             </button>
           </div>
           {!hasContent && (
             <p id="export-disabled-reason" className="text-sm text-base-content/70 mb-2">
-              Report is still generating. Export is available when content is ready.
+              Still generating. Export when content is ready.
             </p>
           )}
           <div className="flex-1 overflow-auto rounded border border-base-300 bg-base-200 p-4 min-w-0">

@@ -64,11 +64,11 @@ export function useKnowledgeIngest(): {
     if (status === 'idle' && prevStatusRef.current === 'running') {
       const err = statusQuery.data?.error;
       if (err) {
-        toast.error('Knowledge ingest failed', { description: err });
+        toast.error('Ingest failed', { description: err });
       } else {
         const last = statusQuery.data?.last_result;
         if (last) {
-          toast.success('Knowledge ingest complete', {
+          toast.success('Ingest complete', {
             description: `${last.chunks_ingested ?? 0} chunks, ${last.files_processed ?? 0} files`,
           });
         }

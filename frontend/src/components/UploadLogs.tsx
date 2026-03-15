@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRef } from 'react';
 import { toast } from 'sonner';
+import { Upload } from 'lucide-react';
 import { ApiError } from '../services/api';
 import { uploadLogs } from '../services/api';
 import { useCurrentSession } from '../contexts/SessionContext';
@@ -55,8 +56,8 @@ export function UploadLogs() {
       // success or partial (backend uses "partial" when some files/lines skipped or rejected)
       toast.success(
         data.status === 'partial'
-          ? 'Upload complete (some files or lines were skipped or rejected).'
-          : 'Logs uploaded successfully.'
+          ? 'Upload complete. Some files or lines were skipped.'
+          : 'Logs uploaded.'
       );
     },
     onError: (err) => {
@@ -94,7 +95,10 @@ export function UploadLogs() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Upload logs</h2>
+      <h2 className="text-xl font-semibold flex items-center gap-2">
+        <Upload size={18} aria-hidden />
+        Upload logs
+      </h2>
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
         <label className="form-control w-full max-w-xs">
           <span className="label-text">Log archive (.zip)</span>
@@ -109,10 +113,16 @@ export function UploadLogs() {
         </label>
         <button
           type="submit"
-          className="btn btn-primary"
+          className="btn btn-primary flex items-center gap-2"
           disabled={mutation.isPending}
           aria-busy={mutation.isPending}
+          aria-label="Upload log archive"
         >
+          {mutation.isPending ? (
+            <span className="loading loading-spinner loading-sm" aria-hidden />
+          ) : (
+            <Upload size={18} aria-hidden />
+          )}
           {mutation.isPending ? 'Uploading…' : 'Upload'}
         </button>
       </form>

@@ -3,6 +3,7 @@
  * last result or error message (FR-007).
  */
 
+import { Database } from 'lucide-react'
 import { useKnowledgeIngest } from '../hooks/useKnowledgeIngest'
 
 export function KnowledgeIngest() {
@@ -17,42 +18,54 @@ export function KnowledgeIngest() {
 
   return (
     <section className="space-y-3" aria-labelledby="knowledge-ingest-heading">
-      <h2 id="knowledge-ingest-heading" className="text-xl font-semibold">
+      <h2 id="knowledge-ingest-heading" className="text-xl font-semibold flex items-center gap-2">
+        <Database size={18} aria-hidden />
         Knowledge base
       </h2>
       <p className="text-base-content/80 text-sm">
-        Ingest documentation and code into the knowledge base for report generation and search.
+        Add docs and code to the knowledge base for reports and search.
       </p>
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
-          className="btn btn-primary"
+          className="btn btn-primary flex items-center gap-2"
           onClick={() => startIngest(undefined)}
           disabled={isRunning || starting}
           aria-busy={isRunning || starting}
           aria-describedby="ingest-status"
           aria-label="Start knowledge base ingestion"
         >
+          {(starting || isRunning) ? (
+            <span className="loading loading-spinner loading-sm" aria-hidden />
+          ) : (
+            <Database size={18} aria-hidden />
+          )}
           {starting ? 'Starting…' : isRunning ? 'Ingesting…' : 'Start ingestion'}
         </button>
         <span
           id="ingest-status"
-          className="text-sm text-base-content/70"
+          className="text-sm text-base-content/70 flex items-center gap-2"
+          role="status"
           aria-live="polite"
         >
-          {statusLoading && !status
-            ? 'Loading status…'
-            : statusError
-              ? 'Failed to load status'
+          {statusLoading && !status ? (
+            <>
+              <span className="loading loading-spinner loading-sm" aria-hidden />
+              Loading status…
+            </>
+          ) : (
+            statusError
+              ? 'Couldn\'t load status'
               : isRunning
-                ? 'Ingest in progress (this may take several minutes)'
+                ? 'Ingesting… This may take a few minutes.'
                 : isIdle && lastResult
                   ? `Last run: ${lastResult.chunks_ingested ?? 0} chunks, ${lastResult.files_processed ?? 0} files`
                   : isIdle && errorMessage
                     ? `Last run failed: ${errorMessage}`
                     : isIdle
-                      ? 'Idle — run ingestion to populate the knowledge base'
-                      : null}
+                      ? 'Idle. Run ingestion to populate.'
+                      : null
+          )}
         </span>
       </div>
     </section>

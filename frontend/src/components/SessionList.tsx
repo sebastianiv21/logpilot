@@ -1,4 +1,5 @@
 import { format, parseISO } from 'date-fns';
+import { Check, Pencil } from 'lucide-react';
 import type { Session } from '../lib/schemas';
 import { useSessionsList } from '../hooks/useSessions';
 import { useCurrentSession } from '../contexts/SessionContext';
@@ -49,19 +50,21 @@ function SessionListItem({
       <div className="mt-2 flex gap-1">
         <button
           type="button"
-          className="btn btn-xs btn-ghost"
+          className="btn btn-xs btn-ghost flex items-center gap-1"
           onClick={onSelect}
           aria-pressed={isCurrent}
           aria-label={isCurrent ? 'Current session' : 'Set as current session'}
         >
+          <Check size={18} aria-hidden />
           {isCurrent ? 'Current' : 'Select'}
         </button>
         <button
           type="button"
-          className="btn btn-xs btn-ghost"
+          className="btn btn-xs btn-ghost flex items-center gap-1"
           onClick={onEdit}
           aria-label="Edit session"
         >
+          <Pencil size={18} aria-hidden />
           Edit
         </button>
       </div>
@@ -79,7 +82,13 @@ export function SessionList({
 
   if (isLoading) {
     return (
-      <div className="text-sm text-base-content/60 p-2" aria-live="polite">
+      <div
+        className="flex items-center gap-2 text-sm text-base-content/60 p-2"
+        role="status"
+        aria-busy="true"
+        aria-live="polite"
+      >
+        <span className="loading loading-spinner loading-sm" aria-hidden />
         Loading sessions…
       </div>
     );
@@ -88,7 +97,7 @@ export function SessionList({
   if (isError) {
     return (
       <div className="text-sm text-error p-2" role="alert">
-        {error?.message ?? 'Failed to load sessions'}
+        {error?.message ?? 'Couldn\'t load sessions'}
       </div>
     );
   }

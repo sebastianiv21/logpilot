@@ -3,6 +3,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { WifiOff, RefreshCw } from 'lucide-react';
 import { getSessions, isConnectionError } from '../services/api';
 
 export function ConnectionBanner() {
@@ -17,25 +18,31 @@ export function ConnectionBanner() {
   if (!isError || !error || !isConnectionError(error)) return null;
 
   const message =
-    error instanceof Error ? error.message : 'Backend unavailable. Check your connection.';
+    error instanceof Error ? error.message : 'Check your connection.';
 
   return (
     <div
       className="bg-error text-error-content px-4 py-2 flex flex-wrap items-center justify-center gap-3"
       role="alert"
     >
+      <WifiOff size={18} aria-hidden />
       <span>{message}</span>
       <button
         type="button"
-        className="btn btn-sm btn-ghost btn-active"
+        className="btn btn-sm btn-ghost btn-active flex items-center gap-2"
         onClick={() => refetch()}
         disabled={isFetching}
         aria-busy={isFetching}
         aria-label="Retry connection"
       >
+        {isFetching ? (
+          <span className="loading loading-spinner loading-sm" aria-hidden />
+        ) : (
+          <RefreshCw size={18} aria-hidden />
+        )}
         {isFetching ? 'Checking…' : 'Retry'}
       </button>
-      <span className="text-sm opacity-90">Check your network and backend, then retry.</span>
+      <span className="text-sm opacity-90">Check your network and try again.</span>
     </div>
   );
 }
