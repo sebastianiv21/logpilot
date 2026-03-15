@@ -52,3 +52,4 @@ Minimal steps to run and validate session-scoped upload result display and state
 ## Optional: API check
 
 - `GET /sessions/{session_id}/upload-summary` returns 200 with last result or 404 when session not found or no upload yet. After POST upload, a subsequent GET for that session returns the same summary payload.
+- To validate the API automatically: run `./validate-api.sh` (or `./validate-api.sh http://localhost:8000`) from this spec directory with the backend up.

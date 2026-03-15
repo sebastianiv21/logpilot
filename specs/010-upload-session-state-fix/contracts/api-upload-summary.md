@@ -20,7 +20,7 @@ Returns the last upload result for the session (for display after refresh).
   - `lines_rejected`: number
   - `session_id`: string
   - `error`: string | null
-- **Response** `404`: Session not found, or session has never had an upload (no summary stored).
+- **Response** `404`: Session not found, or session has never had an upload (no summary stored). Implementation may return `detail`: `"Session not found"` or `"No upload summary for this session"`.
 
 Frontend use: Call when app loads (for current session) and when user selects a session, to show last upload summary or empty. Enables loading state, error + retry (for this session only), and success feedback per spec.
 

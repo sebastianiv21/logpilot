@@ -82,8 +82,8 @@
 
 **Purpose**: Validation and docs.
 
-- [ ] T017 Run quickstart.md validation from specs/010-upload-session-state-fix/quickstart.md (manual or script)
-- [ ] T018 [P] Update specs/010-upload-session-state-fix/contracts/api-upload-summary.md if implementation diverges from contract
+- [x] T017 Run quickstart.md validation from specs/010-upload-session-state-fix/quickstart.md (manual or script)
+- [x] T018 [P] Update specs/010-upload-session-state-fix/contracts/api-upload-summary.md if implementation diverges from contract
 
 ---
 
