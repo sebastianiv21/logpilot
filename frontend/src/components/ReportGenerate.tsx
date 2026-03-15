@@ -7,7 +7,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { FileEdit } from 'lucide-react';
+import { FileOutput } from 'lucide-react';
 import { ReportGenerateFormSchema, type ReportGenerateFormValues } from '../lib/schemas';
 import { useCurrentSession } from '../contexts/SessionContext';
 import { useReportGeneration } from '../contexts/ReportGenerationContext';
@@ -57,7 +57,7 @@ export function ReportGenerate() {
   return (
     <section className="space-y-3" aria-labelledby="report-generate-heading">
       <h2 id="report-generate-heading" className="text-xl font-semibold flex items-center gap-2">
-        <FileEdit size={18} aria-hidden />
+        <FileOutput size={18} aria-hidden />
         Generate report
       </h2>
       <p className="text-base-content/80 text-sm">
@@ -101,7 +101,7 @@ export function ReportGenerate() {
           {generateMutation.isPending || generatingForCurrent ? (
             <span className="loading loading-spinner loading-sm" aria-hidden />
           ) : (
-            <FileEdit size={18} aria-hidden />
+            <FileOutput size={18} aria-hidden />
           )}
           {generateMutation.isPending
             ? 'Starting…'

@@ -92,8 +92,8 @@
 
 ### Implementation for User Story 4
 
-- [ ] T012 [P] [US4] Remove duplicate Knowledge base headings and redundant copy in frontend/src/components/KnowledgePage.tsx
-- [ ] T013 [P] [US4] Use distinct icon for Generate report (e.g. FileOutput or Sparkles from lucide-react) in frontend/src/components/ReportGenerate.tsx; keep Upload icon for upload actions
+- [x] T012 [P] [US4] Remove duplicate Knowledge base headings and redundant copy in frontend/src/components/KnowledgePage.tsx
+- [x] T013 [P] [US4] Use distinct icon for Generate report (e.g. FileOutput or Sparkles from lucide-react) in frontend/src/components/ReportGenerate.tsx; keep Upload icon for upload actions
 
 **Checkpoint**: User Stories 1–4 work independently.
 

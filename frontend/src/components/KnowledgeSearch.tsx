@@ -85,7 +85,7 @@ export function KnowledgeSearch() {
     <section className="space-y-4" aria-labelledby="knowledge-search-heading">
       <h2 id="knowledge-search-heading" className="text-xl font-semibold flex items-center gap-2">
         <Search size={18} aria-hidden />
-        Search knowledge base
+        Search
       </h2>
       <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3">
         <div className="form-control flex-1 min-w-[200px]">

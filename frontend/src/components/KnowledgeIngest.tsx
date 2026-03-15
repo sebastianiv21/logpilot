@@ -20,11 +20,8 @@ export function KnowledgeIngest() {
     <section className="space-y-3" aria-labelledby="knowledge-ingest-heading">
       <h2 id="knowledge-ingest-heading" className="text-xl font-semibold flex items-center gap-2">
         <Database size={18} aria-hidden />
-        Knowledge base
+        Add content
       </h2>
-      <p className="text-base-content/80 text-sm">
-        Add docs and code to the knowledge base for reports and search.
-      </p>
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
