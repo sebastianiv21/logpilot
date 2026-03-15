@@ -19,6 +19,20 @@ export const SessionListSchema = z.object({
 });
 export type SessionList = z.infer<typeof SessionListSchema>;
 
+/** Form schema for create session: optional name and external link. */
+export const CreateSessionFormSchema = z.object({
+  name: z.string().max(500).optional().or(z.literal('')),
+  external_link: z.string().max(2000).optional().or(z.literal('')),
+});
+export type CreateSessionFormValues = z.infer<typeof CreateSessionFormSchema>;
+
+/** Form schema for edit session (PATCH): optional name and external link. */
+export const EditSessionFormSchema = z.object({
+  name: z.string().max(500).optional().or(z.literal('')),
+  external_link: z.string().max(2000).optional().or(z.literal('')),
+});
+export type EditSessionFormValues = z.infer<typeof EditSessionFormSchema>;
+
 // --- Upload result ---
 export const UploadResultSchema = z.object({
   status: z.enum(['success', 'failed']),

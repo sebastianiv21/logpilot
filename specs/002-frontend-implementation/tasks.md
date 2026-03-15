@@ -54,11 +54,11 @@
 
 **Independent Test**: Create multiple sessions with names/links, list them, select one as current, edit name/link; confirm list and detail show updated data. With zero sessions, create first session and confirm it becomes current.
 
-- [ ] T013 [US1] Implement sessions API: GET /sessions, POST /sessions, GET /sessions/{id}, PATCH /sessions/{id} in frontend/src/services/api.ts and TanStack Query hooks (useQuery for list/get, useMutation for create/update) in frontend/src/hooks/useSessions.ts
-- [ ] T014 [US1] Build SessionList component: list all sessions with creation time (date-fns), name, external link, and clear current/selected indicator in frontend/src/components/SessionList.tsx
-- [ ] T015 [US1] Build CreateSession form (optional name, optional external link) with React Hook Form and Zod validation in frontend/src/components/CreateSessionForm.tsx
-- [ ] T016 [US1] Build session selection (set current session in context) and edit session (inline or modal: name, external link) with PATCH mutation and cache invalidation in frontend/src/components/SessionList.tsx or frontend/src/components/EditSessionForm.tsx
-- [ ] T017 [US1] Integrate SessionList, CreateSession, and current session into app layout; ensure one session is selectable as current and UI indicates active session in frontend/src/pages/ or frontend/src/App.tsx
+- [X] T013 [US1] Implement sessions API: GET /sessions, POST /sessions, GET /sessions/{id}, PATCH /sessions/{id} in frontend/src/services/api.ts and TanStack Query hooks (useQuery for list/get, useMutation for create/update) in frontend/src/hooks/useSessions.ts
+- [X] T014 [US1] Build SessionList component: list all sessions with creation time (date-fns), name, external link, and clear current/selected indicator in frontend/src/components/SessionList.tsx
+- [X] T015 [US1] Build CreateSession form (optional name, optional external link) with React Hook Form and Zod validation in frontend/src/components/CreateSessionForm.tsx
+- [X] T016 [US1] Build session selection (set current session in context) and edit session (inline or modal: name, external link) with PATCH mutation and cache invalidation in frontend/src/components/SessionList.tsx or frontend/src/components/EditSessionForm.tsx
+- [X] T017 [US1] Integrate SessionList, CreateSession, and current session into app layout; ensure one session is selectable as current and UI indicates active session in frontend/src/pages/ or frontend/src/App.tsx
 
 **Checkpoint**: User Story 1 complete — session management works independently
 
