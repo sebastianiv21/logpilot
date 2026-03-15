@@ -96,7 +96,21 @@ export function ReportView({ sessionId, reportId, onClose: _onClose }: Props) {
           <div className="flex-1 overflow-auto rounded border border-base-300 bg-base-200 p-4 min-w-0">
             {hasContent ? (
               <div
-                className="report-content text-sm break-words space-y-3 max-w-full [&_h1]:text-xl [&_h1]:font-semibold [&_h1]:mt-4 [&_h1]:mb-2 [&_h1]:first:mt-0 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-3 [&_h2]:mb-1.5 [&_h3]:text-base [&_h3]:font-medium [&_h3]:mt-2 [&_h3]:mb-1 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:space-y-1 [&_pre]:bg-base-300 [&_pre]:p-3 [&_pre]:rounded [&_pre]:overflow-x-auto [&_pre]:text-xs [&_code]:bg-base-300 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_p]:leading-relaxed"
+                className="report-content text-sm break-words space-y-3 max-w-full
+                  [&_h1]:text-xl [&_h1]:font-semibold [&_h1]:mt-4 [&_h1]:mb-2 [&_h1]:first:mt-0
+                  [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-3 [&_h2]:mb-1.5
+                  [&_h3]:text-base [&_h3]:font-medium [&_h3]:mt-2 [&_h3]:mb-1
+                  [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-1
+                  [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:space-y-1
+                  [&_p]:leading-relaxed
+                  [&_code]:font-mono [&_code]:text-[13px] [&_code]:rounded
+                  [&_code]:bg-base-300/80 [&_code]:px-1.5 [&_code]:py-0.5
+                  [&_code]:border [&_code]:border-base-300
+                  [&_pre]:my-3 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-base-300
+                  [&_pre]:bg-base-300/80 [&_pre]:overflow-x-auto [&_pre]:font-mono [&_pre]:text-[13px]
+                  [&_pre]:leading-relaxed [&_pre]:min-h-0
+                  [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:border-0 [&_pre_code]:rounded-none
+                  [&_pre_code]:break-all"
                 style={{ overflowWrap: 'break-word' } as React.CSSProperties}
               >
                 <ReactMarkdown>{report.content}</ReactMarkdown>

@@ -52,6 +52,9 @@ Rules for the report:
   Do NOT offer to run queries yourself or ask for pod names/permissions.
   Do not use "I can run...", "tell me...", "give me permission...". Report is read-only.
 - Uncertainty: What is unknown or ambiguous given the evidence (e.g. missing logs, multiple plausible causes). Use this section; leave "Not determined" only if there is no meaningful uncertainty to state.
+- Formatting: Use Markdown so code and paths are visible as such in the report:
+  - Wrap file paths, environment variable names, short error messages, log line excerpts, and inline code in single backticks (e.g. `ECONNREFUSED 127.0.0.1:8080`, `src/app/config.yaml`, `QueryFailedError: duplicate key...`).
+  - Use fenced code blocks (triple backticks) for multi-line snippets: stack traces, full SQL or shell commands, and log blocks. Do not leave raw quoted strings or technical identifiers as plain text when they should read as code.
 - Cite evidence. Output only the report; no preamble.
 """
 
