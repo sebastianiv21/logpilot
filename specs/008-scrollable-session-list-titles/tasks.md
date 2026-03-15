@@ -23,7 +23,7 @@
 
 **Purpose**: Confirm environment and dependencies; no new packages required per plan.
 
-- [ ] T001 Verify frontend dependencies (Sonner, lucide-react) per plan.md; no new packages required for 008
+- [x] T001 Verify frontend dependencies (Sonner, lucide-react) per plan.md; no new packages required for 008
 
 ---
 
@@ -43,8 +43,8 @@
 
 ### Implementation for User Story 1
 
-- [ ] T002 [US1] Add scrollable wrapper (flex-1 min-h-0 overflow-y-auto) around SessionList in AppLayout so only the list scrolls per contracts/ui-sidebar-scroll-region.md in frontend/src/components/AppLayout.tsx
-- [ ] T003 [US1] Ensure Sessions heading, Current line, and CreateSessionForm remain outside the scroll region in frontend/src/components/AppLayout.tsx
+- [x] T002 [US1] Add scrollable wrapper (flex-1 min-h-0 overflow-y-auto) around SessionList in AppLayout so only the list scrolls per contracts/ui-sidebar-scroll-region.md in frontend/src/components/AppLayout.tsx
+- [x] T003 [US1] Ensure Sessions heading, Current line, and CreateSessionForm remain outside the scroll region in frontend/src/components/AppLayout.tsx
 
 **Checkpoint**: User Story 1 complete — session list scrolls independently; validate per quickstart §1
 

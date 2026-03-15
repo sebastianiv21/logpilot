@@ -147,7 +147,7 @@ export function SessionList({
       </ul>
       {showPaginationControls && (
         <div
-          className="flex flex-wrap gap-2 pt-2"
+          className="flex flex-wrap gap-2 pt-2 justify-center"
           role="group"
           aria-label="Sessions pagination"
         >

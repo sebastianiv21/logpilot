@@ -19,7 +19,7 @@ export function AppLayout() {
   const isKnowledgePage = location.pathname === '/knowledge'
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-screen overflow-hidden">
       <a
         href="#main-content"
         className="sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-content focus:rounded-lg focus:outline-none focus:w-auto focus:h-auto focus:m-0 focus:overflow-visible focus:[clip:auto]"
@@ -48,8 +48,11 @@ export function AppLayout() {
       </nav>
       <div className="flex flex-1 min-h-0">
         {!isKnowledgePage && (
-          <aside className="w-64 bg-base-200 flex flex-col border-r border-base-300 shrink-0">
-            <div className="p-4 border-b border-base-300">
+          <aside
+            className="w-64 bg-base-200 flex flex-col border-r border-base-300 shrink-0 min-h-0"
+            aria-label="Session and app navigation"
+          >
+            <div className="p-4 border-b border-base-300 shrink-0">
               <h2 className="font-semibold text-base flex items-center gap-2">
                 <FolderOpen size={18} aria-hidden />
                 Sessions
@@ -60,12 +63,12 @@ export function AppLayout() {
                   : 'No session selected'}
               </p>
             </div>
-            <nav className="flex-1 overflow-auto flex flex-col p-2" aria-label="Session and app navigation">
-              <div className="mb-3">
-                <CreateSessionForm />
-              </div>
+            <div className="shrink-0 p-2">
+              <CreateSessionForm />
+            </div>
+            <div className="flex-1 min-h-0 overflow-y-auto p-2">
               <SessionList onEditSession={setEditingSession} />
-            </nav>
+            </div>
           </aside>
         )}
         <main id="main-content" className="flex-1 flex flex-col min-w-0 overflow-auto" tabIndex={-1}>
