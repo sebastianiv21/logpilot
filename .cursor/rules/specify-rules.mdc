@@ -17,6 +17,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-15
 - N/A (no new persistence) (004-ui-polish-feedback)
 - TypeScript 5.x (frontend), Python 3.11+ (backend unchanged) + React 18.x, React Router, Vite, Tailwind CSS, DaisyUI, TanStack Query, Sonner; lucide-react (Database icon) (005-kb-config-route-layout)
 - N/A (no new persistence; KB status from existing API) (005-kb-config-route-layout)
+- TypeScript 5.x (frontend), Python 3.11+ (backend unchanged) + React 18.x, React Router, Vite, Tailwind CSS, DaisyUI, theme-change, TanStack Query, Sonner, lucide-reac (006-layout-navbar-theme)
+- Browser localStorage for theme preference (via theme-change; key `theme` or configurable). No server-side storage. (006-layout-navbar-theme)
 
 - Python 3.11+ (typed) + FastAPI, Loki client (e.g. promtail or push API), Prometheus client, Grafana provisioning API, Qdrant client, OpenAI-compatible LLM client (configurable base URL + API key) (001-log-investigation-mvp)
 
@@ -37,9 +39,9 @@ cd src [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLO
 Python 3.11+ (typed): Follow standard conventions
 
 ## Recent Changes
+- 006-layout-navbar-theme: Added TypeScript 5.x (frontend), Python 3.11+ (backend unchanged) + React 18.x, React Router, Vite, Tailwind CSS, DaisyUI, theme-change, TanStack Query, Sonner, lucide-reac
 - 005-kb-config-route-layout: Added TypeScript 5.x (frontend), Python 3.11+ (backend unchanged) + React 18.x, React Router, Vite, Tailwind CSS, DaisyUI, TanStack Query, Sonner; lucide-react (Database icon)
 - 004-ui-polish-feedback: Added TypeScript 5.x (frontend), Python 3.11+ (backend unchanged) + React 18.x, Vite, Tailwind CSS, DaisyUI, TanStack Query, Sonner (toasts); lucide-react (icons, to be added if not present)
-- 003-report-visualization-improvement: Added TypeScript 5.x (frontend), Python 3.11+ (backend); unchanged from 002 + Frontend: React, ReactMarkdown (or equivalent), Tailwind CSS, DaisyUI; Backend: FastAPI, markdown, ReportLab (existing for PDF)
 
 
 <!-- MANUAL ADDITIONS START -->
