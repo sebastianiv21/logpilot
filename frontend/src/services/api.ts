@@ -3,7 +3,17 @@
  * Base URL from VITE_API_BASE; fetch wrapper with JSON and error handling.
  */
 
-import { UploadResultSchema, type Session, type SessionList, type UploadResult } from '../lib/schemas';
+import {
+  LogsQueryResponseSchema,
+  UploadResultSchema,
+} from '../lib/schemas';
+import type {
+  LogsQueryRequest,
+  LogsQueryResponse,
+  Session,
+  SessionList,
+  UploadResult,
+} from '../lib/schemas';
 
 const getBaseUrl = (): string => {
   const base = import.meta.env.VITE_API_BASE;
@@ -119,4 +129,39 @@ export async function uploadLogs(sessionId: string, file: File): Promise<UploadR
     body: form,
   });
   return UploadResultSchema.parse(raw);
+}
+
+// --- Logs query (contracts/api.md) ---
+
+/** POST /sessions/{session_id}/logs/query — body: start, end, limit, service, environment, log_level. Returns parsed LogsQueryResponse. */
+export async function queryLogs(
+  sessionId: string,
+  body: LogsQueryRequest
+): Promise<LogsQueryResponse> {
+  const raw = await apiFetch<unknown>(
+    `/sessions/${encodeURIComponent(sessionId)}/logs/query`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        start: body.start ?? null,
+        end: body.end ?? null,
+        limit: body.limit ?? 100,
+        service: body.service ?? null,
+        environment: body.environment ?? null,
+        log_level: body.log_level ?? null,
+      }),
+    }
+  );
+  return LogsQueryResponseSchema.parse(raw);
+}
+
+// --- Logs range (for Grafana Explore time window) ---
+
+export type LogsRangeResponse = { from_ms: number; to_ms: number };
+
+/** GET /sessions/{session_id}/logs/range — time extent of session logs (ms). 404 if no logs. */
+export async function getLogsRange(sessionId: string): Promise<LogsRangeResponse> {
+  return apiFetch<LogsRangeResponse>(
+    `/sessions/${encodeURIComponent(sessionId)}/logs/range`
+  );
 }

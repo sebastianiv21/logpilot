@@ -55,6 +55,10 @@
   **Response**: `200` — `{ "logs": [ { "timestamp_ns": number, "raw_message": string, ...labels } ] }`  
   **Errors**: `400` invalid time format; `404` session not found.
 
+- **GET** `/sessions/{session_id}/logs/range`  
+  **Response**: `200` — `{ "from_ms": number, "to_ms": number }` (time extent of session logs in milliseconds since epoch; for Grafana Explore `from`/`to`).  
+  **Errors**: `404` session not found or no logs for session.
+
 ---
 
 ## Reports

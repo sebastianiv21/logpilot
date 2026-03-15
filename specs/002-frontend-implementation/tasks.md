@@ -84,11 +84,11 @@
 
 **Independent Test**: With a session that has ingested logs, set filters and time range, run search, verify log lines and metadata; empty result shows “no logs match”.
 
-- [ ] T021 [US3] Implement logs query API: POST /sessions/{session_id}/logs/query with body (start, end, limit, service, environment, log_level) and parse LogsQueryResponse in frontend/src/services/api.ts
-- [ ] T022 [US3] Build log search form: time range (start/end ISO or pickers), optional filters (service, environment, log_level), limit; use React Hook Form + Zod; submit triggers query in frontend/src/components/LogSearchForm.tsx
-- [ ] T023 [US3] Build LogResults component: table or list of log records with timestamp_ns formatted via date-fns, raw_message, and label metadata (e.g. service, log_level) in frontend/src/components/LogResults.tsx
-- [ ] T024 [US3] Use default time range (omit start/end so backend uses full extent of session logs); handle empty result with “no logs match” message; support limit and “load more” or pagination if applicable (FR-005) in frontend/src/components/LogSearchForm.tsx and frontend/src/components/LogResults.tsx
-- [ ] T025 [US3] When session has no ingested logs, show empty or “no data” state and do not run query until user has uploaded logs (edge case from spec) in frontend
+- [X] T021 [US3] Implement logs query API: POST /sessions/{session_id}/logs/query with body (start, end, limit, service, environment, log_level) and parse LogsQueryResponse in frontend/src/services/api.ts
+- [X] T022 [US3] Build log search form: time range (start/end ISO or pickers), optional filters (service, environment, log_level), limit; use React Hook Form + Zod; submit triggers query in frontend/src/components/LogSearchForm.tsx
+- [X] T023 [US3] Build LogResults component: table or list of log records with timestamp_ns formatted via date-fns, raw_message, and label metadata (e.g. service, log_level) in frontend/src/components/LogResults.tsx
+- [X] T024 [US3] Use default time range (omit start/end so backend uses full extent of session logs); handle empty result with “no logs match” message; support limit and “load more” or pagination if applicable (FR-005) in frontend/src/components/LogSearchForm.tsx and frontend/src/components/LogResults.tsx
+- [X] T025 [US3] When session has no ingested logs, show empty or “no data” state and do not run query until user has uploaded logs (edge case from spec) in frontend
 
 **Checkpoint**: User Story 3 complete — log search and inspection work
 

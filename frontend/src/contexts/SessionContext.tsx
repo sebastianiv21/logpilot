@@ -13,6 +13,9 @@ const STORAGE_KEY = 'logpilot_current_session_id';
 type SessionContextValue = {
   currentSessionId: string | null;
   setCurrentSessionId: (id: string | null) => void;
+  /** Session IDs that have had at least one successful upload (in this tab). Used to show "upload first" until logs exist. */
+  sessionIdsWithLogs: Set<string>;
+  markSessionHasLogs: (sessionId: string) => void;
 };
 
 const SessionContext = createContext<SessionContextValue | null>(null);
@@ -37,6 +40,7 @@ function writeStored(id: string | null): void {
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [currentSessionId, setState] = useState<string | null>(readStored);
+  const [sessionIdsWithLogs, setSessionIdsWithLogs] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     writeStored(currentSessionId);
@@ -46,9 +50,18 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setState(id);
   }, []);
 
+  const markSessionHasLogs = useCallback((sessionId: string) => {
+    setSessionIdsWithLogs((prev) => new Set(prev).add(sessionId));
+  }, []);
+
   const value = useMemo<SessionContextValue>(
-    () => ({ currentSessionId, setCurrentSessionId }),
-    [currentSessionId, setCurrentSessionId]
+    () => ({
+      currentSessionId,
+      setCurrentSessionId,
+      sessionIdsWithLogs,
+      markSessionHasLogs,
+    }),
+    [currentSessionId, setCurrentSessionId, sessionIdsWithLogs, markSessionHasLogs]
   );
 
   return (

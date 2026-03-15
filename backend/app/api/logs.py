@@ -1,15 +1,22 @@
-"""POST /sessions/{session_id}/logs/query — time range, label filters; return log records."""
+"""POST /sessions/{session_id}/logs/query and GET /sessions/{session_id}/logs/range."""
 
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict
 
-from app.lib.loki_client import query_logs
+from app.lib.loki_client import get_log_time_range_ns, query_logs
 from app.lib.repositories import SessionRepository
 
 router = APIRouter(prefix="/sessions", tags=["sessions", "logs"])
 _repo = SessionRepository()
+
+
+class LogsRangeResponse(BaseModel):
+    """Time range of logs for the session (ms since epoch for Grafana from/to)."""
+
+    from_ms: int
+    to_ms: int
 
 
 class LogRecordResponse(BaseModel):
@@ -91,3 +98,35 @@ def query_session_logs(
     )
 
     return LogsQueryResponse(logs=[LogRecordResponse.model_validate(r) for r in records])
+
+
+@router.get("/{session_id}/logs/range", response_model=LogsRangeResponse)
+def get_session_logs_range(session_id: str) -> LogsRangeResponse:
+    """
+    Return the time range (from_ms, to_ms) of logs ingested for this session.
+    Uses the extent stored at upload time (from uploaded log timestamps); falls back
+    to querying Loki if no extent is stored (e.g. older uploads).
+    """
+    session = _repo.get(session_id)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    # Prefer extent stored when logs were uploaded (source of truth from upload timestamps)
+    extent = _repo.get_log_extent(session_id)
+    if extent is not None:
+        min_ns, max_ns = extent
+        return LogsRangeResponse(
+            from_ms=min_ns // 1_000_000,
+            to_ms=max_ns // 1_000_000,
+        )
+
+    # Fallback: derive from Loki (e.g. for sessions that had logs before we stored extent)
+    range_ns = get_log_time_range_ns(session_id=session_id)
+    if range_ns is None:
+        raise HTTPException(status_code=404, detail="No logs found for this session")
+
+    min_ns, max_ns = range_ns
+    return LogsRangeResponse(
+        from_ms=min_ns // 1_000_000,
+        to_ms=max_ns // 1_000_000,
+    )

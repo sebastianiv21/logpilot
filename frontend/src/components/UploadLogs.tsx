@@ -39,17 +39,19 @@ function uploadErrorMessage(err: unknown): string {
 }
 
 export function UploadLogs() {
-  const { currentSessionId } = useCurrentSession();
+  const { currentSessionId, markSessionHasLogs } = useCurrentSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const mutation = useMutation({
     mutationFn: async ({ sessionId, file }: { sessionId: string; file: File }) =>
       uploadLogs(sessionId, file),
-    onSuccess: (data: UploadResult) => {
+    onSuccess: (data: UploadResult, variables) => {
       if (data.status === 'failed') {
         toast.error(shortenUploadError(data.error));
         return;
       }
+      // Mark session as having logs so log search can run (T025)
+      markSessionHasLogs(variables.sessionId);
       // success or partial (backend uses "partial" when some files/lines skipped or rejected)
       toast.success(
         data.status === 'partial'

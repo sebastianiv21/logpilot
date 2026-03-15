@@ -68,6 +68,17 @@ export const LogsQueryRequestSchema = z.object({
 });
 export type LogsQueryRequest = z.infer<typeof LogsQueryRequestSchema>;
 
+/** Form schema for log search: optional start/end (ISO or empty), optional filters, limit. */
+export const LogSearchFormSchema = z.object({
+  start: z.string().optional(),
+  end: z.string().optional(),
+  limit: z.number().min(1).max(1000),
+  service: z.string().max(200).optional().or(z.literal('')),
+  environment: z.string().max(200).optional().or(z.literal('')),
+  log_level: z.string().max(50).optional().or(z.literal('')),
+});
+export type LogSearchFormValues = z.infer<typeof LogSearchFormSchema>;
+
 // --- Report ---
 export const ReportSchema = z.object({
   id: z.string(),

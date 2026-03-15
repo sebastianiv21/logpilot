@@ -23,6 +23,15 @@ CREATE TABLE IF NOT EXISTS reports (
 );
 """
 
+SCHEMA_SESSION_LOG_EXTENT = """
+CREATE TABLE IF NOT EXISTS session_log_extent (
+    session_id TEXT PRIMARY KEY,
+    start_ns INTEGER NOT NULL,
+    end_ns INTEGER NOT NULL,
+    FOREIGN KEY (session_id) REFERENCES sessions(id)
+);
+"""
+
 
 def get_connection(db_path: str | Path) -> sqlite3.Connection:
     """Return a connection to the SQLite database; creates file and parent dir if needed."""
@@ -34,8 +43,8 @@ def get_connection(db_path: str | Path) -> sqlite3.Connection:
 
 
 def init_schema(conn: sqlite3.Connection) -> None:
-    """Create sessions and reports tables if they do not exist."""
-    conn.executescript(SCHEMA_SESSIONS + SCHEMA_REPORTS)
+    """Create sessions, reports, and session_log_extent tables if they do not exist."""
+    conn.executescript(SCHEMA_SESSIONS + SCHEMA_REPORTS + SCHEMA_SESSION_LOG_EXTENT)
     conn.commit()
 
 

@@ -10,6 +10,7 @@ from app.lib.archive import PathTraversalError, extract_zip_safe
 from app.lib.config import config
 from app.lib.loki_client import push_logs
 from app.lib.prometheus_client import record_metrics
+from app.lib.repositories import SessionRepository
 from app.services.labels import derive_labels_from_file_path
 from app.services.log_parser import parse_lines
 from app.services.metrics import derive_metrics
@@ -139,6 +140,13 @@ def run_upload_pipeline(
                 if records:
                     records.sort(key=lambda r: r.timestamp_ns)
                     push_logs([r.to_loki_entry() for r in records], labels)
+
+                    # Store log time extent from uploaded timestamps for Grafana time window
+                    batch_start_ns = min(r.timestamp_ns for r in records)
+                    batch_end_ns = max(r.timestamp_ns for r in records)
+                    SessionRepository().update_log_extent(
+                        session_id, batch_start_ns, batch_end_ns
+                    )
 
                     derived = derive_metrics(records)
                     record_metrics(

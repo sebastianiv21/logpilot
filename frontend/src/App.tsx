@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AppLayout } from './components/AppLayout'
+import { MetricsLink } from './components/MetricsLink'
 import { UploadLogs } from './components/UploadLogs'
 import { useCurrentSession } from './contexts/SessionContext'
 
@@ -17,6 +18,17 @@ function HomePage() {
         </p>
       </div>
       {currentSessionId && <UploadLogs />}
+      {currentSessionId && (
+        <section className="space-y-2" aria-labelledby="logs-metrics-heading">
+          <h2 id="logs-metrics-heading" className="text-xl font-semibold">
+            Logs &amp; metrics
+          </h2>
+          <p className="text-base-content/80 text-sm">
+            Use Grafana to view, search, and visualize logs and metrics. Session context is passed so dashboards stay scoped to this investigation.
+          </p>
+          <MetricsLink />
+        </section>
+      )}
     </div>
   )
 }

@@ -129,6 +129,48 @@ class SessionRepository:
             updated_at=now,
         )
 
+    def get_log_extent(self, session_id: str) -> tuple[int, int] | None:
+        """Return (start_ns, end_ns) for the session's logged time range, or None if never updated."""
+        conn = self._connection()
+        try:
+            row = conn.execute(
+                "SELECT start_ns, end_ns FROM session_log_extent WHERE session_id = ?",
+                (session_id,),
+            ).fetchone()
+            if row is None:
+                return None
+            return (int(row["start_ns"]), int(row["end_ns"]))
+        finally:
+            if self._own_conn and self._conn is None:
+                conn.close()
+
+    def update_log_extent(
+        self, session_id: str, batch_start_ns: int, batch_end_ns: int
+    ) -> None:
+        """Extend the session's log time range with this batch (min/max with existing if any)."""
+        conn = self._connection()
+        try:
+            existing = conn.execute(
+                "SELECT start_ns, end_ns FROM session_log_extent WHERE session_id = ?",
+                (session_id,),
+            ).fetchone()
+            if existing is None:
+                conn.execute(
+                    "INSERT INTO session_log_extent (session_id, start_ns, end_ns) VALUES (?, ?, ?)",
+                    (session_id, batch_start_ns, batch_end_ns),
+                )
+            else:
+                start_ns = min(int(existing["start_ns"]), batch_start_ns)
+                end_ns = max(int(existing["end_ns"]), batch_end_ns)
+                conn.execute(
+                    "UPDATE session_log_extent SET start_ns = ?, end_ns = ? WHERE session_id = ?",
+                    (start_ns, end_ns, session_id),
+                )
+            conn.commit()
+        finally:
+            if self._own_conn and self._conn is None:
+                conn.close()
+
 
 class ReportRepository:
     """Create, list by session, get by id for reports."""
