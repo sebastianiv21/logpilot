@@ -30,6 +30,32 @@ class UploadResultResponse(BaseModel):
     error: str | None = None
 
 
+@router.get(
+    "/{session_id}/upload-summary",
+    response_model=UploadResultResponse,
+    summary="Get last upload summary for session",
+)
+def get_upload_summary(session_id: str) -> UploadResultResponse:
+    """
+    Return the last upload result for the session (for display after refresh).
+    404 if session not found or session has never had an upload.
+    """
+    if _repo.get(session_id) is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    summary = _repo.get_upload_summary(session_id)
+    if summary is None:
+        raise HTTPException(status_code=404, detail="No upload summary for this session")
+    return UploadResultResponse(
+        status=summary["status"],
+        files_processed=summary["files_processed"],
+        files_skipped=summary["files_skipped"],
+        lines_parsed=summary["lines_parsed"],
+        lines_rejected=summary["lines_rejected"],
+        session_id=summary["session_id"],
+        error=summary["error"],
+    )
+
+
 @router.post("/{session_id}/logs/upload", response_model=UploadResultResponse)
 async def upload_logs(
     session_id: str,
@@ -73,6 +99,16 @@ async def upload_logs(
             raise HTTPException(status_code=413, detail=err)
         if "path traversal" in err.lower():
             raise HTTPException(status_code=400, detail=err)
+
+    _repo.upsert_upload_summary(
+        session_id=session_id,
+        status=result.status,
+        files_processed=result.files_processed,
+        files_skipped=result.files_skipped,
+        lines_parsed=result.lines_parsed,
+        lines_rejected=result.lines_rejected,
+        error=result.error,
+    )
 
     return UploadResultResponse(
         status=result.status,

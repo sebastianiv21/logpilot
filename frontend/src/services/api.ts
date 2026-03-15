@@ -158,6 +158,19 @@ export async function uploadLogs(sessionId: string, file: File): Promise<UploadR
   return UploadResultSchema.parse(raw);
 }
 
+/** GET /sessions/{session_id}/upload-summary — last upload result for session. Returns null on 404. */
+export async function getUploadSummary(sessionId: string): Promise<UploadResult | null> {
+  try {
+    const raw = await apiFetch<unknown>(
+      `/sessions/${encodeURIComponent(sessionId)}/upload-summary`
+    );
+    return UploadResultSchema.parse(raw);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return null;
+    throw err;
+  }
+}
+
 // --- Logs query (contracts/api.md) ---
 
 /** POST /sessions/{session_id}/logs/query — body: start, end, limit, service, environment, log_level. Returns parsed LogsQueryResponse. */

@@ -1,9 +1,8 @@
-import { useMutation } from '@tanstack/react-query';
-import { useRef } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { Upload } from 'lucide-react';
-import { ApiError } from '../services/api';
-import { uploadLogs } from '../services/api';
+import { ApiError, getUploadSummary, uploadLogs } from '../services/api';
 import { useCurrentSession } from '../contexts/SessionContext';
 import type { UploadResult } from '../lib/schemas';
 import { UploadSummaryCharts } from './UploadSummaryCharts';
@@ -41,8 +40,27 @@ function uploadErrorMessage(err: unknown): string {
 }
 
 export function UploadLogs() {
-  const { currentSessionId, markSessionHasLogs } = useCurrentSession();
+  const {
+    currentSessionId,
+    markSessionHasLogs,
+    lastUploadResultBySessionId,
+    setLastUploadResult,
+  } = useCurrentSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+
+  const {
+    data: uploadSummaryFromApi,
+    isLoading: isUploadSummaryLoading,
+    isError: isUploadSummaryError,
+    error: uploadSummaryError,
+    refetch: refetchUploadSummary,
+    isRefetching: isUploadSummaryRefetching,
+  } = useQuery({
+    queryKey: ['uploadSummary', currentSessionId ?? ''],
+    queryFn: () => getUploadSummary(currentSessionId!),
+    enabled: !!currentSessionId,
+  });
 
   const mutation = useMutation({
     mutationFn: async ({ sessionId, file }: { sessionId: string; file: File }) =>
@@ -52,9 +70,9 @@ export function UploadLogs() {
         toast.error(shortenUploadError(data.error));
         return;
       }
-      // Mark session as having logs so log search can run (T025)
+      setLastUploadResult(variables.sessionId, data);
       markSessionHasLogs(variables.sessionId);
-      // success or partial (backend uses "partial" when some files/lines skipped or rejected)
+      queryClient.setQueryData(['uploadSummary', variables.sessionId], data);
       toast.success(
         data.status === 'partial'
           ? 'Upload complete. Some files or lines were skipped.'
@@ -92,7 +110,29 @@ export function UploadLogs() {
     );
   }
 
-  const result = mutation.data;
+  useEffect(() => {
+    if (uploadSummaryFromApi && currentSessionId) {
+      markSessionHasLogs(currentSessionId);
+    }
+  }, [uploadSummaryFromApi, currentSessionId, markSessionHasLogs]);
+
+  const resultForCurrentSession =
+    uploadSummaryFromApi ??
+    lastUploadResultBySessionId[currentSessionId ?? ''] ??
+    (mutation.data?.session_id === currentSessionId ? mutation.data : null);
+
+  const handleRetryUploadSummary = () => {
+    refetchUploadSummary().then((result) => {
+      if (result.data) {
+        toast.success('Loaded');
+      }
+    });
+  };
+
+  const isUploadingForCurrentSession =
+    mutation.isPending && mutation.variables?.sessionId === currentSessionId;
+
+  const isLoadingSummary = isUploadSummaryLoading || isUploadSummaryRefetching;
 
   return (
     <div className="space-y-4">
@@ -128,35 +168,60 @@ export function UploadLogs() {
         </button>
       </form>
 
-      {mutation.isPending && (
+      {isLoadingSummary && !resultForCurrentSession && (
+        <div className="flex items-center gap-2 text-base-content/80" role="status" aria-live="polite">
+          <span className="loading loading-spinner loading-sm" aria-hidden />
+          Loading…
+        </div>
+      )}
+
+      {isUploadSummaryError && !resultForCurrentSession && (
+        <div className="rounded-lg p-4 bg-base-200 text-base-content" role="alert">
+          <p className="font-medium text-error">
+            {uploadSummaryError instanceof Error
+              ? uploadSummaryError.message
+              : 'Could not load session state.'}
+          </p>
+          <button
+            type="button"
+            className="btn btn-sm btn-outline mt-2"
+            onClick={handleRetryUploadSummary}
+            disabled={isUploadSummaryRefetching}
+          >
+            {isUploadSummaryRefetching ? 'Retrying…' : 'Retry'}
+          </button>
+        </div>
+      )}
+
+      {isUploadingForCurrentSession && (
         <div className="flex items-center gap-2 text-base-content/80" role="status" aria-live="polite">
           <span className="loading loading-spinner loading-sm" aria-hidden />
           Uploading…
         </div>
       )}
 
-      {result && !mutation.isPending && (
+      {resultForCurrentSession && !isUploadingForCurrentSession && (
         <div
-          className={`rounded-lg p-4 ${result.status === 'failed' ? 'bg-error text-error-content' : 'bg-success/10 text-base-content'}`}
+          className={`rounded-lg p-4 ${resultForCurrentSession.status === 'failed' ? 'bg-error text-error-content' : 'bg-success/10 text-base-content'}`}
           role="status"
           aria-live="polite"
         >
           <p className="font-medium">
-            {result.status === 'failed'
+            {resultForCurrentSession.status === 'failed'
               ? 'Failed'
-              : result.status === 'partial'
+              : resultForCurrentSession.status === 'partial'
                 ? 'Complete (some files or lines skipped/rejected)'
                 : 'Success'}
           </p>
-          {result.status !== 'failed' ? (
+          {resultForCurrentSession.status !== 'failed' ? (
             <>
-              <UploadSummaryCharts result={result} />
+              <UploadSummaryCharts result={resultForCurrentSession} />
               <p className="mt-2 text-sm text-base-content/70 sr-only">
-                Files processed: {result.files_processed}, skipped: {result.files_skipped}. Lines parsed: {result.lines_parsed}, rejected: {result.lines_rejected}. Parsed coverage: {result.lines_parsed + result.lines_rejected > 0 ? `${Math.round((result.lines_parsed / (result.lines_parsed + result.lines_rejected)) * 100)}%` : '—'}.
+                Files processed: {resultForCurrentSession.files_processed}, skipped: {resultForCurrentSession.files_skipped}. Lines parsed: {resultForCurrentSession.lines_parsed}, rejected: {resultForCurrentSession.lines_rejected}. Parsed coverage: {resultForCurrentSession.lines_parsed + resultForCurrentSession.lines_rejected > 0 ? `${Math.round((resultForCurrentSession.lines_parsed / (resultForCurrentSession.lines_parsed + resultForCurrentSession.lines_rejected)) * 100)}%` : '—'}.
               </p>
             </>
           ) : (
-            <p className="mt-2 text-sm">{shortenUploadError(result.error)}</p>
+            <p className="mt-2 text-sm">{shortenUploadError(resultForCurrentSession.error)}</p>
           )}
         </div>
       )}

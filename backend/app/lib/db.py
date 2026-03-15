@@ -32,6 +32,20 @@ CREATE TABLE IF NOT EXISTS session_log_extent (
 );
 """
 
+SCHEMA_SESSION_UPLOAD_SUMMARY = """
+CREATE TABLE IF NOT EXISTS session_upload_summary (
+    session_id TEXT PRIMARY KEY,
+    status TEXT NOT NULL,
+    files_processed INTEGER NOT NULL,
+    files_skipped INTEGER NOT NULL,
+    lines_parsed INTEGER NOT NULL,
+    lines_rejected INTEGER NOT NULL,
+    error TEXT,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (session_id) REFERENCES sessions(id)
+);
+"""
+
 
 def get_connection(db_path: str | Path) -> sqlite3.Connection:
     """Return a connection to the SQLite database; creates file and parent dir if needed."""
@@ -43,8 +57,13 @@ def get_connection(db_path: str | Path) -> sqlite3.Connection:
 
 
 def init_schema(conn: sqlite3.Connection) -> None:
-    """Create sessions, reports, and session_log_extent tables if they do not exist."""
-    conn.executescript(SCHEMA_SESSIONS + SCHEMA_REPORTS + SCHEMA_SESSION_LOG_EXTENT)
+    """Create sessions, reports, session_log_extent, and session_upload_summary tables if they do not exist."""
+    conn.executescript(
+        SCHEMA_SESSIONS
+        + SCHEMA_REPORTS
+        + SCHEMA_SESSION_LOG_EXTENT
+        + SCHEMA_SESSION_UPLOAD_SUMMARY
+    )
     conn.commit()
 
 
