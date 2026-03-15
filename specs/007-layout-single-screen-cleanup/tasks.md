@@ -107,8 +107,8 @@
 
 ### Implementation for User Story 5
 
-- [ ] T014 [US5] Make LogPilot in top bar a link to / (e.g. React Router Link) in frontend/src/components/AppLayout.tsx
-- [ ] T015 [US5] Add Lucide app icon (e.g. ScrollText) next to LogPilot with accessible label in frontend/src/components/AppLayout.tsx
+- [x] T014 [US5] Make LogPilot in top bar a link to / (e.g. React Router Link) in frontend/src/components/AppLayout.tsx
+- [x] T015 [US5] Add Lucide app icon (e.g. ScrollText) next to LogPilot with accessible label in frontend/src/components/AppLayout.tsx
 
 **Checkpoint**: All user stories are independently functional.
 
