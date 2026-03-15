@@ -81,6 +81,7 @@ export function CreateSessionForm({ onSuccess }: Props) {
         className="btn btn-primary btn-sm w-full"
         disabled={createSession.isPending}
         aria-busy={createSession.isPending}
+        aria-label="Create new session"
       >
         {createSession.isPending ? 'Creating…' : 'Create session'}
       </button>

@@ -46,12 +46,15 @@ Then produce one final answer: a structured incident report in Markdown with the
 
 Rules for the report:
 - Recommended Fix: List concrete steps only. Put non-code actions first (config, restarts, scaling), then code changes as last resort labeled "Last resort (code change):". Do NOT add subheadings or meta-labels in this section (e.g. no "Non-code actions (do these first)", "Immediate actions", "Prefer non-code actions", or similar).
-- Next troubleshooting steps: List only steps a human operator can run or data they can collect.
+- Next troubleshooting steps: Output this section as a Markdown numbered list (1. First step, 2. Second step, 3. ...). List only steps a human operator can run or data they can collect.
   Do NOT assume only Kubernetes. Operators may use Docker (e.g. docker compose).
   Include both K8s and Docker when relevant (e.g. kubectl logs and docker logs).
   Do NOT offer to run queries yourself or ask for pod names/permissions.
   Do not use "I can run...", "tell me...", "give me permission...". Report is read-only.
 - Uncertainty: What is unknown or ambiguous given the evidence (e.g. missing logs, multiple plausible causes). Use this section; leave "Not determined" only if there is no meaningful uncertainty to state.
+- Formatting: Use Markdown so code and paths are visible as such in the report:
+  - Wrap file paths, environment variable names, short error messages, log line excerpts, and inline code in single backticks (e.g. `ECONNREFUSED 127.0.0.1:8080`, `src/app/config.yaml`, `QueryFailedError: duplicate key...`).
+  - Use fenced code blocks (triple backticks) for multi-line snippets: stack traces, full SQL or shell commands, and log blocks. Do not leave raw quoted strings or technical identifiers as plain text when they should read as code.
 - Cite evidence. Output only the report; no preamble.
 """
 

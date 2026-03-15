@@ -11,6 +11,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-14
 ## Active Technologies
 - TypeScript 5.x (frontend), React 18.x; backend remains Python 3.11+ + Vite, React, React Router, Tailwind CSS, DaisyUI, TanStack Query, Zod, React Hook Form, date-fns, Sonner; backend: FastAPI (existing) (002-frontend-implementation)
 - None on frontend; session/report state from backend API; optional local state (e.g. current session id in memory or localStorage for UX) (002-frontend-implementation)
+- TypeScript 5.x (frontend), Python 3.11+ (backend); unchanged from 002 + Frontend: React, ReactMarkdown (or equivalent), Tailwind CSS, DaisyUI; Backend: FastAPI, markdown, ReportLab (existing for PDF) (003-report-visualization-improvement)
+- N/A (report content from existing API; no new persistence) (003-report-visualization-improvement)
 
 - Python 3.11+ (typed) + FastAPI, Loki client (e.g. promtail or push API), Prometheus client, Grafana provisioning API, Qdrant client, OpenAI-compatible LLM client (configurable base URL + API key) (001-log-investigation-mvp)
 
@@ -31,6 +33,7 @@ cd src [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLO
 Python 3.11+ (typed): Follow standard conventions
 
 ## Recent Changes
+- 003-report-visualization-improvement: Added TypeScript 5.x (frontend), Python 3.11+ (backend); unchanged from 002 + Frontend: React, ReactMarkdown (or equivalent), Tailwind CSS, DaisyUI; Backend: FastAPI, markdown, ReportLab (existing for PDF)
 - 002-frontend-implementation: Added TypeScript 5.x, React 18.x; Vite, React Router, Tailwind, DaisyUI, TanStack Query, Zod, React Hook Form, date-fns, Sonner (toasts styled with DaisyUI alert); backend: FastAPI (existing)
 
 - 001-log-investigation-mvp: Added Python 3.11+ (typed) + FastAPI, Loki client (e.g. promtail or push API), Prometheus client, Grafana provisioning API, Qdrant client, OpenAI-compatible LLM client (configurable base URL + API key)

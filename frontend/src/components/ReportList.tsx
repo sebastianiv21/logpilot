@@ -3,10 +3,11 @@
  * Click to open report view.
  */
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { format } from 'date-fns';
 import { useCurrentSession } from '../contexts/SessionContext';
 import { useReportsList } from '../hooks/useReports';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { ReportView } from './ReportView';
 import type { ReportListItem } from '../lib/schemas';
 
@@ -14,6 +15,8 @@ export function ReportList() {
   const { currentSessionId } = useCurrentSession();
   const { data, isLoading, error } = useReportsList(currentSessionId);
   const [selectedReport, setSelectedReport] = useState<ReportListItem | null>(null);
+  const reportModalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(!!selectedReport, reportModalRef);
 
   if (!currentSessionId) {
     return (
@@ -59,9 +62,9 @@ export function ReportList() {
       )}
 
       {selectedReport && (
-        <dialog open className="modal modal-open" id="report-view-modal">
-          <div className="modal-box max-w-4xl max-h-[80vh] flex flex-col">
-            <h3 className="font-semibold text-lg">Report</h3>
+        <dialog open className="modal modal-open" id="report-view-modal" aria-modal="true" aria-labelledby="report-view-title">
+          <div className="modal-box max-w-4xl max-h-[80vh] flex flex-col" ref={reportModalRef} role="document">
+            <h3 id="report-view-title" className="font-semibold text-lg">Report</h3>
             <ReportView
               sessionId={currentSessionId}
               reportId={selectedReport.id}
@@ -69,7 +72,7 @@ export function ReportList() {
             />
           </div>
           <form method="dialog" className="modal-backdrop" onSubmit={() => setSelectedReport(null)}>
-            <button type="submit" aria-label="Close">close</button>
+            <button type="submit" aria-label="Close report view">close</button>
           </form>
         </dialog>
       )}

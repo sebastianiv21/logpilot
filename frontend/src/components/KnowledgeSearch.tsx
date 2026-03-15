@@ -73,6 +73,7 @@ export function KnowledgeSearch() {
             placeholder="e.g. authentication flow"
             {...form.register('query')}
             aria-invalid={!!form.formState.errors.query}
+            aria-label="Search query for knowledge base"
           />
           {form.formState.errors.query && (
             <p className="text-error text-sm mt-1" role="alert">
@@ -91,6 +92,7 @@ export function KnowledgeSearch() {
             max={100}
             className="input input-bordered w-full"
             {...form.register('limit', { valueAsNumber: true })}
+            aria-label="Maximum number of search results"
           />
         </div>
         <button
@@ -98,6 +100,7 @@ export function KnowledgeSearch() {
           className="btn btn-primary"
           disabled={searchMutation.isPending}
           aria-busy={searchMutation.isPending}
+          aria-label="Search knowledge base"
         >
           {searchMutation.isPending ? 'Searching…' : 'Search'}
         </button>

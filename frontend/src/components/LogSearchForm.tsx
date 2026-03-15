@@ -153,6 +153,7 @@ export function LogSearchForm({ onResult, disabled }: LogSearchFormProps) {
         className="btn btn-primary btn-sm"
         disabled={disabled || mutation.isPending}
         aria-busy={mutation.isPending}
+        aria-label="Search logs"
       >
         {mutation.isPending ? 'Searching…' : 'Search'}
       </button>
