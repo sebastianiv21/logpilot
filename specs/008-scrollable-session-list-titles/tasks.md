@@ -74,8 +74,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T007 [US3] Add session ID line (full session.id) and copy button below Logs & metrics and Reports section titles, visible only when currentSession is non-null in frontend/src/App.tsx
-- [ ] T008 [US3] Implement copy handler with navigator.clipboard.writeText(sessionId), Sonner success toast (e.g. "Session ID copied") and error toast (e.g. "Copy failed"), and button aria-label "Copy session ID" in frontend/src/App.tsx
+- [x] T007 [US3] Add session ID line (full session.id) and copy button below Logs & metrics and Reports section titles, visible only when currentSession is non-null in frontend/src/App.tsx
+- [x] T008 [US3] Implement copy handler with navigator.clipboard.writeText(sessionId), Sonner success toast (e.g. "Session ID copied") and error toast (e.g. "Copy failed"), and button aria-label "Copy session ID" in frontend/src/App.tsx
 
 **Checkpoint**: User Story 3 complete — session ID copy with feedback; validate per quickstart §4–5
 
