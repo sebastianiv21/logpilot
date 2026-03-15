@@ -60,7 +60,7 @@
 
 ### Implementation for User Story 2
 
-- [ ] T005 [US2] In SessionList, when sessions.length > 0 but filtered list is empty (searchQuery non-empty after trim and no matches), render empty state message "No sessions match your search" (or equivalent) instead of empty list; keep existing "No sessions yet" when sessions.length === 0. In frontend/src/components/SessionList.tsx
+- [x] T005 [US2] In SessionList, when sessions.length > 0 but filtered list is empty (searchQuery non-empty after trim and no matches), render empty state message "No sessions match your search" (or equivalent) instead of empty list; keep existing "No sessions yet" when sessions.length === 0. In frontend/src/components/SessionList.tsx
 
 **Checkpoint**: User Story 2 complete — empty state when no matches; validate per quickstart §4
 

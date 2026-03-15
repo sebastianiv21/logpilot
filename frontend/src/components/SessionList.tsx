@@ -141,6 +141,21 @@ export function SessionList({
     );
   }
 
+  if (
+    filteredSessions.length === 0 &&
+    searchQuery.trim() !== ''
+  ) {
+    return (
+      <div
+        className="text-sm text-base-content/60 p-2"
+        aria-live="polite"
+        role="status"
+      >
+        No sessions match your search.
+      </div>
+    );
+  }
+
   const handleLoadMore = () => {
     setVisibleCount((c) =>
       Math.min(c + SESSIONS_BATCH_SIZE, filteredSessions.length)
