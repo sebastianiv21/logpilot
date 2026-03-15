@@ -137,7 +137,7 @@ export function UploadLogs() {
 
       {result && !mutation.isPending && (
         <div
-          className={`rounded-lg p-4 ${result.status === 'failed' ? 'bg-error/10 text-error-content' : 'bg-success/10 text-base-content'}`}
+          className={`rounded-lg p-4 ${result.status === 'failed' ? 'bg-error text-error-content' : 'bg-success/10 text-base-content'}`}
           role="status"
           aria-live="polite"
         >
