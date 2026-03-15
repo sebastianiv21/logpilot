@@ -23,8 +23,8 @@
 
 **Purpose**: Add the `/knowledge` route and a main-content navbar in AppLayout so the upper-right control has a destination and a place to live. Unblocks US1 and US2.
 
-- [ ] T001 Add `/knowledge` route and `KnowledgePage` component in `frontend/src/App.tsx`; render `KnowledgeIngest` and `KnowledgeSearch` inside `frontend/src/components/KnowledgePage.tsx`, grouped under a single "Knowledge base" heading per spec.
-- [ ] T002 Add a main-content navbar (horizontal bar above the page content) in `frontend/src/components/AppLayout.tsx` so the main area has a top-right region for the KB control; ensure `Outlet` remains below the navbar and skip-link/main landmarks are preserved.
+- [x] T001 Add `/knowledge` route and `KnowledgePage` component in `frontend/src/App.tsx`; render `KnowledgeIngest` and `KnowledgeSearch` inside `frontend/src/components/KnowledgePage.tsx`, grouped under a single "Knowledge base" heading per spec.
+- [x] T002 Add a main-content navbar (horizontal bar above the page content) in `frontend/src/components/AppLayout.tsx` so the main area has a top-right region for the KB control; ensure `Outlet` remains below the navbar and skip-link/main landmarks are preserved.
 
 **Checkpoint**: Navigating to `/knowledge` shows the KB page; AppLayout has a navbar for the control.
 
@@ -38,9 +38,9 @@
 
 ### Implementation for User Story 1
 
-- [ ] T003 [US1] Create `frontend/src/components/HeaderKbLink.tsx`: database icon (lucide-react `Database`) + status indicator dot (red when idle and no last_result or error; yellow/ochre with pulsating CSS when status === 'running'; green when idle with last_result and no error). Use `useKnowledgeIngestStatus` from `frontend/src/hooks/useKnowledgeIngest.ts` for state. Single click navigates to `/knowledge` (React Router `Link` or `useNavigate`). Tooltip "Knowledge base" on hover/focus (title or a proper tooltip). aria-label that includes status for assistive tech (e.g. "Knowledge base, no data" / "Knowledge base, ingesting" / "Knowledge base, ready").
-- [ ] T004 [US1] In `frontend/src/components/AppLayout.tsx`, render `HeaderKbLink` in the top-right of the main-content navbar (from T002). Ensure it is keyboard-focusable and visible on both home and knowledge routes.
-- [ ] T005 [US1] Remove the knowledge base section (KnowledgeIngest + KnowledgeSearch) from the home page in `frontend/src/App.tsx` (or the component that renders the main content for `/`), so the main screen shows only intro, Upload logs, Logs & metrics, Reports in that order.
+- [x] T003 [US1] Create `frontend/src/components/HeaderKbLink.tsx`: database icon (lucide-react `Database`) + status indicator dot (red when idle and no last_result or error; yellow/ochre with pulsating CSS when status === 'running'; green when idle with last_result and no error). Use `useKnowledgeIngestStatus` from `frontend/src/hooks/useKnowledgeIngest.ts` for state. Single click navigates to `/knowledge` (React Router `Link` or `useNavigate`). Tooltip "Knowledge base" on hover/focus (title or a proper tooltip). aria-label that includes status for assistive tech (e.g. "Knowledge base, no data" / "Knowledge base, ingesting" / "Knowledge base, ready").
+- [x] T004 [US1] In `frontend/src/components/AppLayout.tsx`, render `HeaderKbLink` in the top-right of the main-content navbar (from T002). Ensure it is keyboard-focusable and visible on both home and knowledge routes.
+- [x] T005 [US1] Remove the knowledge base section (KnowledgeIngest + KnowledgeSearch) from the home page in `frontend/src/App.tsx` (or the component that renders the main content for `/`), so the main screen shows only intro, Upload logs, Logs & metrics, Reports in that order.
 
 **Checkpoint**: User Story 1 is independently testable; upper-right control works and main screen has no KB block.
 
