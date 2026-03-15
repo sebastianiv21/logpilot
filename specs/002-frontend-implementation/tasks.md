@@ -22,11 +22,11 @@
 
 **Purpose**: Frontend project initialization and basic structure
 
-- [ ] T001 Create frontend directory structure per plan.md: frontend/src/components, frontend/src/pages, frontend/src/services, frontend/src/hooks, frontend/src/App.tsx, frontend/public, frontend/index.html, frontend/vite.config.ts, frontend/tailwind.config.js, frontend/package.json, frontend/tests
-- [ ] T002 Initialize Vite + React + TypeScript project in frontend/ with dependencies: react, react-dom, react-router-dom, tailwindcss, daisyui, @tanstack/react-query, zod, react-hook-form, @hookform/resolvers, date-fns, sonner (see research.md)
-- [ ] T003 [P] Configure Tailwind CSS and DaisyUI in frontend/tailwind.config.js
-- [ ] T004 [P] Add frontend env: VITE_API_BASE and VITE_GRAFANA_URL in frontend/.env.example; configure Vite proxy to backend in frontend/vite.config.ts if desired
-- [ ] T005 [P] Configure Vitest and React Testing Library in frontend/ (package.json + config)
+- [X] T001 Create frontend directory structure per plan.md: frontend/src/components, frontend/src/pages, frontend/src/services, frontend/src/hooks, frontend/src/App.tsx, frontend/public, frontend/index.html, frontend/vite.config.ts, frontend/tailwind.config.js, frontend/package.json, frontend/tests
+- [X] T002 Initialize Vite + React + TypeScript project in frontend/ with dependencies: react, react-dom, react-router-dom, tailwindcss, daisyui, @tanstack/react-query, zod, react-hook-form, @hookform/resolvers, date-fns, sonner (see research.md)
+- [X] T003 [P] Configure Tailwind CSS and DaisyUI in frontend/tailwind.config.js
+- [X] T004 [P] Add frontend env: VITE_API_BASE and VITE_GRAFANA_URL in frontend/.env.example; configure Vite proxy to backend in frontend/vite.config.ts if desired
+- [X] T005 [P] Configure Vitest and React Testing Library in frontend/ (package.json + config)
 
 ---
 
