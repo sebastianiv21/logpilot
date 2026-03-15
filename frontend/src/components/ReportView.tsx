@@ -17,7 +17,7 @@ type Props = {
   onClose?: () => void;
 };
 
-export function ReportView({ sessionId, reportId, onClose: _onClose }: Props) {
+export function ReportView({ sessionId, reportId }: Props) {
   const { data: report, isLoading, error } = useReport(sessionId, reportId, {
     refetchIntervalWhenEmpty: 2000,
   });

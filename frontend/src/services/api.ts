@@ -100,7 +100,7 @@ export async function apiFetch<T>(
         ...options.headers,
       },
     });
-  } catch (e) {
+  } catch {
     throw new ApiError(0, NETWORK_ERROR_MESSAGE, NETWORK_ERROR_MESSAGE);
   }
   if (!res.ok) {

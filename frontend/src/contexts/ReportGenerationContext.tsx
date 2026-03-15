@@ -103,6 +103,7 @@ export function ReportGenerationProvider({ children }: { children: ReactNode }) 
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- hook exported from same file as provider
 export function useReportGeneration(): ReportGenerationContextValue {
   const ctx = useContext(ReportGenerationContext);
   if (ctx == null) {

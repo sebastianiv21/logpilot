@@ -119,7 +119,7 @@
 
 **Purpose**: Validation and final checks
 
-- [ ] T030 Run quickstart validation per specs/004-ui-polish-feedback/quickstart.md and fix any regressions
+- [X] T030 Run quickstart validation per specs/004-ui-polish-feedback/quickstart.md and fix any regressions
 
 ---
 
