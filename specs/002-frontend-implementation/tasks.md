@@ -130,12 +130,12 @@
 
 **Independent Test**: Select session with logs, enter question, trigger report, wait for content, view report, export Markdown and PDF; try second report while first generating → trigger disabled.
 
-- [ ] T034 [US6] Implement reports API: GET /sessions/{id}/reports, GET /sessions/{id}/reports/{report_id}, POST /sessions/{id}/reports/generate, GET /sessions/{id}/reports/{report_id}/export?format=markdown|pdf (blob download) in frontend/src/services/api.ts
-- [ ] T035 [US6] Build useReports hook: list reports, get report by id with polling until content is non-empty, generate mutation; invalidate list after generate in frontend/src/hooks/useReports.ts
-- [ ] T036 [US6] Build ReportGenerate component: incident question input (React Hook Form + Zod), trigger button, disabled when a report is already generating for current session; show “in progress” until content (FR-008) in frontend/src/components/ReportGenerate.tsx
-- [ ] T037 [US6] Build ReportList and ReportView: report history (list with created_at via date-fns), open report to view content (markdown rendered), export dropdown or buttons (Markdown / PDF) that trigger download (FR-009, FR-010) in frontend/src/components/ReportList.tsx and frontend/src/components/ReportView.tsx
-- [ ] T038 [US6] Export only when report has content; show “generating…” or disable export and explain when content not ready (FR-010); one report at a time per session (FR-008) in frontend/src/components/ReportView.tsx
-- [ ] T039 [US6] When user switches session during report generation, operation continues in original session; result visible when user returns to that session; UI does not cancel and makes behavior clear (FR-012) in frontend
+- [X] T034 [US6] Implement reports API: GET /sessions/{id}/reports, GET /sessions/{id}/reports/{report_id}, POST /sessions/{id}/reports/generate, GET /sessions/{id}/reports/{report_id}/export?format=markdown|pdf (blob download) in frontend/src/services/api.ts
+- [X] T035 [US6] Build useReports hook: list reports, get report by id with polling until content is non-empty, generate mutation; invalidate list after generate in frontend/src/hooks/useReports.ts
+- [X] T036 [US6] Build ReportGenerate component: incident question input (React Hook Form + Zod), trigger button, disabled when a report is already generating for current session; show “in progress” until content (FR-008) in frontend/src/components/ReportGenerate.tsx
+- [X] T037 [US6] Build ReportList and ReportView: report history (list with created_at via date-fns), open report to view content (markdown rendered), export dropdown or buttons (Markdown / PDF) that trigger download (FR-009, FR-010) in frontend/src/components/ReportList.tsx and frontend/src/components/ReportView.tsx
+- [X] T038 [US6] Export only when report has content; show “generating…” or disable export and explain when content not ready (FR-010); one report at a time per session (FR-008) in frontend/src/components/ReportView.tsx
+- [X] T039 [US6] When user switches session during report generation, operation continues in original session; result visible when user returns to that session; UI does not cancel and makes behavior clear (FR-012) in frontend
 
 **Checkpoint**: User Story 6 complete — report generation, view, and export work
 

@@ -4,16 +4,22 @@
  */
 
 import {
+  GenerateReportResponseSchema,
   KnowledgeIngestStatusSchema,
   KnowledgeSearchResponseSchema,
   LogsQueryResponseSchema,
+  ReportListSchema,
+  ReportSchema,
   UploadResultSchema,
 } from '../lib/schemas';
 import type {
+  GenerateReportResponse,
   KnowledgeIngestStatus,
   KnowledgeSearchResponse,
   LogsQueryRequest,
   LogsQueryResponse,
+  Report,
+  ReportList,
   Session,
   SessionList,
   UploadResult,
@@ -204,4 +210,73 @@ export async function searchKnowledge(
     }),
   });
   return KnowledgeSearchResponseSchema.parse(raw);
+}
+
+// --- Reports (contracts/api.md) ---
+
+/** GET /sessions/{session_id}/reports — list reports (no content). */
+export async function getReports(sessionId: string): Promise<ReportList> {
+  const raw = await apiFetch<unknown>(
+    `/sessions/${encodeURIComponent(sessionId)}/reports`
+  );
+  return ReportListSchema.parse(raw);
+}
+
+/** GET /sessions/{session_id}/reports/{report_id} — single report with content (empty while generating). */
+export async function getReport(
+  sessionId: string,
+  reportId: string
+): Promise<Report> {
+  const raw = await apiFetch<unknown>(
+    `/sessions/${encodeURIComponent(sessionId)}/reports/${encodeURIComponent(reportId)}`
+  );
+  return ReportSchema.parse(raw);
+}
+
+export type GenerateReportBody = { question: string };
+
+/** POST /sessions/{session_id}/reports/generate — start generation; returns 202 with report id. Poll GET report until content present. */
+export async function generateReport(
+  sessionId: string,
+  body: GenerateReportBody
+): Promise<{ id: string; session_id: string; created_at: string; content: string | null }> {
+  const raw = await apiFetch<unknown>(
+    `/sessions/${encodeURIComponent(sessionId)}/reports/generate`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ question: body.question }),
+    }
+  );
+  return GenerateReportResponseSchema.parse(raw) as GenerateReportResponse;
+}
+
+/** GET /sessions/{session_id}/reports/{report_id}/export?format=markdown|pdf — blob download. */
+export async function exportReport(
+  sessionId: string,
+  reportId: string,
+  format: 'markdown' | 'pdf'
+): Promise<Blob> {
+  const url = apiUrl(
+    `/sessions/${encodeURIComponent(sessionId)}/reports/${encodeURIComponent(reportId)}/export?format=${format}`
+  );
+  const res = await fetch(url, { credentials: 'same-origin' });
+  if (!res.ok) {
+    const contentType = res.headers.get('content-type');
+    if (contentType?.includes('application/json')) {
+      const data = await res.json().catch(() => ({}));
+      const detail = data?.detail ?? res.statusText;
+      throw new ApiError(res.status, typeof detail === 'string' ? detail : JSON.stringify(detail));
+    }
+    throw new ApiError(res.status, `${res.status} ${res.statusText}`);
+  }
+  return res.blob();
+}
+
+/** Trigger browser download of a blob (e.g. from exportReport). */
+export function downloadBlob(blob: Blob, filename: string): void {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }

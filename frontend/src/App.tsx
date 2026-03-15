@@ -4,6 +4,8 @@ import { AppLayout } from './components/AppLayout'
 import { KnowledgeIngest } from './components/KnowledgeIngest'
 import { KnowledgeSearch } from './components/KnowledgeSearch'
 import { MetricsLink } from './components/MetricsLink'
+import { ReportGenerate } from './components/ReportGenerate'
+import { ReportList } from './components/ReportList'
 import { UploadLogs } from './components/UploadLogs'
 import { useCurrentSession } from './contexts/SessionContext'
 
@@ -29,6 +31,15 @@ function HomePage() {
             View and search logs and metrics in Grafana for this session.
           </p>
           <MetricsLink />
+        </section>
+      )}
+      {currentSessionId && (
+        <section className="space-y-6 mt-8 border-t border-base-300 pt-6" aria-labelledby="reports-heading">
+          <h2 id="reports-heading" className="text-xl font-semibold">
+            Reports
+          </h2>
+          <ReportGenerate />
+          <ReportList />
         </section>
       )}
       <section className="space-y-6 mt-8 border-t border-base-300 pt-6">

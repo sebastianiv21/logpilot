@@ -100,6 +100,21 @@ export const ReportListSchema = z.object({
 });
 export type ReportList = z.infer<typeof ReportListSchema>;
 
+/** POST generate response: content is null until generation completes. */
+export const GenerateReportResponseSchema = z.object({
+  id: z.string(),
+  session_id: z.string(),
+  created_at: z.string(),
+  content: z.string().nullable(),
+});
+export type GenerateReportResponse = z.infer<typeof GenerateReportResponseSchema>;
+
+/** Form schema for report generation: question (min length 1). */
+export const ReportGenerateFormSchema = z.object({
+  question: z.string().min(1, 'Enter an incident question'),
+});
+export type ReportGenerateFormValues = z.infer<typeof ReportGenerateFormSchema>;
+
 // --- Knowledge ---
 export const KnowledgeIngestStatusSchema = z.object({
   status: z.enum(['running', 'idle']),
