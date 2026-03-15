@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Link, Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { FolderOpen, Pencil } from 'lucide-react'
 import { useCurrentSession } from '../contexts/SessionContext'
 import type { Session } from '../lib/schemas'
@@ -32,17 +32,7 @@ export function AppLayout() {
       >
         <div className="flex items-center gap-2 min-w-0">
           <span className="font-semibold text-lg truncate" aria-hidden="true">LogPilot</span>
-          {isKnowledgePage ? (
-            <Link
-              to="/"
-              className="link link-hover text-sm font-medium shrink-0"
-              aria-label="Back to home"
-            >
-              Back to home
-            </Link>
-          ) : (
-            <span className="flex-1" aria-hidden="true" />
-          )}
+          {!isKnowledgePage && <span className="flex-1" aria-hidden="true" />}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <HeaderKbLink />

@@ -77,8 +77,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T010 [US3] Remove Back to Home from top nav when on /knowledge in frontend/src/components/AppLayout.tsx
-- [ ] T011 [US3] Add Back to Home link/button at top of main content in frontend/src/components/KnowledgePage.tsx
+- [x] T010 [US3] Remove Back to Home from top nav when on /knowledge in frontend/src/components/AppLayout.tsx
+- [x] T011 [US3] Add Back to Home link/button at top of main content in frontend/src/components/KnowledgePage.tsx
 
 **Checkpoint**: User Stories 1–3 work independently.
 
