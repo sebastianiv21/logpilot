@@ -23,7 +23,7 @@ function HomePage() {
       </div>
       {currentSessionId && <UploadLogs />}
       {currentSessionId && (
-        <section className="space-y-2" aria-labelledby="logs-metrics-heading">
+        <section className="space-y-2 mt-8 border-t border-base-300 pt-6" aria-labelledby="logs-metrics-heading">
           <h2 id="logs-metrics-heading" className="text-xl font-semibold">
             Logs &amp; metrics
           </h2>

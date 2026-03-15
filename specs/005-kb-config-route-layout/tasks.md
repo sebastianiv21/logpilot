@@ -69,8 +69,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T008 [US3] In the home page content (e.g. in `frontend/src/App.tsx` or the component for `/`), ensure sections have clear visual hierarchy: consistent heading levels (e.g. h1 for title, h2 for section titles), spacing (e.g. `space-y-6`, `border-t`, `pt-6` between major sections), and grouping. Do not change the order of sections.
-- [ ] T009 [US3] In `frontend/src/components/KnowledgePage.tsx`, ensure knowledge base ingestion and search are grouped under one coherent section with a clear heading and spacing so it is obvious they belong together. Optionally add a short descriptive line under the heading.
+- [x] T008 [US3] In the home page content (e.g. in `frontend/src/App.tsx` or the component for `/`), ensure sections have clear visual hierarchy: consistent heading levels (e.g. h1 for title, h2 for section titles), spacing (e.g. `space-y-6`, `border-t`, `pt-6` between major sections), and grouping. Do not change the order of sections.
+- [x] T009 [US3] In `frontend/src/components/KnowledgePage.tsx`, ensure knowledge base ingestion and search are grouped under one coherent section with a clear heading and spacing so it is obvious they belong together. Optionally add a short descriptive line under the heading.
 
 **Checkpoint**: User Story 3 is independently testable; layout is clearer on both screens.
 
