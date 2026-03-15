@@ -118,8 +118,8 @@
 
 **Purpose**: Validation and accessibility.
 
-- [ ] T016 Run quickstart.md validation steps in specs/007-layout-single-screen-cleanup/quickstart.md
-- [ ] T017 [P] Ensure pagination controls and charts have appropriate aria-labels and semantics per contracts/ui-pagination-and-charts.md
+- [x] T016 Run quickstart.md validation steps in specs/007-layout-single-screen-cleanup/quickstart.md
+- [x] T017 [P] Ensure pagination controls and charts have appropriate aria-labels and semantics per contracts/ui-pagination-and-charts.md
 
 ---
 

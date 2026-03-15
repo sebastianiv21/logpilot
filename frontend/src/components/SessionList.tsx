@@ -146,7 +146,11 @@ export function SessionList({
         ))}
       </ul>
       {showPaginationControls && (
-        <div className="flex flex-wrap gap-2 pt-2">
+        <div
+          className="flex flex-wrap gap-2 pt-2"
+          role="group"
+          aria-label="Sessions pagination"
+        >
           {hasPrevious && (
             <button
               type="button"

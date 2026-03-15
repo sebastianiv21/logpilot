@@ -88,7 +88,7 @@ export function UploadSummaryCharts({ result }: { result: UploadResult | null })
               nameKey="name"
             >
               {filesData.length
-                ? filesData.map((entry, i) => (
+                ? filesData.map((entry) => (
                     <Cell key={entry.name} fill={entry.color} />
                   ))
                 : <Cell fill="hsl(var(--b3))" />}
@@ -96,7 +96,7 @@ export function UploadSummaryCharts({ result }: { result: UploadResult | null })
             <Tooltip content={<ChartTooltip />} />
             <Legend
               wrapperStyle={{ fontSize: 12 }}
-              formatter={(value, entry) => (
+              formatter={(value) => (
                 <span className="text-base-content">{value}</span>
               )}
               iconType="circle"
