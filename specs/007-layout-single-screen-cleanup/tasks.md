@@ -62,7 +62,7 @@
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US2] Add KB search results pagination (visibleCount/range, Load more, optional Previous) with fixed batch size 10 in frontend/src/components/KnowledgeSearch.tsx; hide or disable Load more and Previous when there are zero or only one page of results
+- [x] T008 [US2] Add KB search results pagination (visibleCount/range, Load more, optional Previous) with fixed batch size 10 in frontend/src/components/KnowledgeSearch.tsx; hide or disable Load more and Previous when there are zero or only one page of results
 - [x] T009 [US2] Batch size control removed; fixed at 10 per product decision (no dropdown for KB search)
 
 **Checkpoint**: User Stories 1 and 2 both work independently.

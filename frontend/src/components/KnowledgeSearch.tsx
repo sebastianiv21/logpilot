@@ -1,8 +1,10 @@
 /**
  * KnowledgeSearch: search input, run query, display chunks (content, source_path, metadata).
  * When knowledge base is empty or ingest not run, show clear message (FR-007).
+ * Results are paginated: fixed batch size 10, Load more and Previous (hidden when 0 or 1 page).
  */
 
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Search } from 'lucide-react'
@@ -13,6 +15,8 @@ import {
   type KnowledgeSearchFormValues,
 } from '../lib/schemas'
 import type { KnowledgeSearchChunk } from '../lib/schemas'
+
+const KB_SEARCH_BATCH_SIZE = 10
 
 function ChunkCard({ chunk }: { chunk: KnowledgeSearchChunk }) {
   return (
@@ -35,10 +39,11 @@ function ChunkCard({ chunk }: { chunk: KnowledgeSearchChunk }) {
 export function KnowledgeSearch() {
   const { data: ingestStatus } = useKnowledgeIngestStatus()
   const searchMutation = useKnowledgeSearch()
+  const [visibleCount, setVisibleCount] = useState(KB_SEARCH_BATCH_SIZE)
 
   const form = useForm<KnowledgeSearchFormValues>({
     resolver: zodResolver(KnowledgeSearchFormSchema),
-    defaultValues: { query: '', limit: 10 },
+    defaultValues: { query: '' },
   })
 
   const hasIngestRun =
@@ -47,15 +52,34 @@ export function KnowledgeSearch() {
   const hasSearched = searchMutation.isSuccess
   const isEmptyResult = hasSearched && chunks.length === 0
 
+  const visibleChunks = useMemo(
+    () => chunks.slice(0, visibleCount),
+    [chunks, visibleCount]
+  )
+  const hasMore = visibleCount < chunks.length
+  const hasPrevious = visibleCount > KB_SEARCH_BATCH_SIZE
+  const isSinglePage = chunks.length <= KB_SEARCH_BATCH_SIZE
+  const showPaginationControls = chunks.length > 0 && !isSinglePage
+
+  useEffect(() => {
+    if (searchMutation.data?.chunks) {
+      setVisibleCount(KB_SEARCH_BATCH_SIZE)
+    }
+  }, [searchMutation.data])
+
   const onSubmit = form.handleSubmit((values) => {
-    const limit = typeof values.limit === 'number' && Number.isFinite(values.limit)
-      ? values.limit
-      : 10
     searchMutation.mutate({
       query: values.query.trim(),
-      limit,
+      limit: 50,
     })
   })
+
+  const handleLoadMore = () => {
+    setVisibleCount((c) => Math.min(c + KB_SEARCH_BATCH_SIZE, chunks.length))
+  }
+  const handlePrevious = () => {
+    setVisibleCount((c) => Math.max(KB_SEARCH_BATCH_SIZE, c - KB_SEARCH_BATCH_SIZE))
+  }
 
   return (
     <section className="space-y-4" aria-labelledby="knowledge-search-heading">
@@ -82,20 +106,6 @@ export function KnowledgeSearch() {
               {form.formState.errors.query.message}
             </p>
           )}
-        </div>
-        <div className="form-control w-24">
-          <label htmlFor="knowledge-limit" className="label">
-            <span className="label-text">Limit</span>
-          </label>
-          <input
-            id="knowledge-limit"
-            type="number"
-            min={1}
-            max={100}
-            className="input input-bordered w-full"
-            {...form.register('limit', { valueAsNumber: true })}
-            aria-label="Maximum number of search results"
-          />
         </div>
         <button
           type="submit"
@@ -140,14 +150,43 @@ export function KnowledgeSearch() {
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-base-content/80">
             {chunks.length} result{chunks.length !== 1 ? 's' : ''}
+            {showPaginationControls && (
+              <span className="font-normal text-base-content/60 ml-1">
+                (showing {visibleChunks.length})
+              </span>
+            )}
           </h3>
-          <ul className="space-y-2 list-none p-0 m-0">
-            {chunks.map((chunk, i) => (
+          <ul className="space-y-2 list-none p-0 m-0" aria-label="Search results">
+            {visibleChunks.map((chunk, i) => (
               <li key={i}>
                 <ChunkCard chunk={chunk} />
               </li>
             ))}
           </ul>
+          {showPaginationControls && (
+            <div className="flex flex-wrap gap-2 pt-2">
+              {hasPrevious && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={handlePrevious}
+                  aria-label="Previous page of results"
+                >
+                  Previous
+                </button>
+              )}
+              {hasMore && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={handleLoadMore}
+                  aria-label="Load more results"
+                >
+                  Load more
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </section>
