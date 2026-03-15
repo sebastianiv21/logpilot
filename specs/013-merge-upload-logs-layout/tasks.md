@@ -74,8 +74,8 @@
 
 **Independent Test**: Home view shows two columns (Logs & metrics left, Reports right). With no upload for session, report generation is disabled with message (e.g. "Upload logs to generate reports"); after upload, reports become available. Layout stacks on narrow viewport.
 
-- [ ] T010 [US3] Ensure home view uses two-column grid (one column "Logs & metrics", one column Reports; session title above) and collapses to stacked layout on narrow viewports in frontend/src/App.tsx
-- [ ] T011 [US3] Gate report generation on session having upload: use upload-summary query (200 with status success/partial) or in-tab last upload result; disable the trigger to generate a new report (ReportGenerate) with clear message until upload exists; ReportList (viewing existing reports) remains visible in frontend/src/App.tsx and frontend/src/components/ReportGenerate.tsx
+- [x] T010 [US3] Ensure home view uses two-column grid (one column "Logs & metrics", one column Reports; session title above) and collapses to stacked layout on narrow viewports in frontend/src/App.tsx
+- [x] T011 [US3] Gate report generation on session having upload: use upload-summary query (200 with status success/partial) or in-tab last upload result; disable the trigger to generate a new report (ReportGenerate) with clear message until upload exists; ReportList (viewing existing reports) remains visible in frontend/src/App.tsx and frontend/src/components/ReportGenerate.tsx
 
 **Checkpoint**: User Story 3 is done; two-column layout and report gate work. Verify stacked layout on narrow viewport (FR-005).
 
