@@ -54,8 +54,8 @@
 
 ### Implementation for User Story 2
 
-- [ ] T006 [US2] Add a visible in-app return control (e.g. "Back to home" or "Home" link or button) on the knowledge page. Prefer placing it at the top of `KnowledgePage` or in the same AppLayout navbar when on `/knowledge` (e.g. left side of navbar) so it is above the KB section. Link to `/` using React Router `Link`.
-- [ ] T007 [US2] Verify direct navigation to `/knowledge` (e.g. address bar, bookmark) renders the knowledge page without errors and without requiring a session (KB is global). Verify browser back from `/knowledge` returns to the previous screen. (Manual validation; also covered by T011 quickstart.)
+- [x] T006 [US2] Add a visible in-app return control (e.g. "Back to home" or "Home" link or button) on the knowledge page. Prefer placing it at the top of `KnowledgePage` or in the same AppLayout navbar when on `/knowledge` (e.g. left side of navbar) so it is above the KB section. Link to `/` using React Router `Link`.
+- [x] T007 [US2] Verify direct navigation to `/knowledge` (e.g. address bar, bookmark) renders the knowledge page without errors and without requiring a session (KB is global). Verify browser back from `/knowledge` returns to the previous screen. (Manual validation; also covered by T011 quickstart.)
 
 **Checkpoint**: User Story 2 is independently testable; route is bookmarkable and return control works.
 
