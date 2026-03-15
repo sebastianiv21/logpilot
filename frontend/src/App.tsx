@@ -2,8 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AppLayout } from './components/AppLayout'
 import { ConnectionBanner } from './components/ConnectionBanner'
-import { KnowledgeIngest } from './components/KnowledgeIngest'
-import { KnowledgeSearch } from './components/KnowledgeSearch'
+import { KnowledgePage } from './components/KnowledgePage'
 import { MetricsLink } from './components/MetricsLink'
 import { ReportGenerate } from './components/ReportGenerate'
 import { ReportList } from './components/ReportList'
@@ -24,7 +23,7 @@ function HomePage() {
       </div>
       {currentSessionId && <UploadLogs />}
       {currentSessionId && (
-        <section className="space-y-2" aria-labelledby="logs-metrics-heading">
+        <section className="space-y-2 mt-8 border-t border-base-300 pt-6" aria-labelledby="logs-metrics-heading">
           <h2 id="logs-metrics-heading" className="text-xl font-semibold">
             Logs &amp; metrics
           </h2>
@@ -43,10 +42,6 @@ function HomePage() {
           <ReportList />
         </section>
       )}
-      <section className="space-y-6 mt-8 border-t border-base-300 pt-6">
-        <KnowledgeIngest />
-        <KnowledgeSearch />
-      </section>
     </div>
   )
 }
@@ -69,6 +64,7 @@ function App() {
       <Routes>
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/knowledge" element={<KnowledgePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

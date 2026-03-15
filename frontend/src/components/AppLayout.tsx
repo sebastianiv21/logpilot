@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 import { FolderOpen, Pencil } from 'lucide-react'
 import { useCurrentSession } from '../contexts/SessionContext'
 import type { Session } from '../lib/schemas'
@@ -7,12 +7,15 @@ import { useFocusTrap } from '../hooks/useFocusTrap'
 import { SessionList } from './SessionList'
 import { CreateSessionForm } from './CreateSessionForm'
 import { EditSessionForm } from './EditSessionForm'
+import { HeaderKbLink } from './HeaderKbLink'
 
 export function AppLayout() {
   const { currentSessionId } = useCurrentSession()
+  const location = useLocation()
   const [editingSession, setEditingSession] = useState<Session | null>(null)
   const editModalRef = useRef<HTMLDivElement>(null)
   useFocusTrap(!!editingSession, editModalRef)
+  const isKnowledgePage = location.pathname === '/knowledge'
 
   return (
     <div className="flex min-h-screen">
@@ -42,6 +45,23 @@ export function AppLayout() {
         </nav>
       </aside>
       <main id="main-content" className="flex-1 flex flex-col min-w-0" tabIndex={-1}>
+        <nav
+          className="flex items-center justify-between gap-2 px-4 py-2 border-b border-base-300 bg-base-200/50"
+          aria-label="Main navigation"
+        >
+          {isKnowledgePage ? (
+            <Link
+              to="/"
+              className="link link-hover text-sm font-medium"
+              aria-label="Back to home"
+            >
+              Back to home
+            </Link>
+          ) : (
+            <div className="flex-1" />
+          )}
+          <HeaderKbLink />
+        </nav>
         <div className="p-4 flex-1">
           <Outlet />
         </div>
