@@ -100,12 +100,26 @@ def query_session_logs(
     return LogsQueryResponse(logs=[LogRecordResponse.model_validate(r) for r in records])
 
 
+# One hour in milliseconds; added as buffer on each side of the log time range
+LOG_RANGE_BUFFER_MS = 60 * 60 * 1000
+
+
+def _range_response_from_ns(min_ns: int, max_ns: int) -> LogsRangeResponse:
+    """Build LogsRangeResponse with one-hour buffer on each side."""
+    from_ms = (min_ns // 1_000_000) - LOG_RANGE_BUFFER_MS
+    to_ms = (max_ns // 1_000_000) + LOG_RANGE_BUFFER_MS
+    if from_ms < 0:
+        from_ms = 0
+    return LogsRangeResponse(from_ms=from_ms, to_ms=to_ms)
+
+
 @router.get("/{session_id}/logs/range", response_model=LogsRangeResponse)
 def get_session_logs_range(session_id: str) -> LogsRangeResponse:
     """
     Return the time range (from_ms, to_ms) of logs ingested for this session.
     Uses the extent stored at upload time (from uploaded log timestamps); falls back
     to querying Loki if no extent is stored (e.g. older uploads).
+    Adds a one-hour buffer on each side of the range.
     """
     session = _repo.get(session_id)
     if session is None:
@@ -114,19 +128,11 @@ def get_session_logs_range(session_id: str) -> LogsRangeResponse:
     # Prefer extent stored when logs were uploaded (source of truth from upload timestamps)
     extent = _repo.get_log_extent(session_id)
     if extent is not None:
-        min_ns, max_ns = extent
-        return LogsRangeResponse(
-            from_ms=min_ns // 1_000_000,
-            to_ms=max_ns // 1_000_000,
-        )
+        return _range_response_from_ns(extent[0], extent[1])
 
     # Fallback: derive from Loki (e.g. for sessions that had logs before we stored extent)
     range_ns = get_log_time_range_ns(session_id=session_id)
     if range_ns is None:
         raise HTTPException(status_code=404, detail="No logs found for this session")
 
-    min_ns, max_ns = range_ns
-    return LogsRangeResponse(
-        from_ms=min_ns // 1_000_000,
-        to_ms=max_ns // 1_000_000,
-    )
+    return _range_response_from_ns(range_ns[0], range_ns[1])
