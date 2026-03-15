@@ -46,27 +46,22 @@ function HomePage() {
         onCopySessionId={copySessionId}
       />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-        <div className="min-w-0">
-          <UploadLogs />
-        </div>
-      <div className="flex flex-col gap-6 min-w-0">
-        <section className="space-y-2 border-t border-base-300 pt-6 lg:border-t-0 lg:pt-0" aria-labelledby="logs-metrics-heading">
+        <section className="min-w-0 space-y-4" aria-labelledby="logs-metrics-heading">
           <h2 id="logs-metrics-heading" className="text-xl font-semibold">
             Logs &amp; metrics
           </h2>
-          <p className="text-base-content/80 text-sm">
-            Search logs and open metrics in Grafana.
-          </p>
+          <UploadLogs />
           <MetricsLink />
         </section>
-        <section className="space-y-6 border-t border-base-300 pt-6" aria-labelledby="reports-heading">
+        <div className="flex flex-col gap-6 min-w-0">
+        <section className="space-y-6 border-t border-base-300 pt-6 lg:border-t-0 lg:pt-0" aria-labelledby="reports-heading">
           <h2 id="reports-heading" className="text-xl font-semibold">
             Reports
           </h2>
           <ReportGenerate />
           <ReportList />
         </section>
-      </div>
+        </div>
       </div>
     </div>
   )

@@ -28,6 +28,8 @@ class UploadResultResponse(BaseModel):
     lines_rejected: int
     session_id: str
     error: str | None = None
+    uploaded_file_name: str | None = None
+    updated_at: str | None = None
 
 
 @router.get(
@@ -53,6 +55,8 @@ def get_upload_summary(session_id: str) -> UploadResultResponse:
         lines_rejected=summary["lines_rejected"],
         session_id=summary["session_id"],
         error=summary["error"],
+        uploaded_file_name=summary.get("uploaded_file_name"),
+        updated_at=summary.get("updated_at"),
     )
 
 
@@ -108,7 +112,9 @@ async def upload_logs(
         lines_parsed=result.lines_parsed,
         lines_rejected=result.lines_rejected,
         error=result.error,
+        uploaded_file_name=file.filename,
     )
+    updated = _repo.get_upload_summary(session_id)
 
     return UploadResultResponse(
         status=result.status,
@@ -118,4 +124,6 @@ async def upload_logs(
         lines_rejected=result.lines_rejected,
         session_id=result.session_id,
         error=result.error,
+        uploaded_file_name=file.filename,
+        updated_at=updated["updated_at"] if updated else None,
     )

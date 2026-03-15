@@ -1,24 +1,36 @@
 /**
  * ReportGenerate: incident question input, trigger button.
  * Disabled when a report is already generating for the current session (FR-008).
+ * Disabled until the current session has at least one successful/partial log upload (FR-008).
  * Shows "in progress" until content is ready.
  */
 
 import { useForm } from 'react-hook-form';
+import { useQuery } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { FileOutput } from 'lucide-react';
+import { FileOutput, Upload } from 'lucide-react';
 import { ReportGenerateFormSchema, type ReportGenerateFormValues } from '../lib/schemas';
+import { getUploadSummary } from '../services/api';
 import { useCurrentSession } from '../contexts/SessionContext';
 import { useReportGeneration } from '../contexts/ReportGenerationContext';
 import { useGenerateReport } from '../hooks/useReports';
 
 export function ReportGenerate() {
   const { currentSessionId } = useCurrentSession();
-  const { setGenerating, isGenerating, generatingBySession } = useReportGeneration();
+  const { setGenerating, isGenerating } = useReportGeneration();
   const generateMutation = useGenerateReport(currentSessionId, (reportId) => {
     if (currentSessionId) setGenerating(currentSessionId, reportId);
   });
+
+  const { data: uploadSummary } = useQuery({
+    queryKey: ['uploadSummary', currentSessionId ?? ''],
+    queryFn: () => getUploadSummary(currentSessionId!),
+    enabled: !!currentSessionId,
+  });
+  const hasUpload =
+    uploadSummary != null &&
+    (uploadSummary.status === 'success' || uploadSummary.status === 'partial');
 
   const {
     register,
@@ -31,9 +43,6 @@ export function ReportGenerate() {
   });
 
   const generatingForCurrent = currentSessionId ? isGenerating(currentSessionId) : false;
-  const otherSessionsGenerating = Object.keys(generatingBySession).filter(
-    (sid) => sid !== currentSessionId
-  );
 
   const onSubmit = handleSubmit((data) => {
     if (!currentSessionId) return;
@@ -64,10 +73,15 @@ export function ReportGenerate() {
         Ask a question to generate a report. One report at a time per session.
       </p>
 
-      {otherSessionsGenerating.length > 0 && (
-        <p className="text-sm text-base-content/70" role="status">
-          Report generating in another session. It will show in that session's list when ready.
-        </p>
+      {currentSessionId && !hasUpload && (
+        <div
+          className="alert alert-info text-sm py-2 px-3 flex items-center gap-2"
+          role="status"
+          aria-live="polite"
+        >
+          <Upload size={18} aria-hidden />
+          <span>Upload logs first to generate reports.</span>
+        </div>
       )}
 
       <form onSubmit={onSubmit} className="space-y-2">
@@ -93,7 +107,12 @@ export function ReportGenerate() {
         <button
           type="submit"
           className="btn btn-primary flex items-center gap-2"
-          disabled={!currentSessionId || generatingForCurrent || generateMutation.isPending}
+          disabled={
+            !currentSessionId ||
+            !hasUpload ||
+            generatingForCurrent ||
+            generateMutation.isPending
+          }
           aria-busy={generatingForCurrent || generateMutation.isPending}
           aria-describedby="report-generate-status"
           aria-label="Generate report from incident question"
@@ -110,7 +129,7 @@ export function ReportGenerate() {
               : 'Generate report'}
         </button>
         <p id="report-generate-status" className="text-sm text-base-content/70" aria-live="polite">
-          {generatingForCurrent && 'Generating. It will appear in the list below when ready.'}
+          {!hasUpload && currentSessionId && 'Upload logs first.'}
         </p>
         {generateMutation.isError && (
           <p className="text-error text-sm" role="alert">

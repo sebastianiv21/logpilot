@@ -43,6 +43,8 @@ export const UploadResultSchema = z.object({
   lines_rejected: z.number(),
   session_id: z.string(),
   error: z.string().nullable(),
+  uploaded_file_name: z.string().nullable().optional(),
+  updated_at: z.string().nullable().optional(),
 });
 export type UploadResult = z.infer<typeof UploadResultSchema>;
 
