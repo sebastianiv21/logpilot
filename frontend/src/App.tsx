@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom'
 import { Toaster, toast } from 'sonner'
-import { Copy } from 'lucide-react'
 import { AppLayout } from './components/AppLayout'
+import { SessionTitleRow } from './components/SessionTitleRow'
 import { ConnectionBanner } from './components/ConnectionBanner'
 import { KnowledgePage } from './components/KnowledgePage'
 import { MetricsLink } from './components/MetricsLink'
@@ -40,31 +40,11 @@ function HomePage() {
 
   return (
     <div className="space-y-6">
-      {sessionTitle && (
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold truncate" title={sessionTitle}>
-            {sessionTitle}
-          </h1>
-          {currentSession && (
-            <div className="flex items-center gap-1.5 flex-wrap text-sm text-base-content/70">
-              <span className="shrink-0">Session ID:</span>
-              <span className="flex items-center gap-1 min-w-0 max-w-full">
-                <code className="truncate font-mono text-xs" title={currentSession.id}>
-                  {currentSession.id}
-                </code>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-xs btn-square shrink-0"
-                  onClick={copySessionId}
-                  aria-label="Copy session ID"
-                >
-                  <Copy size={14} aria-hidden />
-                </button>
-              </span>
-            </div>
-          )}
-        </div>
-      )}
+      <SessionTitleRow
+        sessionTitle={sessionTitle}
+        currentSession={currentSession}
+        onCopySessionId={copySessionId}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
         <div className="min-w-0">
           <UploadLogs />

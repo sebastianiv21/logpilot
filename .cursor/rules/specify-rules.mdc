@@ -29,6 +29,7 @@ Auto-generated from all feature plans. Last updated: 2026-03-15
 - Backend: SQLite (existing sessions + session_log_extent); add storage for last upload result per session (new table or columns). Frontend: no new persistence; continue storing currentSessionId in localStorage. (010-upload-session-state-fix)
 - TypeScript 5.x (frontend), Python 3.11+ (backend unchanged) + React 18.x, React Router, Vite, Tailwind CSS, DaisyUI, TanStack Query, Sonner (toast), lucide-reac (011-report-ready-alert-session)
 - N/A (session/report from existing API; optional localStorage for current session already exists) (011-report-ready-alert-session)
+- N/A (session and `external_link` from existing API; no new persistence) (012-session-external-link-button)
 
 - Python 3.11+ (typed) + FastAPI, Loki client (e.g. promtail or push API), Prometheus client, Grafana provisioning API, Qdrant client, OpenAI-compatible LLM client (configurable base URL + API key) (001-log-investigation-mvp)
 
@@ -49,9 +50,9 @@ cd src [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLO
 Python 3.11+ (typed): Follow standard conventions
 
 ## Recent Changes
+- 012-session-external-link-button: Added TypeScript 5.x (frontend); Python 3.11+ (backend unchanged) + React 18.x, React Router, Vite, Tailwind CSS, DaisyUI, TanStack Query, Sonner, lucide-reac
 - 011-report-ready-alert-session: Added TypeScript 5.x (frontend), Python 3.11+ (backend unchanged) + React 18.x, React Router, Vite, Tailwind CSS, DaisyUI, TanStack Query, Sonner (toast), lucide-reac
 - 010-upload-session-state-fix: Added TypeScript 5.x (frontend), Python 3.11+ (backend) + React 18.x, TanStack Query, FastAPI; existing SessionContext, UploadLogs, upload API
-- 009-session-search-bar: Added TypeScript 5.x (frontend); Python 3.11+ (backend unchanged) + React 18.x, React Router, Vite, Tailwind CSS, DaisyUI, TanStack Query, Sonner, lucide-reac
 
 
 <!-- MANUAL ADDITIONS START -->
