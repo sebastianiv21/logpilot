@@ -127,20 +127,15 @@ export function MetricsLink() {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <button
-        type="button"
-        className="btn btn-primary"
-        onClick={handleOpen}
-        disabled={opening}
-        aria-busy={opening}
-        aria-label="Open Grafana for this session in a new tab"
-      >
-        {opening ? 'Opening…' : 'Open in Grafana'}
-      </button>
-      <p className="text-sm text-base-content/70">
-        Opens in a new tab; updates when you switch sessions.
-      </p>
-    </div>
+    <button
+      type="button"
+      className="btn btn-primary"
+      onClick={handleOpen}
+      disabled={opening}
+      aria-busy={opening}
+      aria-label="Open Grafana for this session in a new tab"
+    >
+      {opening ? 'Opening…' : 'Open in Grafana'}
+    </button>
   );
 }

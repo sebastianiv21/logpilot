@@ -137,10 +137,6 @@ export function UploadLogs() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold flex items-center gap-2">
-        <Upload size={18} aria-hidden />
-        Upload logs
-      </h2>
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
         <label className="form-control w-full max-w-xs">
           <span className="label-text">Log archive (.zip)</span>

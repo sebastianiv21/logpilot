@@ -18,7 +18,7 @@ import { useGenerateReport } from '../hooks/useReports';
 
 export function ReportGenerate() {
   const { currentSessionId } = useCurrentSession();
-  const { setGenerating, isGenerating, generatingBySession } = useReportGeneration();
+  const { setGenerating, isGenerating } = useReportGeneration();
   const generateMutation = useGenerateReport(currentSessionId, (reportId) => {
     if (currentSessionId) setGenerating(currentSessionId, reportId);
   });
@@ -43,9 +43,6 @@ export function ReportGenerate() {
   });
 
   const generatingForCurrent = currentSessionId ? isGenerating(currentSessionId) : false;
-  const otherSessionsGenerating = Object.keys(generatingBySession).filter(
-    (sid) => sid !== currentSessionId
-  );
 
   const onSubmit = handleSubmit((data) => {
     if (!currentSessionId) return;
@@ -85,12 +82,6 @@ export function ReportGenerate() {
           <Upload size={18} aria-hidden />
           <span>Upload logs first to generate reports.</span>
         </div>
-      )}
-
-      {otherSessionsGenerating.length > 0 && (
-        <p className="text-sm text-base-content/70" role="status">
-          Report generating in another session. It will show in that session's list when ready.
-        </p>
       )}
 
       <form onSubmit={onSubmit} className="space-y-2">
@@ -139,7 +130,6 @@ export function ReportGenerate() {
         </button>
         <p id="report-generate-status" className="text-sm text-base-content/70" aria-live="polite">
           {!hasUpload && currentSessionId && 'Upload logs first.'}
-          {hasUpload && generatingForCurrent && 'Generating. It will appear in the list below when ready.'}
         </p>
         {generateMutation.isError && (
           <p className="text-error text-sm" role="alert">

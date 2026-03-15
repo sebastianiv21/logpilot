@@ -87,7 +87,7 @@
 
 **Independent Test**: Open view with "Open in Grafana"; confirm the phrase is not present; button still opens Grafana in a new tab.
 
-- [ ] T012 [P] [US4] Remove the paragraph containing "Opens in a new tab; updates when you switch sessions." from frontend/src/components/MetricsLink.tsx (keep the button and onClick behavior)
+- [x] T012 [P] [US4] Remove the paragraph containing "Opens in a new tab; updates when you switch sessions." from frontend/src/components/MetricsLink.tsx (keep the button and onClick behavior)
 
 **Checkpoint**: User Story 4 is done; copy removed, behavior unchanged.
 
