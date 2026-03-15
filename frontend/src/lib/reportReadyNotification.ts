@@ -44,6 +44,7 @@ export async function notifyReportReady(
   const description = labelDisplay !== labelTitle ? labelTitle : undefined;
   toast.success(message, {
     ...(description && { description }),
+    // FR-005: Sonner action renders as a focusable button; label "View report" is the accessible name.
     ...(onViewReport && {
       action: {
         label: 'View report',

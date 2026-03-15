@@ -32,7 +32,7 @@
 - [x] T002 [P] Add ReportToOpenContext with state `reportToOpen: { sessionId: string, reportId: string } | null`, `openReport(sessionId, reportId)`, and `clearReportToOpen()` in `frontend/src/contexts/ReportToOpenContext.tsx`
 - [x] T003 Add ReportToOpenProvider in `frontend/src/App.tsx` inside BrowserRouter (so it can use useNavigate); provider consumes SessionContext and implements openReport by setting currentSessionId, setting reportToOpen, and navigating to `/`
 - [x] T004 Move ReportGenerationProvider from `frontend/src/main.tsx` into `frontend/src/App.tsx` so it sits inside ReportToOpenProvider; wrap Routes (and Toaster/ConnectionBanner) with ReportGenerationProvider in App
-- [ ] T005 Update ReportGenerationContext to consume ReportToOpenContext and pass `openReport` into `notifyReportReady` when calling it (pass reportId and onViewReport) in `frontend/src/contexts/ReportGenerationContext.tsx`
+- [x] T005 Update ReportGenerationContext to consume ReportToOpenContext and pass `openReport` into `notifyReportReady` when calling it (pass reportId and onViewReport) in `frontend/src/contexts/ReportGenerationContext.tsx`
 
 **Checkpoint**: Foundation ready — report-to-open context and provider order in place; ReportGenerationContext can call notifyReportReady with openReport.
 
@@ -61,10 +61,10 @@
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US2] In `frontend/src/lib/reportReadyNotification.ts`, when `onViewReport` is provided call `toast.success(message, { action: { label: 'View report', onClick: () => onViewReport(sessionId, reportId) } })` and ensure the action control is keyboard-focusable and has an accessible name (e.g. Sonner action button or custom description with aria-label "View report") per FR-002 and FR-005
-- [ ] T009 [US2] In `frontend/src/contexts/ReportGenerationContext.tsx`, add `openReport` from ReportToOpenContext as the fourth argument to the existing notifyReportReady call (sessionId, reportId, generatingCount already passed from T007)
-- [ ] T010 [US2] In `frontend/src/components/ReportList.tsx`, consume reportToOpen from ReportToOpenContext; when `currentSessionId === reportToOpen.sessionId` and reports have loaded, if `reportToOpen.reportId` is in the reports list set selectedReport to that report (open modal) and call clearReportToOpen
-- [ ] T011 [US2] In `frontend/src/components/ReportList.tsx`, when reportToOpen matches current session but reports failed to load or reportId is not in the list, show a clear toast (e.g. "Session or report no longer available") and call clearReportToOpen so the user gets a clear indication per FR-003 and SC-003
+- [x] T008 [US2] In `frontend/src/lib/reportReadyNotification.ts`, when `onViewReport` is provided call `toast.success(message, { action: { label: 'View report', onClick: () => onViewReport(sessionId, reportId) } })` and ensure the action control is keyboard-focusable and has an accessible name (e.g. Sonner action button or custom description with aria-label "View report") per FR-002 and FR-005
+- [x] T009 [US2] In `frontend/src/contexts/ReportGenerationContext.tsx`, add `openReport` from ReportToOpenContext as the fourth argument to the existing notifyReportReady call (sessionId, reportId, generatingCount already passed from T007)
+- [x] T010 [US2] In `frontend/src/components/ReportList.tsx`, consume reportToOpen from ReportToOpenContext; when `currentSessionId === reportToOpen.sessionId` and reports have loaded, if `reportToOpen.reportId` is in the reports list set selectedReport to that report (open modal) and call clearReportToOpen
+- [x] T011 [US2] In `frontend/src/components/ReportList.tsx`, when reportToOpen matches current session but reports failed to load or reportId is not in the list, show a clear toast (e.g. "Session or report no longer available") and call clearReportToOpen so the user gets a clear indication per FR-003 and SC-003
 
 **Checkpoint**: User Story 2 complete — "View report" in toast opens session and report; keyboard/screen reader can activate it; unavailable case shows clear message.
 
