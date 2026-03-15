@@ -36,13 +36,13 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Create API client module: base URL from import.meta.env.VITE_API_BASE, fetch wrapper for JSON requests and error handling (detail from backend) in frontend/src/services/api.ts
-- [ ] T007 [P] Add Zod schemas for API response types (Session, SessionList, UploadResult, LogsQuery, Report, ReportList, KnowledgeIngestStatus, KnowledgeSearch) per data-model.md and contracts/api.md in frontend/src/lib/schemas.ts
-- [ ] T008 Setup QueryClientProvider and React Query default options in frontend/src/main.tsx (Vite entry point; root component remains App.tsx)
-- [ ] T009 Setup React Router with root layout and routes (e.g. /, /session/:sessionId or single layout with session scope) in frontend/src/App.tsx
-- [ ] T010 Add current session state and persistence (e.g. React context + localStorage for session id) so all session-scoped features use it. Implement in either frontend/src/contexts/SessionContext.tsx or frontend/src/hooks/useCurrentSession.ts; either approach is acceptable.
-- [ ] T011 Add Sonner Toaster with DaisyUI alert styling (unstyled + toastOptions.classNames.toast mapping success/error/info to alert alert-success/alert-error/alert-info) in frontend/src/App.tsx per research.md §8
-- [ ] T012 Add app shell/layout: nav or sidebar for session list, current session indicator, and area for session-scoped content in frontend/src/components/AppLayout.tsx (or equivalent layout component)
+- [X] T006 Create API client module: base URL from import.meta.env.VITE_API_BASE, fetch wrapper for JSON requests and error handling (detail from backend) in frontend/src/services/api.ts
+- [X] T007 [P] Add Zod schemas for API response types (Session, SessionList, UploadResult, LogsQuery, Report, ReportList, KnowledgeIngestStatus, KnowledgeSearch) per data-model.md and contracts/api.md in frontend/src/lib/schemas.ts
+- [X] T008 Setup QueryClientProvider and React Query default options in frontend/src/main.tsx (Vite entry point; root component remains App.tsx)
+- [X] T009 Setup React Router with root layout and routes (e.g. /, /session/:sessionId or single layout with session scope) in frontend/src/App.tsx
+- [X] T010 Add current session state and persistence (e.g. React context + localStorage for session id) so all session-scoped features use it. Implement in either frontend/src/contexts/SessionContext.tsx or frontend/src/hooks/useCurrentSession.ts; either approach is acceptable.
+- [X] T011 Add Sonner Toaster with DaisyUI alert styling (unstyled + toastOptions.classNames.toast mapping success/error/info to alert alert-success/alert-error/alert-info) in frontend/src/App.tsx per research.md §8
+- [X] T012 Add app shell/layout: nav or sidebar for session list, current session indicator, and area for session-scoped content in frontend/src/components/AppLayout.tsx (or equivalent layout component)
 
 **Checkpoint**: Foundation ready — user story implementation can now begin
 
