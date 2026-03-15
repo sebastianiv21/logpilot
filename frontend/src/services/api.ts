@@ -3,7 +3,7 @@
  * Base URL from VITE_API_BASE; fetch wrapper with JSON and error handling.
  */
 
-import type { Session, SessionList } from '../lib/schemas';
+import { UploadResultSchema, type Session, type SessionList, type UploadResult } from '../lib/schemas';
 
 const getBaseUrl = (): string => {
   const base = import.meta.env.VITE_API_BASE;
@@ -106,4 +106,17 @@ export async function patchSession(id: string, body: PatchSessionBody): Promise<
     method: 'PATCH',
     body: JSON.stringify(body),
   });
+}
+
+// --- Upload (contracts/api.md) ---
+
+/** POST /sessions/{session_id}/logs/upload — multipart/form-data, field "file" (.zip). Returns parsed UploadResult. */
+export async function uploadLogs(sessionId: string, file: File): Promise<UploadResult> {
+  const form = new FormData();
+  form.append('file', file);
+  const raw = await apiFetch<unknown>(`/sessions/${encodeURIComponent(sessionId)}/logs/upload`, {
+    method: 'POST',
+    body: form,
+  });
+  return UploadResultSchema.parse(raw);
 }

@@ -34,8 +34,9 @@ export const EditSessionFormSchema = z.object({
 export type EditSessionFormValues = z.infer<typeof EditSessionFormSchema>;
 
 // --- Upload result ---
+// Backend may return "success" | "partial" | "failed" (partial when some files/lines skipped or rejected)
 export const UploadResultSchema = z.object({
-  status: z.enum(['success', 'failed']),
+  status: z.enum(['success', 'failed', 'partial']),
   files_processed: z.number(),
   files_skipped: z.number(),
   lines_parsed: z.number(),

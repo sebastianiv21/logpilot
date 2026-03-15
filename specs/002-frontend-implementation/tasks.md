@@ -70,9 +70,9 @@
 
 **Independent Test**: Select a session, upload a valid .zip, verify success and summary; upload invalid or oversized file and verify error message.
 
-- [ ] T018 [US2] Implement upload API: POST /sessions/{session_id}/logs/upload (multipart/form-data, field "file") and parse UploadResultResponse in frontend/src/services/api.ts
-- [ ] T019 [US2] Build UploadLogs component: file input (accept .zip), loading state during upload, display result (status, files_processed, files_skipped, lines_parsed, lines_rejected) or error message in frontend/src/components/UploadLogs.tsx
-- [ ] T020 [US2] Map backend errors (404, 413, 400) to user-friendly messages and show via Sonner toast or inline; do not indicate success on failure (FR-004, FR-011) in frontend/src/components/UploadLogs.tsx
+- [X] T018 [US2] Implement upload API: POST /sessions/{session_id}/logs/upload (multipart/form-data, field "file") and parse UploadResultResponse in frontend/src/services/api.ts
+- [X] T019 [US2] Build UploadLogs component: file input (accept .zip), loading state during upload, display result (status, files_processed, files_skipped, lines_parsed, lines_rejected) or error message in frontend/src/components/UploadLogs.tsx
+- [X] T020 [US2] Map backend errors (404, 413, 400) to user-friendly messages and show via Sonner toast or inline; do not indicate success on failure (FR-004, FR-011) in frontend/src/components/UploadLogs.tsx
 
 **Checkpoint**: User Story 2 complete — upload and result display work
 
