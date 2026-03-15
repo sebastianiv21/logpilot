@@ -18,8 +18,8 @@ function HomePage() {
         <h1 className="text-2xl font-semibold">LogPilot</h1>
         <p className="mt-2 text-base-content/80">
           {currentSessionId
-            ? 'Upload logs or use the session list to switch.'
-            : 'Select a session or create one to get started.'}
+            ? 'Upload logs or switch session in the sidebar.'
+            : 'Select or create a session to get started.'}
         </p>
       </div>
       {currentSessionId && <UploadLogs />}
@@ -29,7 +29,7 @@ function HomePage() {
             Logs &amp; metrics
           </h2>
           <p className="text-base-content/80 text-sm">
-            View and search logs and metrics in Grafana for this session.
+            Search logs and open metrics in Grafana.
           </p>
           <MetricsLink />
         </section>

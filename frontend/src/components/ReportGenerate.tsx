@@ -42,14 +42,13 @@ export function ReportGenerate() {
       {
         onSuccess: () => {
           reset();
-          toast.info('Report generation started', {
-            description:
-              "Content will appear when ready. You can switch sessions; the report will show in this session's list when done.",
+          toast.info('Report started', {
+            description: 'Content will appear when ready. You can switch sessions.',
           });
         },
         onError: (err) => {
           const msg = err instanceof Error ? err.message : 'Failed to start report';
-          toast.error('Could not start report', { description: msg });
+          toast.error('Couldn\'t start report', { description: msg });
         },
       }
     );
@@ -62,14 +61,12 @@ export function ReportGenerate() {
         Generate report
       </h2>
       <p className="text-base-content/80 text-sm">
-        Enter an incident question to generate an AI report for the current session. Only one
-        report generates at a time per session.
+        Ask a question to generate a report. One report at a time per session.
       </p>
 
       {otherSessionsGenerating.length > 0 && (
         <p className="text-sm text-base-content/70" role="status">
-          Report is generating in the background for another session. It will appear in that
-          session's report list when ready. You can continue here.
+          Report generating in another session. It will show in that session's list when ready.
         </p>
       )}
 
@@ -113,8 +110,7 @@ export function ReportGenerate() {
               : 'Generate report'}
         </button>
         <p id="report-generate-status" className="text-sm text-base-content/70" aria-live="polite">
-          {generatingForCurrent &&
-            'Report is being generated. View it in the report list below once content is ready.'}
+          {generatingForCurrent && 'Generating. It will appear in the list below when ready.'}
         </p>
         {generateMutation.isError && (
           <p className="text-error text-sm" role="alert">

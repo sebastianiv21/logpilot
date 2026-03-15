@@ -40,7 +40,7 @@ export function ReportList() {
   if (error) {
     return (
       <p className="text-error text-sm" role="alert">
-        Failed to load reports: {error.message}
+        Couldn't load reports.
       </p>
     );
   }

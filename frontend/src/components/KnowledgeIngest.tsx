@@ -23,7 +23,7 @@ export function KnowledgeIngest() {
         Knowledge base
       </h2>
       <p className="text-base-content/80 text-sm">
-        Ingest documentation and code into the knowledge base for report generation and search.
+        Add docs and code to the knowledge base for reports and search.
       </p>
       <div className="flex flex-wrap items-center gap-3">
         <button
@@ -55,15 +55,15 @@ export function KnowledgeIngest() {
             </>
           ) : (
             statusError
-              ? 'Failed to load status'
+              ? 'Couldn\'t load status'
               : isRunning
-                ? 'Ingest in progress (this may take several minutes)'
+                ? 'Ingesting… This may take a few minutes.'
                 : isIdle && lastResult
                   ? `Last run: ${lastResult.chunks_ingested ?? 0} chunks, ${lastResult.files_processed ?? 0} files`
                   : isIdle && errorMessage
                     ? `Last run failed: ${errorMessage}`
                     : isIdle
-                      ? 'Idle — run ingestion to populate the knowledge base'
+                      ? 'Idle. Run ingestion to populate.'
                       : null
           )}
         </span>

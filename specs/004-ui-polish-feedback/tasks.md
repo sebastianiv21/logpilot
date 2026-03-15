@@ -104,12 +104,12 @@
 
 ### Implementation for User Story 4
 
-- [ ] T024 [P] [US4] Review and simplify copy in frontend/src/App.tsx and frontend/src/components/AppLayout.tsx
-- [ ] T025 [P] [US4] Review and simplify copy in frontend/src/components/SessionList.tsx, frontend/src/components/CreateSessionForm.tsx, frontend/src/components/EditSessionForm.tsx
-- [ ] T026 [P] [US4] Review and simplify copy in frontend/src/components/ReportList.tsx, frontend/src/components/ReportView.tsx, frontend/src/components/ReportGenerate.tsx
-- [ ] T027 [P] [US4] Review and simplify copy in frontend/src/components/LogSearchForm.tsx, frontend/src/components/LogResults.tsx, frontend/src/components/KnowledgeIngest.tsx, frontend/src/components/KnowledgeSearch.tsx
-- [ ] T028 [P] [US4] Review and simplify copy in frontend/src/components/UploadLogs.tsx and frontend/src/components/ConnectionBanner.tsx
-- [ ] T029 [US4] Simplify toast and error messages across components (ReportGenerate, ReportView, KnowledgeIngest, UploadLogs, ConnectionBanner) per spec FR-004; prefer non-technical messages (e.g. "Check your connection")
+- [x] T024 [P] [US4] Review and simplify copy in frontend/src/App.tsx and frontend/src/components/AppLayout.tsx
+- [x] T025 [P] [US4] Review and simplify copy in frontend/src/components/SessionList.tsx, frontend/src/components/CreateSessionForm.tsx, frontend/src/components/EditSessionForm.tsx
+- [x] T026 [P] [US4] Review and simplify copy in frontend/src/components/ReportList.tsx, frontend/src/components/ReportView.tsx, frontend/src/components/ReportGenerate.tsx
+- [x] T027 [P] [US4] Review and simplify copy in frontend/src/components/LogSearchForm.tsx, frontend/src/components/LogResults.tsx, frontend/src/components/KnowledgeIngest.tsx, frontend/src/components/KnowledgeSearch.tsx
+- [x] T028 [P] [US4] Review and simplify copy in frontend/src/components/UploadLogs.tsx and frontend/src/components/ConnectionBanner.tsx
+- [x] T029 [US4] Simplify toast and error messages across components (ReportGenerate, ReportView, KnowledgeIngest, UploadLogs, ConnectionBanner) per spec FR-004; prefer non-technical messages (e.g. "Check your connection")
 
 **Checkpoint**: User Story 4 is independently testable; copy is shorter and clearer across the app.
 

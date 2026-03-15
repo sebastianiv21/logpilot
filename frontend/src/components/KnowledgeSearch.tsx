@@ -115,19 +115,19 @@ export function KnowledgeSearch() {
 
       {searchMutation.isError && (
         <div className="alert alert-error" role="alert">
-          <span>{searchMutation.error?.message ?? 'Search failed'}</span>
+          <span>{searchMutation.error?.message ?? 'Couldn\'t search'}</span>
         </div>
       )}
 
       {/* T033: empty state when no ingest run or no knowledge available */}
       {!hasIngestRun && !hasSearched && (
         <p className="text-base-content/70 text-sm">
-          Run ingestion first to populate the knowledge base, then search here.
+          Run ingestion first, then search.
         </p>
       )}
       {!hasIngestRun && hasSearched && isEmptyResult && (
         <p className="text-base-content/70 text-sm">
-          No knowledge available. Run ingestion first to index documentation and code.
+          No knowledge yet. Run ingestion first.
         </p>
       )}
       {hasIngestRun && hasSearched && isEmptyResult && (

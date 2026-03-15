@@ -80,7 +80,7 @@ export function LogSearchForm({ onResult, disabled }: LogSearchFormProps) {
   return (
     <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3">
       <label className="form-control max-w-xs">
-        <span className="label-text">Start (ISO or leave empty for session start)</span>
+        <span className="label-text">Start (optional, ISO)</span>
         <input
           type="text"
           placeholder="e.g. 2025-01-01T00:00:00Z"
@@ -93,7 +93,7 @@ export function LogSearchForm({ onResult, disabled }: LogSearchFormProps) {
         )}
       </label>
       <label className="form-control max-w-xs">
-        <span className="label-text">End (ISO or leave empty for session end)</span>
+        <span className="label-text">End (optional, ISO)</span>
         <input
           type="text"
           placeholder="e.g. 2025-01-02T00:00:00Z"

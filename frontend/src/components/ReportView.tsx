@@ -47,7 +47,7 @@ export function ReportView({ sessionId, reportId, onClose: _onClose }: Props) {
                 ? 'Export failed. Try again.'
                 : err.message)
             : 'Export failed. Try again.';
-      toast.error('Export failed', { description });
+      toast.error('Export failed', { description: description || 'Try again.' });
     } finally {
       setExporting(null);
     }
@@ -67,7 +67,7 @@ export function ReportView({ sessionId, reportId, onClose: _onClose }: Props) {
       )}
       {error && (
         <p className="text-error text-sm" role="alert">
-          Failed to load report: {error.message}
+          Couldn't load report.
         </p>
       )}
       {report && (
@@ -100,7 +100,7 @@ export function ReportView({ sessionId, reportId, onClose: _onClose }: Props) {
           </div>
           {!hasContent && (
             <p id="export-disabled-reason" className="text-sm text-base-content/70 mb-2">
-              Report is still generating. Export is available when content is ready.
+              Still generating. Export when content is ready.
             </p>
           )}
           <div className="flex-1 overflow-auto rounded border border-base-300 bg-base-200 p-4 min-w-0">

@@ -18,7 +18,7 @@ export function ConnectionBanner() {
   if (!isError || !error || !isConnectionError(error)) return null;
 
   const message =
-    error instanceof Error ? error.message : 'Backend unavailable. Check your connection.';
+    error instanceof Error ? error.message : 'Check your connection.';
 
   return (
     <div
@@ -42,7 +42,7 @@ export function ConnectionBanner() {
         )}
         {isFetching ? 'Checking…' : 'Retry'}
       </button>
-      <span className="text-sm opacity-90">Check your network and backend, then retry.</span>
+      <span className="text-sm opacity-90">Check your network and try again.</span>
     </div>
   );
 }

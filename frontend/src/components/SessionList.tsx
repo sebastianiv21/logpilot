@@ -97,7 +97,7 @@ export function SessionList({
   if (isError) {
     return (
       <div className="text-sm text-error p-2" role="alert">
-        {error?.message ?? 'Failed to load sessions'}
+        {error?.message ?? 'Couldn\'t load sessions'}
       </div>
     );
   }

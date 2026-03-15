@@ -56,8 +56,8 @@ export function UploadLogs() {
       // success or partial (backend uses "partial" when some files/lines skipped or rejected)
       toast.success(
         data.status === 'partial'
-          ? 'Upload complete (some files or lines were skipped or rejected).'
-          : 'Logs uploaded successfully.'
+          ? 'Upload complete. Some files or lines were skipped.'
+          : 'Logs uploaded.'
       );
     },
     onError: (err) => {
