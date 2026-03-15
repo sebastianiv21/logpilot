@@ -1,7 +1,7 @@
 /**
  * Report-ready notification: toast + subtle sound.
  * Message always includes session identity (name or id); long names truncated with full value in title.
- * Per specs/011-report-ready-alert-session/contracts/report-ready-notification.md
+ * Contract: specs/011-report-ready-alert-session/contracts/report-ready-notification.md
  */
 
 import { toast } from 'sonner';
@@ -49,6 +49,10 @@ export async function notifyReportReady(
       action: {
         label: 'View report',
         onClick: () => onViewReport(sessionId, reportId),
+      },
+      classNames: {
+        actionButton:
+          'btn btn-sm btn-success font-medium rounded-md px-3 py-1.5',
       },
     }),
   });

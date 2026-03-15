@@ -74,8 +74,8 @@
 
 **Purpose**: Contract reference and quickstart validation.
 
-- [ ] T012 [P] Update `frontend/src/lib/reportReadyNotification.ts` (or contract) comment to reference `specs/011-report-ready-alert-session/contracts/report-ready-notification.md`
-- [ ] T013 Run quickstart validation from `specs/011-report-ready-alert-session/quickstart.md` (sections 1–5) and fix any regressions
+- [x] T012 [P] Update `frontend/src/lib/reportReadyNotification.ts` (or contract) comment to reference `specs/011-report-ready-alert-session/contracts/report-ready-notification.md`
+- [x] T013 Run quickstart validation from `specs/011-report-ready-alert-session/quickstart.md` (sections 1–5) and fix any regressions
 
 ---
 
