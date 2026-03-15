@@ -141,6 +141,12 @@ export function UploadLogs() {
               <li>Files skipped: {result.files_skipped}</li>
               <li>Lines parsed: {result.lines_parsed}</li>
               <li>Lines rejected: {result.lines_rejected}</li>
+              <li>
+                Parsed coverage:{' '}
+                {result.lines_parsed + result.lines_rejected > 0
+                  ? `${Math.round((result.lines_parsed / (result.lines_parsed + result.lines_rejected)) * 100)}%`
+                  : '—'}
+              </li>
             </ul>
           ) : (
             <p className="mt-2 text-sm">{shortenUploadError(result.error)}</p>
