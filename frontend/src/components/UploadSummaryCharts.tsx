@@ -8,11 +8,12 @@ import {
 } from 'recharts';
 import type { UploadResult } from '../lib/schemas';
 
+/** Explicit colors that stay visible in both light and dark theme (DaisyUI --su/--wa/--er are too dark in dark mode). */
 const COLORS = {
-  Processed: 'hsl(var(--su))',
-  Skipped: 'hsl(var(--wa))',
-  Parsed: 'hsl(var(--su))',
-  Rejected: 'hsl(var(--er))',
+  Processed: 'hsl(142, 76%, 46%)',   // green
+  Skipped: 'hsl(38, 92%, 50%)',     // amber
+  Parsed: 'hsl(142, 76%, 46%)',     // green
+  Rejected: 'hsl(0, 84%, 60%)',     // red
 } as const;
 
 /** Theme-aware tooltip so label and value are readable in light and dark mode */
