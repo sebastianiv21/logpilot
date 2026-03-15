@@ -111,6 +111,16 @@ export function SessionList({
   const isSinglePage = filteredSessions.length <= SESSIONS_BATCH_SIZE;
   const showPaginationControls = filteredSessions.length > 0 && !isSinglePage;
 
+  const searchActive = searchQuery.trim() !== '';
+  const liveRegionText =
+    !searchActive
+      ? ''
+      : filteredSessions.length === 0
+        ? 'No sessions match your search.'
+        : filteredSessions.length === 1
+          ? '1 session'
+          : `${filteredSessions.length} sessions`;
+
   if (isLoading) {
     return (
       <div
@@ -146,12 +156,18 @@ export function SessionList({
     searchQuery.trim() !== ''
   ) {
     return (
-      <div
-        className="text-sm text-base-content/60 p-2"
-        aria-live="polite"
-        role="status"
-      >
-        No sessions match your search.
+      <div className="space-y-2">
+        <div
+          className="sr-only"
+          aria-live="polite"
+          aria-atomic="true"
+          role="status"
+        >
+          {liveRegionText}
+        </div>
+        <div className="text-sm text-base-content/60 p-2">
+          No sessions match your search.
+        </div>
       </div>
     );
   }
@@ -167,6 +183,16 @@ export function SessionList({
 
   return (
     <div className="space-y-2">
+      {liveRegionText ? (
+        <div
+          className="sr-only"
+          aria-live="polite"
+          aria-atomic="true"
+          role="status"
+        >
+          {liveRegionText}
+        </div>
+      ) : null}
       <ul className="space-y-2 p-0 list-none" aria-label="Session list">
         {visibleSessions.map((session) => (
           <li key={session.id}>

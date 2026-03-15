@@ -70,8 +70,8 @@
 
 **Purpose**: Spec FR-007 — accessible label for search input and live region for filter result.
 
-- [ ] T006 [A11y] Give the session search input an accessible name (e.g. aria-label="Search sessions by name, ID, or link") in frontend/src/components/AppLayout.tsx
-- [ ] T007 [A11y] Add a live region (aria-live="polite", aria-atomic="true") that announces the filter result when the debounced search changes: when filter is active (searchQuery non-empty), announce number of matching sessions (e.g. "3 sessions" or "1 session") or "No sessions match your search" when filtered list is empty; when search is empty, omit or keep announcement minimal to avoid noise. Place in SessionList so it has access to filtered count and searchQuery; update region text when filtered result changes. In frontend/src/components/SessionList.tsx
+- [x] T006 [A11y] Give the session search input an accessible name (e.g. aria-label="Search sessions by name, ID, or link") in frontend/src/components/AppLayout.tsx
+- [x] T007 [A11y] Add a live region (aria-live="polite", aria-atomic="true") that announces the filter result when the debounced search changes: when filter is active (searchQuery non-empty), announce number of matching sessions (e.g. "3 sessions" or "1 session") or "No sessions match your search" when filtered list is empty; when search is empty, omit or keep announcement minimal to avoid noise. Place in SessionList so it has access to filtered count and searchQuery; update region text when filtered result changes. In frontend/src/components/SessionList.tsx
 
 **Checkpoint**: Search input has label; screen reader hears result count or "no sessions match"; validate per quickstart §6
 
