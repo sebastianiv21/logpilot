@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom'
 import { Toaster, toast } from 'sonner'
-import { Copy } from 'lucide-react'
+import { Copy, ExternalLink } from 'lucide-react'
 import { AppLayout } from './components/AppLayout'
 import { ConnectionBanner } from './components/ConnectionBanner'
 import { KnowledgePage } from './components/KnowledgePage'
@@ -28,6 +28,9 @@ function HomePage() {
     return currentSession.name ?? `Session ${currentSession.id.slice(0, 8)}`
   }, [currentSession])
 
+  const externalLinkUrl = useMemo(() => currentSession?.external_link?.trim() ?? '', [currentSession?.external_link])
+  const hasExternalLink = externalLinkUrl.length > 0
+
   const copySessionId = useCallback(async () => {
     if (!currentSession?.id) return
     try {
@@ -42,9 +45,34 @@ function HomePage() {
     <div className="space-y-6">
       {sessionTitle && (
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold truncate" title={sessionTitle}>
-            {sessionTitle}
-          </h1>
+          <div className="flex items-center justify-between gap-2 min-w-0">
+            <h1 className="text-2xl font-semibold truncate min-w-0 flex-1" title={sessionTitle}>
+              {sessionTitle}
+            </h1>
+            {currentSession &&
+              (hasExternalLink ? (
+                <a
+                  href={externalLinkUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-ghost btn-sm gap-1.5 shrink-0"
+                  aria-label="Open session's external link"
+                >
+                  <ExternalLink size={16} aria-hidden />
+                  <span>External link</span>
+                </a>
+              ) : (
+                <span
+                  className="tooltip tooltip-left tooltip-neutral btn btn-sm gap-1.5 shrink-0 cursor-not-allowed before:text-sm before:font-medium bg-base-200 border border-base-300 text-base-content/70"
+                  data-tip="No external link provided"
+                  aria-label="External link — no link provided"
+                  tabIndex={0}
+                >
+                  <ExternalLink size={16} aria-hidden />
+                  <span>External link</span>
+                </span>
+              ))}
+          </div>
           {currentSession && (
             <div className="flex items-center gap-1.5 flex-wrap text-sm text-base-content/70">
               <span className="shrink-0">Session ID:</span>

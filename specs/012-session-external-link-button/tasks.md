@@ -23,7 +23,7 @@
 
 **Purpose**: Confirm existing stack and session shape; no new dependencies.
 
-- [ ] T001 [P] Verify Session type and sessions API expose `external_link` in `frontend/src/lib/schemas.ts` and `frontend/src/services/api.ts` (confirm only; no changes required)
+- [x] T001 [P] Verify Session type and sessions API expose `external_link` in `frontend/src/lib/schemas.ts` and `frontend/src/services/api.ts` (confirm only; no changes required)
 
 ---
 
@@ -45,7 +45,7 @@
 
 ### Implementation for User Story 1
 
-- [ ] T002 [US1] Add external link control next to session title in `frontend/src/App.tsx`: always show the control (icon + "External link" text) to the right of the title. When `currentSession.external_link` is non-empty after trim, render an `<a>` with `href={trimmedExternalLink}`, `target="_blank"`, `rel="noopener noreferrer"`, `aria-label="Open session's external link"`. When no external link (null/empty/whitespace), render the control in a disabled state (e.g. `<span>` or disabled button/link with `aria-disabled="true"` and pointer-events none, or non-clickable anchor) with a tooltip "No external link provided" (e.g. `title` or DaisyUI tooltip) and `aria-label="External link — no link provided"`. Use `ExternalLink` icon from lucide-react and visible text "External link"; when disabled use muted styling. Place control in the existing title block (e.g. wrap title and control in a flex container) per `specs/012-session-external-link-button/contracts/main-content-external-link.md`
+- [x] T002 [US1] Add external link control next to session title in `frontend/src/App.tsx`: always show the control (icon + "External link" text) to the right of the title. When `currentSession.external_link` is non-empty after trim, render an `<a>` with `href={trimmedExternalLink}`, `target="_blank"`, `rel="noopener noreferrer"`, `aria-label="Open session's external link"`. When no external link (null/empty/whitespace), render the control in a disabled state (e.g. `<span>` or disabled button/link with `aria-disabled="true"` and pointer-events none, or non-clickable anchor) with a tooltip "No external link provided" (e.g. `title` or DaisyUI tooltip) and `aria-label="External link — no link provided"`. Use `ExternalLink` icon from lucide-react and visible text "External link"; when disabled use muted styling. Place control in the existing title block (e.g. wrap title and control in a flex container) per `specs/012-session-external-link-button/contracts/main-content-external-link.md`
 
 **Checkpoint**: User Story 1 is complete and independently testable via quickstart.md.
 
