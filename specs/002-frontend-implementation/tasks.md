@@ -114,11 +114,11 @@
 
 **Independent Test**: Trigger ingest, see status until idle; run search and verify snippets and source_path; empty knowledge → clear message.
 
-- [ ] T029 [US5] Implement knowledge API: POST /knowledge/ingest, GET /knowledge/ingest/status, POST /knowledge/search in frontend/src/services/api.ts
-- [ ] T030 [US5] Build useKnowledgeIngest hook: trigger ingest mutation, poll GET /knowledge/ingest/status until status is idle; show success/error via Sonner (FR-007) in frontend/src/hooks/useKnowledgeIngest.ts
-- [ ] T031 [US5] Build KnowledgeIngest component: button to start ingest, display status (running / idle), last result or error message in frontend/src/components/KnowledgeIngest.tsx
-- [ ] T032 [US5] Build useKnowledgeSearch hook and KnowledgeSearch component: search input, run query, display chunks (content, source_path, metadata) in frontend/src/hooks/useKnowledgeSearch.ts and frontend/src/components/KnowledgeSearch.tsx
-- [ ] T033 [US5] When knowledge base is empty or ingest not run, show clear message (e.g. “Run ingestion first” or “No knowledge available”) in frontend/src/components/KnowledgeSearch.tsx (FR-007)
+- [X] T029 [US5] Implement knowledge API: POST /knowledge/ingest, GET /knowledge/ingest/status, POST /knowledge/search in frontend/src/services/api.ts
+- [X] T030 [US5] Build useKnowledgeIngest hook: trigger ingest mutation, poll GET /knowledge/ingest/status until status is idle; show success/error via Sonner (FR-007) in frontend/src/hooks/useKnowledgeIngest.ts
+- [X] T031 [US5] Build KnowledgeIngest component: button to start ingest, display status (running / idle), last result or error message in frontend/src/components/KnowledgeIngest.tsx
+- [X] T032 [US5] Build useKnowledgeSearch hook and KnowledgeSearch component: search input, run query, display chunks (content, source_path, metadata) in frontend/src/hooks/useKnowledgeSearch.ts and frontend/src/components/KnowledgeSearch.tsx
+- [X] T033 [US5] When knowledge base is empty or ingest not run, show clear message (e.g. “Run ingestion first” or “No knowledge available”) in frontend/src/components/KnowledgeSearch.tsx (FR-007)
 
 **Checkpoint**: User Story 5 complete — knowledge ingest and search work
 

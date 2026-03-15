@@ -1,6 +1,8 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AppLayout } from './components/AppLayout'
+import { KnowledgeIngest } from './components/KnowledgeIngest'
+import { KnowledgeSearch } from './components/KnowledgeSearch'
 import { MetricsLink } from './components/MetricsLink'
 import { UploadLogs } from './components/UploadLogs'
 import { useCurrentSession } from './contexts/SessionContext'
@@ -29,6 +31,10 @@ function HomePage() {
           <MetricsLink />
         </section>
       )}
+      <section className="space-y-6 mt-8 border-t border-base-300 pt-6">
+        <KnowledgeIngest />
+        <KnowledgeSearch />
+      </section>
     </div>
   )
 }

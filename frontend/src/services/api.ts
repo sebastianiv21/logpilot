@@ -4,10 +4,14 @@
  */
 
 import {
+  KnowledgeIngestStatusSchema,
+  KnowledgeSearchResponseSchema,
   LogsQueryResponseSchema,
   UploadResultSchema,
 } from '../lib/schemas';
 import type {
+  KnowledgeIngestStatus,
+  KnowledgeSearchResponse,
   LogsQueryRequest,
   LogsQueryResponse,
   Session,
@@ -164,4 +168,40 @@ export async function getLogsRange(sessionId: string): Promise<LogsRangeResponse
   return apiFetch<LogsRangeResponse>(
     `/sessions/${encodeURIComponent(sessionId)}/logs/range`
   );
+}
+
+// --- Knowledge (contracts/api.md) ---
+
+export type KnowledgeIngestBody = { sources?: string[] };
+
+/** POST /knowledge/ingest — start background ingest. Returns 202; poll GET /knowledge/ingest/status. */
+export async function startKnowledgeIngest(
+  body: KnowledgeIngestBody = {}
+): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>('/knowledge/ingest', {
+    method: 'POST',
+    body: JSON.stringify({ sources: body.sources ?? [] }),
+  });
+}
+
+/** GET /knowledge/ingest/status — running | idle, last_result, error. */
+export async function getKnowledgeIngestStatus(): Promise<KnowledgeIngestStatus> {
+  const raw = await apiFetch<unknown>('/knowledge/ingest/status');
+  return KnowledgeIngestStatusSchema.parse(raw);
+}
+
+export type KnowledgeSearchBody = { query: string; limit?: number };
+
+/** POST /knowledge/search — semantic search; returns chunks with content, source_path, metadata. */
+export async function searchKnowledge(
+  body: KnowledgeSearchBody
+): Promise<KnowledgeSearchResponse> {
+  const raw = await apiFetch<unknown>('/knowledge/search', {
+    method: 'POST',
+    body: JSON.stringify({
+      query: body.query,
+      limit: body.limit ?? 10,
+    }),
+  });
+  return KnowledgeSearchResponseSchema.parse(raw);
 }
