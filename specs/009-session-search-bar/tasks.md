@@ -81,7 +81,7 @@
 
 **Purpose**: Validation and final checks
 
-- [ ] T008 Run quickstart.md validation steps for 009 in specs/009-session-search-bar/quickstart.md
+- [x] T008 Run quickstart.md validation steps for 009 in specs/009-session-search-bar/quickstart.md
 
 ---
 
