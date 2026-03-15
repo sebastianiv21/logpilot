@@ -32,10 +32,10 @@
 
 **⚠️ CRITICAL**: Phase 4 (US2) depends on this phase.
 
-- [ ] T002 Add `session_upload_summary` table in backend/app/lib/db.py (session_id PK/FK, status, files_processed, files_skipped, lines_parsed, lines_rejected, error, updated_at per data-model.md)
-- [ ] T003 Add get_upload_summary(session_id) and upsert_upload_summary(session_id, result) to SessionRepository in backend/app/lib/repositories.py
-- [ ] T004 In backend/app/api/upload.py after successful POST upload response, call repository upsert_upload_summary so last result is persisted
-- [ ] T005 Add GET /sessions/{session_id}/upload-summary endpoint (e.g. in backend/app/api/upload.py) returning 200 with UploadResult shape or 404 per contracts/api-upload-summary.md
+- [x] T002 Add `session_upload_summary` table in backend/app/lib/db.py (session_id PK/FK, status, files_processed, files_skipped, lines_parsed, lines_rejected, error, updated_at per data-model.md)
+- [x] T003 Add get_upload_summary(session_id) and upsert_upload_summary(session_id, result) to SessionRepository in backend/app/lib/repositories.py
+- [x] T004 In backend/app/api/upload.py after successful POST upload response, call repository upsert_upload_summary so last result is persisted
+- [x] T005 Add GET /sessions/{session_id}/upload-summary endpoint (e.g. in backend/app/api/upload.py) returning 200 with UploadResult shape or 404 per contracts/api-upload-summary.md
 
 **Checkpoint**: Backend persists last upload result and exposes GET upload-summary; US2 frontend can refetch.
 
@@ -66,12 +66,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T010 Add getUploadSummary(sessionId) in frontend/src/services/api.ts calling GET /sessions/{session_id}/upload-summary (return UploadResult or null on 404; use existing UploadResultSchema)
-- [ ] T011 [US2] Add useQuery for upload summary keyed by currentSessionId in frontend/src/components/UploadLogs.tsx with query key ['uploadSummary', sessionId]; enabled when sessionId is set; handle loading and error
-- [ ] T012 [US2] On app load and when currentSessionId changes, use upload-summary query for current session; on 200 call markSessionHasLogs(sessionId) and use query data for display; on 404 show empty; ensure displayed result for current session comes from query when available (merge with in-context result from US1)
-- [ ] T013 [US2] Show loading indicator (e.g. spinner or skeleton) in frontend/src/components/UploadLogs.tsx while upload-summary is loading for current session (FR-006)
-- [ ] T014 [US2] On upload-summary fetch error in frontend show error message and retry control (e.g. button); refetch only for current session (FR-007)
-- [ ] T015 [US2] After successful retry show loaded state and brief success message (e.g. toast "Loaded") in frontend (FR-007)
+- [x] T010 Add getUploadSummary(sessionId) in frontend/src/services/api.ts calling GET /sessions/{session_id}/upload-summary (return UploadResult or null on 404; use existing UploadResultSchema)
+- [x] T011 [US2] Add useQuery for upload summary keyed by currentSessionId in frontend/src/components/UploadLogs.tsx with query key ['uploadSummary', sessionId]; enabled when sessionId is set; handle loading and error
+- [x] T012 [US2] On app load and when currentSessionId changes, use upload-summary query for current session; on 200 call markSessionHasLogs(sessionId) and use query data for display; on 404 show empty; ensure displayed result for current session comes from query when available (merge with in-context result from US1)
+- [x] T013 [US2] Show loading indicator (e.g. spinner or skeleton) in frontend/src/components/UploadLogs.tsx while upload-summary is loading for current session (FR-006)
+- [x] T014 [US2] On upload-summary fetch error in frontend show error message and retry control (e.g. button); refetch only for current session (FR-007)
+- [x] T015 [US2] After successful retry show loaded state and brief success message (e.g. toast "Loaded") in frontend (FR-007)
 - [ ] T016 [P] [US2] Optional: Add has_logs to GET /sessions response in backend/app/api/sessions.py and extend frontend session list types in frontend/src/services/api.ts and display in frontend/src/components/SessionList.tsx
 
 **Checkpoint**: User Story 2 is testable: refresh and select session → loading then summary; error path → retry → success toast.

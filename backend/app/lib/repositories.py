@@ -171,6 +171,63 @@ class SessionRepository:
             if self._own_conn and self._conn is None:
                 conn.close()
 
+    def get_upload_summary(
+        self, session_id: str
+    ) -> dict[str, str | int | None] | None:
+        """Return the last upload summary for the session, or None if never uploaded."""
+        conn = self._connection()
+        try:
+            row = conn.execute(
+                "SELECT session_id, status, files_processed, files_skipped, "
+                "lines_parsed, lines_rejected, error, updated_at "
+                "FROM session_upload_summary WHERE session_id = ?",
+                (session_id,),
+            ).fetchone()
+            if row is None:
+                return None
+            return {
+                "session_id": row["session_id"],
+                "status": row["status"],
+                "files_processed": int(row["files_processed"]),
+                "files_skipped": int(row["files_skipped"]),
+                "lines_parsed": int(row["lines_parsed"]),
+                "lines_rejected": int(row["lines_rejected"]),
+                "error": row["error"],
+                "updated_at": row["updated_at"],
+            }
+        finally:
+            if self._own_conn and self._conn is None:
+                conn.close()
+
+    def upsert_upload_summary(
+        self,
+        session_id: str,
+        status: str,
+        files_processed: int,
+        files_skipped: int,
+        lines_parsed: int,
+        lines_rejected: int,
+        error: str | None = None,
+    ) -> None:
+        """Insert or replace the last upload summary for the session."""
+        now = _iso_now()
+        conn = self._connection()
+        try:
+            conn.execute(
+                "INSERT INTO session_upload_summary "
+                "(session_id, status, files_processed, files_skipped, lines_parsed, lines_rejected, error, updated_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
+                "ON CONFLICT(session_id) DO UPDATE SET "
+                "status=excluded.status, files_processed=excluded.files_processed, "
+                "files_skipped=excluded.files_skipped, lines_parsed=excluded.lines_parsed, "
+                "lines_rejected=excluded.lines_rejected, error=excluded.error, updated_at=excluded.updated_at",
+                (session_id, status, files_processed, files_skipped, lines_parsed, lines_rejected, error, now),
+            )
+            conn.commit()
+        finally:
+            if self._own_conn and self._conn is None:
+                conn.close()
+
 
 class ReportRepository:
     """Create, list by session, get by id for reports."""

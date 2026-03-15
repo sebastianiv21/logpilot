@@ -1,9 +1,8 @@
-import { useMutation } from '@tanstack/react-query';
-import { useRef } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { Upload } from 'lucide-react';
-import { ApiError } from '../services/api';
-import { uploadLogs } from '../services/api';
+import { ApiError, getUploadSummary, uploadLogs } from '../services/api';
 import { useCurrentSession } from '../contexts/SessionContext';
 import type { UploadResult } from '../lib/schemas';
 import { UploadSummaryCharts } from './UploadSummaryCharts';
@@ -48,6 +47,20 @@ export function UploadLogs() {
     setLastUploadResult,
   } = useCurrentSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+
+  const {
+    data: uploadSummaryFromApi,
+    isLoading: isUploadSummaryLoading,
+    isError: isUploadSummaryError,
+    error: uploadSummaryError,
+    refetch: refetchUploadSummary,
+    isRefetching: isUploadSummaryRefetching,
+  } = useQuery({
+    queryKey: ['uploadSummary', currentSessionId ?? ''],
+    queryFn: () => getUploadSummary(currentSessionId!),
+    enabled: !!currentSessionId,
+  });
 
   const mutation = useMutation({
     mutationFn: async ({ sessionId, file }: { sessionId: string; file: File }) =>
@@ -59,6 +72,7 @@ export function UploadLogs() {
       }
       setLastUploadResult(variables.sessionId, data);
       markSessionHasLogs(variables.sessionId);
+      queryClient.setQueryData(['uploadSummary', variables.sessionId], data);
       toast.success(
         data.status === 'partial'
           ? 'Upload complete. Some files or lines were skipped.'
@@ -96,12 +110,29 @@ export function UploadLogs() {
     );
   }
 
+  useEffect(() => {
+    if (uploadSummaryFromApi && currentSessionId) {
+      markSessionHasLogs(currentSessionId);
+    }
+  }, [uploadSummaryFromApi, currentSessionId, markSessionHasLogs]);
+
   const resultForCurrentSession =
+    uploadSummaryFromApi ??
     lastUploadResultBySessionId[currentSessionId ?? ''] ??
     (mutation.data?.session_id === currentSessionId ? mutation.data : null);
 
+  const handleRetryUploadSummary = () => {
+    refetchUploadSummary().then((result) => {
+      if (result.data) {
+        toast.success('Loaded');
+      }
+    });
+  };
+
   const isUploadingForCurrentSession =
     mutation.isPending && mutation.variables?.sessionId === currentSessionId;
+
+  const isLoadingSummary = isUploadSummaryLoading || isUploadSummaryRefetching;
 
   return (
     <div className="space-y-4">
@@ -136,6 +167,31 @@ export function UploadLogs() {
           {mutation.isPending ? 'Uploading…' : 'Upload'}
         </button>
       </form>
+
+      {isLoadingSummary && !resultForCurrentSession && (
+        <div className="flex items-center gap-2 text-base-content/80" role="status" aria-live="polite">
+          <span className="loading loading-spinner loading-sm" aria-hidden />
+          Loading…
+        </div>
+      )}
+
+      {isUploadSummaryError && !resultForCurrentSession && (
+        <div className="rounded-lg p-4 bg-base-200 text-base-content" role="alert">
+          <p className="font-medium text-error">
+            {uploadSummaryError instanceof Error
+              ? uploadSummaryError.message
+              : 'Could not load session state.'}
+          </p>
+          <button
+            type="button"
+            className="btn btn-sm btn-outline mt-2"
+            onClick={handleRetryUploadSummary}
+            disabled={isUploadSummaryRefetching}
+          >
+            {isUploadSummaryRefetching ? 'Retrying…' : 'Retry'}
+          </button>
+        </div>
+      )}
 
       {isUploadingForCurrentSession && (
         <div className="flex items-center gap-2 text-base-content/80" role="status" aria-live="polite">
