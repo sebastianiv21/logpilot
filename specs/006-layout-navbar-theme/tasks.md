@@ -49,8 +49,8 @@
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Create a theme switcher component (e.g. `frontend/src/components/ThemeSwitcher.tsx`): sun/moon swap or toggle using theme-change (e.g. `data-toggle-theme="dark,light"` or `data-set-theme`). Use daisyUI swap or toggle markup if desired; ensure the control is accessible (aria-label, keyboard). Render it as the last item in the top bar in `frontend/src/components/AppLayout.tsx` (after HeaderKbLink).
-- [ ] T006 [US1] Implement default theme when no stored preference: on app init (in `frontend/src/main.tsx` or in ThemeSwitcher/AppLayout), when localStorage has no `theme` key, set `data-theme` from `window.matchMedia('(prefers-color-scheme: dark)').matches` (e.g. `'dark'` or `'light'`). If the media query is unavailable, default to `'light'`. Coordinate with T002 so the initial value is set before or at first paint.
+- [x] T005 [US1] Create a theme switcher component (e.g. `frontend/src/components/ThemeSwitcher.tsx`): sun/moon swap or toggle using theme-change (e.g. `data-toggle-theme="dark,light"` or `data-set-theme`). Use daisyUI swap or toggle markup if desired; ensure the control is accessible (aria-label, keyboard). Render it as the last item in the top bar in `frontend/src/components/AppLayout.tsx` (after HeaderKbLink).
+- [x] T006 [US1] Implement default theme when no stored preference: on app init (in `frontend/src/main.tsx` or in ThemeSwitcher/AppLayout), when localStorage has no `theme` key, set `data-theme` from `window.matchMedia('(prefers-color-scheme: dark)').matches` (e.g. `'dark'` or `'light'`). If the media query is unavailable, default to `'light'`. Coordinate with T002 so the initial value is set before or at first paint.
 
 **Checkpoint**: User Story 1 is independently testable; theme switcher works, persists, and defaults correctly.
 

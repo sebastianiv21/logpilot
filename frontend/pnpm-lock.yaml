@@ -47,9 +47,6 @@ importers:
       tailwindcss:
         specifier: ^4.2.1
         version: 4.2.1
-      theme-change:
-        specifier: ^2.5.0
-        version: 2.5.0
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -2063,9 +2060,6 @@ packages:
   tapable@2.3.0:
     resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
     engines: {node: '>=6'}
-
-  theme-change@2.5.0:
-    resolution: {integrity: sha512-B/UdsgdHAGhSKHTAQnxg/etN0RaMDpehuJmZIjLMDVJ6DGIliRHGD6pODi1CXLQAN9GV0GSyB3G6yCuK05PkPQ==}
 
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
@@ -4298,8 +4292,6 @@ snapshots:
   tailwindcss@4.2.1: {}
 
   tapable@2.3.0: {}
-
-  theme-change@2.5.0: {}
 
   tinybench@2.9.0: {}
 

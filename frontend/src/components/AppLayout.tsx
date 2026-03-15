@@ -8,6 +8,7 @@ import { SessionList } from './SessionList'
 import { CreateSessionForm } from './CreateSessionForm'
 import { EditSessionForm } from './EditSessionForm'
 import { HeaderKbLink } from './HeaderKbLink'
+import { ThemeSwitcher } from './ThemeSwitcher'
 
 export function AppLayout() {
   const { currentSessionId } = useCurrentSession()
@@ -45,6 +46,7 @@ export function AppLayout() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <HeaderKbLink />
+          <ThemeSwitcher />
         </div>
       </nav>
       <div className="flex flex-1 min-h-0">
