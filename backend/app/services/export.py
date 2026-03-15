@@ -106,6 +106,49 @@ def _html_blocks_to_flowables_data(html_str: str) -> list[BlockItem]:
     return blocks
 
 
+# Characters where we prefer to break long code lines (ReportLab-compatible set).
+_PRE_WRAP_SPLIT_CHARS = frozenset(" :.,;/-\\()[]{}")
+
+
+def _wrap_pre_lines(text: str, max_len: int = 78) -> str:
+    """Wrap long lines in preformatted text to avoid PDF overflow and ReportLab CPU hang.
+
+    ReportLab's Preformatted with maxLineLength can be very slow or hang on large
+    reports with long lines. We do a single-pass wrap here and pass the result
+    without maxLineLength.
+    """
+    if not text or max_len < 1:
+        return text
+    lines = text.split("\n")
+    out: list[str] = []
+    for line in lines:
+        if len(line) <= max_len:
+            out.append(line)
+            continue
+        pos = 0
+        while pos < len(line):
+            chunk = line[pos : pos + max_len]
+            if len(chunk) < max_len:
+                out.append(chunk)
+                break
+            # Prefer break at last occurrence of a split char in this chunk
+            break_at = -1
+            for i in range(len(chunk) - 1, -1, -1):
+                if chunk[i] in _PRE_WRAP_SPLIT_CHARS:
+                    break_at = i
+                    break
+            if break_at >= 0:
+                out.append(chunk[: break_at + 1].rstrip())
+                pos += break_at + 1
+                # Skip leading spaces on continuation
+                while pos < len(line) and line[pos] == " ":
+                    pos += 1
+            else:
+                out.append(chunk)
+                pos += max_len
+    return "\n".join(out)
+
+
 def _paragraph_to_reportlab_markup(raw_html: str | None, plain_text: str) -> str:
     """Convert paragraph HTML to ReportLab Paragraph markup; preserve <code> as Courier font."""
     if not raw_html or "<code>" not in raw_html:
@@ -234,7 +277,14 @@ def export_pdf(content: str) -> bytes:
         elif tag in ("h3", "h4"):
             story.append(Paragraph(escaped, h3_style))
         elif tag == "pre":
-            story.append(Preformatted(escaped, code_style))
+            # Preformatted draws the string as-is; do not pass html.escape(text) or
+            # entities like &quot; and &#x27; appear literally. Unescape so quotes
+            # and apostrophes render correctly.
+            pre_text = html.unescape(text)
+            # Pre-wrap long lines to avoid PDF overflow and to avoid ReportLab's
+            # internal line-breaking (which can hang or exhaust memory on large reports).
+            pre_text = _wrap_pre_lines(pre_text, max_len=78)
+            story.append(Preformatted(pre_text, code_style))
         elif tag == "li":
             if list_type == "ol" and ol_index is not None:
                 story.append(Paragraph(f"{ol_index}. {escaped}", body_style))
