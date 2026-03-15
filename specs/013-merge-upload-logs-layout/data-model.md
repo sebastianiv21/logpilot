@@ -24,5 +24,5 @@ Entities and changes relevant to this feature. Existing sessions and reports mod
 
 ## Frontend (no new persisted entities)
 
-- **Latest upload summary (display)**: Same as API response — status, counts, `uploaded_file_name` (optional). No new client-side persistence; file name comes from GET upload-summary / POST upload response.
+- **Latest upload summary (display)**: Same as API response — status, counts, `uploaded_file_name` (optional), and when the upload occurred (`updated_at` from API, displayed as date/time or relative time). No new client-side persistence; file name and upload time come from GET upload-summary / POST upload response.
 - **Report generation gate**: Derived from upload-summary query result (200 + status success/partial) plus in-tab last upload result; not a separate stored entity.

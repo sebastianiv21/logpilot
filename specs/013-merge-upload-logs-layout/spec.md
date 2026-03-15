@@ -15,6 +15,7 @@
 - Q: Should the merged "Logs & metrics" section include log search, or only the metrics link? → A: Only the metrics link; log search is out of scope for this feature.
 - Q: When the latest upload summary is loading, should the merged section show a loading state for the summary area or hide it until loaded? → A: Show a loading indicator in the summary area (e.g. spinner or skeleton) while loading.
 - Q: Should report generation be available before logs are uploaded for the session? → A: No; report generation must not be available until logs have been uploaded for the current session.
+- Q: Besides the uploaded file name and existing status/stats, should the latest upload summary show when the upload happened? → A: Yes; show when the upload occurred (e.g. date/time or relative time like "2 hours ago") in the latest upload summary.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -36,16 +37,16 @@ Users see one combined section titled "Logs & metrics" that contains log upload 
 
 ### User Story 2 - Show Uploaded File Name in Latest Upload Summary (Priority: P1)
 
-When a user has performed a log upload for the current session, the latest upload summary (the block that shows success/partial/failed and any stats or charts) also shows the name of the file that was uploaded.
+When a user has performed a log upload for the current session, the latest upload summary (the block that shows success/partial/failed and any stats or charts) also shows the name of the file that was uploaded and when the upload occurred (e.g. date/time or relative time).
 
 **Why this priority**: Users can confirm which file the summary refers to, especially when switching sessions or returning later.
 
-**Independent Test**: Can be fully tested by uploading a .zip file, then verifying that the summary area displays that file’s name (e.g. "my-logs.zip") alongside status and stats.
+**Independent Test**: Can be fully tested by uploading a .zip file, then verifying that the summary area displays that file’s name (e.g. "my-logs.zip") and when the upload occurred (e.g. "2 hours ago" or a date/time) alongside status and stats.
 
 **Acceptance Scenarios**:
 
-1. **Given** the user has just uploaded a file (e.g. "logs-2024.zip"), **When** the upload completes successfully, **Then** the latest upload summary shows the uploaded file name (e.g. "logs-2024.zip") together with status and any stats/charts.
-2. **Given** the user has previously uploaded a file for the current session, **When** they view the latest upload summary (e.g. after refresh or switching back to the session), **Then** the summary still shows the name of the file that was uploaded when that summary was generated.
+1. **Given** the user has just uploaded a file (e.g. "logs-2024.zip"), **When** the upload completes successfully, **Then** the latest upload summary shows the uploaded file name (e.g. "logs-2024.zip") and when the upload occurred (e.g. date/time or relative time) together with status and any stats/charts.
+2. **Given** the user has previously uploaded a file for the current session, **When** they view the latest upload summary (e.g. after refresh or switching back to the session), **Then** the summary still shows the name of the file that was uploaded and when that upload occurred.
 3. **Given** the upload failed, **When** the user views the summary, **Then** the failed summary may still show the file name that was attempted, where applicable.
 
 ---
@@ -94,7 +95,7 @@ The helper text that says "Opens in a new tab; updates when you switch sessions.
 ### Functional Requirements
 
 - **FR-001**: The product MUST present a single merged section with the visible heading "Logs & metrics" that contains log upload (file selection, upload action, latest upload summary) and the metrics link (e.g. link or button to open Grafana or equivalent). Log search is out of scope for this feature.
-- **FR-002**: The latest upload summary MUST display the name of the file that was uploaded for that summary (when a file was uploaded and the summary is available).
+- **FR-002**: The latest upload summary MUST display the name of the file that was uploaded for that summary and when the upload occurred (e.g. date/time or relative time such as "2 hours ago") when a summary is available.
 - **FR-003**: The home view layout MUST use a two-column grid: one column for the merged "Logs & metrics" section and one for the Reports section (session title above), with sections grouped for clarity and task flow.
 - **FR-004**: The product MUST remove the exact helper text "Opens in a new tab; updates when you switch sessions." from the area next to the control that opens metrics in a new tab; the control and its behavior MUST remain.
 - **FR-005**: The merged section MUST remain usable on narrow viewports (e.g. single column or responsive stacking) without losing access to upload or metrics.
@@ -104,7 +105,7 @@ The helper text that says "Opens in a new tab; updates when you switch sessions.
 
 ### Key Entities
 
-- **Latest upload summary**: The per-session summary of the most recent log upload, including status (success/partial/failed), optional stats/charts, and the uploaded file name. The file name is persisted server-side and returned with the summary so it is available after refresh or session switch.
+- **Latest upload summary**: The per-session summary of the most recent log upload, including status (success/partial/failed), optional stats/charts, the uploaded file name, and when the upload occurred (e.g. date/time or relative time). The file name and upload time are persisted server-side and returned with the summary so they are available after refresh or session switch.
 - **Merged upload-and-logs section**: The single UI section with the heading "Logs & metrics" that combines upload controls, latest upload summary, and the metrics link (e.g. "Open in Grafana"). Log search is not part of this section for this feature.
 
 ## Success Criteria *(mandatory)*
@@ -112,7 +113,7 @@ The helper text that says "Opens in a new tab; updates when you switch sessions.
 ### Measurable Outcomes
 
 - **SC-001**: Users can perform log upload and access logs/metrics from one clearly identifiable section without switching between two separate blocks.
-- **SC-002**: Users can identify which file a latest upload summary refers to by seeing the uploaded file name in that summary.
+- **SC-002**: Users can identify which file a latest upload summary refers to and when it was uploaded by seeing the file name and upload time (e.g. date/time or relative time) in that summary.
 - **SC-003**: Users complete the common flow (upload → check summary → open metrics or generate report) with fewer distinct visual sections and no redundant "Opens in a new tab; updates when you switch sessions." copy.
 - **SC-004**: The home view layout is measurably simpler (e.g. fewer top-level section headings or cards) while retaining all current capabilities (upload, summary, metrics link, reports).
 - **SC-005**: Users cannot access report generation until the current session has at least one log upload; once uploaded, report generation becomes available, reducing attempts to generate reports with no data.

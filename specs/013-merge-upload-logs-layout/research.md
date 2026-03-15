@@ -47,3 +47,13 @@ Resolves technical decisions for the merge-upload-logs-layout feature. No NEEDS 
 **Alternatives considered**:
 - Backfill from existing data: Not possible; previous uploads did not store filename.
 - New table for "last upload metadata": Rejected; one extra column is simpler than a new table.
+
+## 6. Displaying when the upload occurred
+
+**Decision**: Use the existing `updated_at` column on `session_upload_summary` (already set on upsert). API returns it in GET upload-summary and POST upload response (e.g. as ISO 8601 string or epoch). Frontend displays it as date/time or relative time (e.g. "2 hours ago"); format is an implementation choice (e.g. date-fns formatDistanceToNow or format()).
+
+**Rationale**: Spec (FR-002, clarification) requires showing when the upload occurred. No new backend column; `updated_at` is the natural source. Frontend can show absolute or relative time per UX preference.
+
+**Alternatives considered**:
+- New column `uploaded_at` distinct from `updated_at`: Rejected; semantics are the same for "last upload time."
+- Server-computed relative string: Rejected; client can format based on user locale and preference.

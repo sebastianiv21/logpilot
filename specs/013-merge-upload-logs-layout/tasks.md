@@ -29,15 +29,15 @@
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Backend support for uploaded file name so US2 (file name in summary) and US3 (report gate using upload-summary) can be implemented.
+**Purpose**: Backend support for uploaded file name and upload time (updated_at) so US2 (file name and upload time in summary) and US3 (report gate using upload-summary) can be implemented.
 
-**⚠️ CRITICAL**: No user story work that depends on API can complete until upload-summary returns `uploaded_file_name`.
+**⚠️ CRITICAL**: No user story work that depends on API can complete until upload-summary returns `uploaded_file_name` and `updated_at`.
 
 - [ ] T002 [P] Add `uploaded_file_name` column (TEXT, nullable) to `session_upload_summary` schema in backend/app/lib/db.py (extend SCHEMA_SESSION_UPLOAD_SUMMARY and ensure migration/init adds column for existing DBs)
 - [ ] T003 Include `uploaded_file_name` in get_upload_summary return dict and in upsert_upload_summary parameters/INSERT in backend/app/lib/repositories.py
-- [ ] T004 Add `uploaded_file_name` to UploadResultResponse; in get_upload_summary return it from repo; in upload_logs pass file.filename to upsert_upload_summary and include in response in backend/app/api/upload.py
+- [ ] T004 Add `uploaded_file_name` and `updated_at` to UploadResultResponse; in get_upload_summary return both from repo; in upload_logs pass file.filename to upsert_upload_summary and include uploaded_file_name and updated_at in response in backend/app/api/upload.py
 
-**Checkpoint**: GET/POST upload-summary return uploaded_file_name; frontend can show file name and use upload-summary for report gate.
+**Checkpoint**: GET/POST upload-summary return uploaded_file_name and updated_at; frontend can show file name, upload time, and use upload-summary for report gate.
 
 ---
 
@@ -55,16 +55,16 @@
 
 ## Phase 4: User Story 2 – Show Uploaded File Name and Loading State (Priority: P1)
 
-**Goal**: Latest upload summary shows the uploaded file name when available; summary area shows a loading indicator while the upload-summary query is loading.
+**Goal**: Latest upload summary shows the uploaded file name and when the upload occurred when available; summary area shows a loading indicator while the upload-summary query is loading.
 
-**Independent Test**: Upload a .zip file; summary shows its name (e.g. "my-logs.zip"). After session switch, summary area shows loading then data with file name. New session shows loading then empty/neutral state.
+**Independent Test**: Upload a .zip file; summary shows its name (e.g. "my-logs.zip") and when the upload occurred (e.g. "2 hours ago" or date/time). After session switch, summary area shows loading then data with file name and upload time. New session shows loading then empty/neutral state.
 
-- [ ] T006 [P] [US2] Add optional `uploaded_file_name` (z.string().nullable() or z.string().optional()) to UploadResultSchema in frontend/src/lib/schemas.ts
-- [ ] T007 [US2] Ensure getUploadSummary and uploadLogs response types and parsing include uploaded_file_name in frontend/src/services/api.ts (implement after T006 so schema is available)
-- [ ] T008 [US2] Display uploaded file name in the latest upload summary block when present (from API or last upload result) in frontend/src/components/UploadLogs.tsx
+- [ ] T006 [P] [US2] Add optional `uploaded_file_name` and `updated_at` (z.string().nullable() or z.string().optional()) to UploadResultSchema in frontend/src/lib/schemas.ts
+- [ ] T007 [US2] Ensure getUploadSummary and uploadLogs response types and parsing include uploaded_file_name and updated_at in frontend/src/services/api.ts (implement after T006 so schema is available)
+- [ ] T008 [US2] Display uploaded file name and when the upload occurred (e.g. date/time or relative time like "2 hours ago" from updated_at) in the latest upload summary block when present in frontend/src/components/UploadLogs.tsx
 - [ ] T009 [US2] Show loading indicator (spinner or skeleton) in the upload summary area while upload-summary query is loading (isLoading/isFetching and no data); show empty/neutral state on 404 in frontend/src/components/UploadLogs.tsx
 
-**Checkpoint**: User Story 2 is done; file name in summary and loading state work.
+**Checkpoint**: User Story 2 is done; file name and upload time in summary and loading state work.
 
 ---
 
@@ -97,7 +97,7 @@
 
 **Purpose**: Validation and consistency.
 
-- [ ] T013 Run quickstart.md validation (backend: upload returns uploaded_file_name; GET upload-summary returns it; frontend: merged section, file name, loading state, two-column layout, report gate, no helper copy) and fix any gaps
+- [ ] T013 Run quickstart.md validation (backend: upload returns uploaded_file_name and updated_at; GET upload-summary returns both; frontend: merged section, file name and upload time, loading state, two-column layout, report gate, no helper copy) and fix any gaps
 
 ---
 
@@ -153,9 +153,9 @@ Task T010–T011: Two-column layout + report gate in App.tsx / ReportGenerate.ts
 
 ### Incremental Delivery
 
-1. Setup + Foundational → API returns uploaded_file_name  
+1. Setup + Foundational → API returns uploaded_file_name and updated_at  
 2. US1 (merge) → Demo single section  
-3. US2 (file name + loading) → Demo summary with filename and loader  
+3. US2 (file name + upload time + loading) → Demo summary with filename, upload time, and loader  
 4. US3 (layout + report gate) → Demo two columns and report gate  
 5. US4 (remove copy) → Demo no helper text  
 6. Polish (T013) → quickstart.md checklist
