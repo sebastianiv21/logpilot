@@ -97,7 +97,7 @@
 
 **Purpose**: Validation and consistency.
 
-- [ ] T013 Run quickstart.md validation (backend: upload returns uploaded_file_name and updated_at; GET upload-summary returns both; frontend: merged section, file name and upload time, loading state, two-column layout, report gate, no helper copy) and fix any gaps
+- [x] T013 Run quickstart.md validation (backend: upload returns uploaded_file_name and updated_at; GET upload-summary returns both; frontend: merged section, file name and upload time, loading state, two-column layout, report gate, no helper copy) and fix any gaps
 
 ---
 
