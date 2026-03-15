@@ -24,7 +24,7 @@ function HomePage() {
             Logs &amp; metrics
           </h2>
           <p className="text-base-content/80 text-sm">
-            Use Grafana to view, search, and visualize logs and metrics. Session context is passed so dashboards stay scoped to this investigation.
+            View and search logs and metrics in Grafana for this session.
           </p>
           <MetricsLink />
         </section>

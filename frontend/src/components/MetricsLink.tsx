@@ -120,7 +120,8 @@ export function MetricsLink() {
   if (!hasUploadedLogs) {
     return (
       <div className="rounded-lg bg-base-200 p-4 text-base-content/80" role="status">
-        Upload logs first, then open Grafana to view logs for this session.
+        <p>No metrics available for this session until logs are uploaded.</p>
+        <p className="mt-2 text-sm">Upload logs first, then open Grafana to view logs for this session.</p>
       </div>
     );
   }
@@ -133,13 +134,12 @@ export function MetricsLink() {
         onClick={handleOpen}
         disabled={opening}
         aria-busy={opening}
-        aria-label={`Open logs in Grafana for current session (${currentSessionId.slice(0, 8)}…)`}
+        aria-label="Open Grafana for this session in a new tab"
       >
         {opening ? 'Opening…' : 'Open in Grafana'}
       </button>
       <p className="text-sm text-base-content/70">
-        Opens the Grafana Loki Explore app for this session with the time window of your uploaded
-        logs.
+        Opens in a new tab; updates when you switch sessions.
       </p>
     </div>
   );

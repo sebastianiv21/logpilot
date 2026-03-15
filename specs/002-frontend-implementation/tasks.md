@@ -100,9 +100,9 @@
 
 **Independent Test**: Select session with data, open metrics link in new tab and confirm session context; switch session and confirm link or instructions for new session; no data → clear message.
 
-- [ ] T026 [US4] Build MetricsLink component: button or link that opens VITE_GRAFANA_URL in new tab with session context (e.g. query param var-session_id or dashboard variable) in frontend/src/components/MetricsLink.tsx
-- [ ] T027 [US4] When user switches session, ensure MetricsLink or label clearly indicates “Open metrics for [current session]” or link updates with new session id (FR-006) in frontend/src/components/MetricsLink.tsx
-- [ ] T028 [US4] When no metrics available for session (e.g. no data yet), show clear message or open link with empty-state guidance (FR-006) in frontend/src/components/MetricsLink.tsx
+- [X] T026 [US4] Build MetricsLink component: button or link that opens VITE_GRAFANA_URL in new tab with session context (e.g. query param var-session_id or dashboard variable) in frontend/src/components/MetricsLink.tsx
+- [X] T027 [US4] When user switches session, ensure MetricsLink or label clearly indicates “Open metrics for [current session]” or link updates with new session id (FR-006) in frontend/src/components/MetricsLink.tsx
+- [X] T028 [US4] When no metrics available for session (e.g. no data yet), show clear message or open link with empty-state guidance (FR-006) in frontend/src/components/MetricsLink.tsx
 
 **Checkpoint**: User Story 4 complete — metrics/dashboard link works
 
