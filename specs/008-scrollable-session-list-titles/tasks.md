@@ -85,7 +85,7 @@
 
 **Purpose**: Validation and final checks
 
-- [ ] T009 Run quickstart.md validation steps for 008 in specs/008-scrollable-session-list-titles/quickstart.md
+- [x] T009 Run quickstart.md validation steps for 008 in specs/008-scrollable-session-list-titles/quickstart.md
 
 ---
 

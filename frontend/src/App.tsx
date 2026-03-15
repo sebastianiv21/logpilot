@@ -34,7 +34,7 @@ function HomePage() {
     } catch {
       toast.error('Copy failed')
     }
-  }, [currentSession?.id])
+  }, [currentSession])
 
   return (
     <div className="space-y-6">
