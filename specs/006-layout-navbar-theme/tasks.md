@@ -64,8 +64,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T007 [US3] In `frontend/src/App.tsx` (HomePage), remove the exact phrase "Upload logs or switch session in the sidebar." from the paragraph under the main content heading. When `currentSessionId` is set, omit the subheading line entirely (no "sidebar" reference and no replacement phrase). When `currentSessionId` is not set, show exactly one short instructional line (e.g. "Select or create a session to get started.") per FR-004b.
-- [ ] T008 [US3] Verify the home page never displays "Upload logs or switch session in the sidebar." (text search or manual check) and that with no session selected the required instructional line is present (e.g. in `frontend/src/App.tsx`).
+- [x] T007 [US3] In `frontend/src/App.tsx` (HomePage), remove the exact phrase "Upload logs or switch session in the sidebar." from the paragraph under the main content heading. When `currentSessionId` is set, omit the subheading line entirely (no "sidebar" reference and no replacement phrase). When `currentSessionId` is not set, show exactly one short instructional line (e.g. "Select or create a session to get started.") per FR-004b.
+- [x] T008 [US3] Verify the home page never displays "Upload logs or switch session in the sidebar." (text search or manual check) and that with no session selected the required instructional line is present (e.g. in `frontend/src/App.tsx`).
 
 **Checkpoint**: User Story 3 is independently testable; copy meets FR-004 and FR-004b.
 
@@ -75,7 +75,7 @@
 
 **Purpose**: Accessibility and quickstart validation.
 
-- [ ] T009 Run the validation steps in `specs/006-layout-navbar-theme/quickstart.md`: theme switcher (placement, toggle, persistence, default), sidebar hidden on knowledge page, copy and instructional line, LogPilot in top bar only, optional keyboard/accessibility checks.
+- [x] T009 Run the validation steps in `specs/006-layout-navbar-theme/quickstart.md`: theme switcher (placement, toggle, persistence, default), sidebar hidden on knowledge page, copy and instructional line, LogPilot in top bar only, optional keyboard/accessibility checks.
 
 ---
 
