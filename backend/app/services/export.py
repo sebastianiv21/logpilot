@@ -53,7 +53,7 @@ class _ReportHTMLParser(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         tag_l = tag.lower()
-        if self._current_tag == "p":
+        if self._current_tag in ("p", "li"):
             self._current_raw.append(f"<{tag_l}>")
         if tag_l == "ol":
             self._list_stack.append("ol")
@@ -74,7 +74,7 @@ class _ReportHTMLParser(HTMLParser):
                 self._list_stack.pop()
         elif tag_l == self._current_tag and self._current_tag is not None:
             text = _strip_tags("".join(self._current_text)).strip()
-            raw_html = "".join(self._current_raw).strip() if self._current_tag == "p" else None
+            raw_html = "".join(self._current_raw).strip() if self._current_tag in ("p", "li") else None
             if text:
                 list_type: Literal["ol", "ul"] | None = (
                     self._list_stack[-1] if self._list_stack else None
@@ -84,13 +84,13 @@ class _ReportHTMLParser(HTMLParser):
             self._current_tag = None
             self._current_text = []
             self._current_raw = []
-        elif self._current_tag == "p":
+        elif self._current_tag in ("p", "li"):
             self._current_raw.append(f"</{tag_l}>")
 
     def handle_data(self, data: str) -> None:
         if self._current_tag is not None:
             self._current_text.append(data)
-            if self._current_tag == "p":
+            if self._current_tag in ("p", "li"):
                 self._current_raw.append(data)
 
 
@@ -286,7 +286,11 @@ def export_pdf(content: str) -> bytes:
             pre_text = _wrap_pre_lines(pre_text, max_len=78)
             story.append(Preformatted(pre_text, code_style))
         elif tag == "li":
-            if list_type == "ol" and ol_index is not None:
+            if raw_html and "<code>" in raw_html:
+                li_markup = _paragraph_to_reportlab_markup(raw_html, text)
+                prefix = f"{ol_index}. " if list_type == "ol" and ol_index is not None else "• "
+                story.append(Paragraph(prefix + li_markup, body_style))
+            elif list_type == "ol" and ol_index is not None:
                 story.append(Paragraph(f"{ol_index}. {escaped}", body_style))
             else:
                 story.append(Paragraph(f"• {escaped}", body_style))
