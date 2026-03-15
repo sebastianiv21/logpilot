@@ -65,7 +65,8 @@ frontend/
 │   ├── pages/           # Route-level views (sessions, upload, search, knowledge, reports)
 │   ├── services/        # API client (fetch to backend base URL)
 │   ├── hooks/           # Optional: useSessions, useReportPoll, etc.
-│   └── App.tsx
+│   ├── App.tsx          # Root component (routing, layout)
+│   └── main.tsx         # Entry point (QueryClientProvider, React root)
 ├── public/
 ├── index.html
 ├── vite.config.ts
