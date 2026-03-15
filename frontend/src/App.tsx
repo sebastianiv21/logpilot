@@ -1,5 +1,5 @@
-import { useCallback, useMemo } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { useCallback, useMemo, useState } from 'react'
+import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom'
 import { Toaster, toast } from 'sonner'
 import { Copy } from 'lucide-react'
 import { AppLayout } from './components/AppLayout'
@@ -9,6 +9,8 @@ import { MetricsLink } from './components/MetricsLink'
 import { ReportGenerate } from './components/ReportGenerate'
 import { ReportList } from './components/ReportList'
 import { UploadLogs } from './components/UploadLogs'
+import { ReportGenerationProvider } from './contexts/ReportGenerationContext'
+import { ReportToOpenContext } from './contexts/ReportToOpenContext'
 import { useCurrentSession } from './contexts/SessionContext'
 import { useSessionsList } from './hooks/useSessions'
 
@@ -90,27 +92,60 @@ function HomePage() {
   )
 }
 
+function ReportToOpenProviderWithNav({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const [reportToOpen, setReportToOpen] = useState<{
+    sessionId: string
+    reportId: string
+  } | null>(null)
+  const navigate = useNavigate()
+  const { setCurrentSessionId } = useCurrentSession()
+  const openReport = useCallback(
+    (sessionId: string, reportId: string) => {
+      setCurrentSessionId(sessionId)
+      setReportToOpen({ sessionId, reportId })
+      navigate('/')
+    },
+    [navigate, setCurrentSessionId]
+  )
+  const clearReportToOpen = useCallback(() => setReportToOpen(null), [])
+  return (
+    <ReportToOpenContext.Provider
+      value={{ reportToOpen, openReport, clearReportToOpen }}
+    >
+      {children}
+    </ReportToOpenContext.Provider>
+  )
+}
+
 function App() {
   return (
     <BrowserRouter>
-      <ConnectionBanner />
-      <Toaster
-        toastOptions={{
-          unstyled: true,
-          classNames: {
-            toast: 'alert shadow-lg',
-            success: 'alert-success',
-            error: 'alert-error',
-            info: 'alert-info',
-          },
-        }}
-      />
-      <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/knowledge" element={<KnowledgePage />} />
-        </Route>
-      </Routes>
+      <ReportToOpenProviderWithNav>
+        <ReportGenerationProvider>
+          <ConnectionBanner />
+          <Toaster
+            toastOptions={{
+              unstyled: true,
+              classNames: {
+                toast: 'alert shadow-lg',
+                success: 'alert-success',
+                error: 'alert-error',
+                info: 'alert-info',
+              },
+            }}
+          />
+          <Routes>
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/knowledge" element={<KnowledgePage />} />
+            </Route>
+          </Routes>
+        </ReportGenerationProvider>
+      </ReportToOpenProviderWithNav>
     </BrowserRouter>
   )
 }

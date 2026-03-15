@@ -1,12 +1,14 @@
 /**
  * Report-ready notification: toast + subtle sound.
- * Context-aware message when multiple sessions have reports generating (session name or id).
- * Per specs/004-ui-polish-feedback/contracts/report-ready-notification.md
+ * Message always includes session identity (name or id); long names truncated with full value in title.
+ * Contract: specs/011-report-ready-alert-session/contracts/report-ready-notification.md
  */
 
 import { toast } from 'sonner';
 import { getSession } from '../services/api';
 import { playReportReadySound } from './sound';
+
+const MAX_LABEL_LENGTH = 40;
 
 function getSessionLabel(sessionId: string): Promise<string> {
   return getSession(sessionId)
@@ -15,17 +17,44 @@ function getSessionLabel(sessionId: string): Promise<string> {
 }
 
 /**
+ * Truncate label for display; full value available via title (FR-004).
+ */
+function truncateLabel(label: string): { display: string; title: string } {
+  if (label.length <= MAX_LABEL_LENGTH) return { display: label, title: label };
+  return {
+    display: `${label.slice(0, MAX_LABEL_LENGTH - 1)}\u2026`,
+    title: label,
+  };
+}
+
+/**
  * Show report-ready toast and play sound. Call when a report transitions from generating to ready.
- * If generatingCount > 1, message includes session context (resolved via getSession).
+ * Message always includes session identity (session name or truncated id). Optional onViewReport
+ * is used in Phase 4 to add a "View report" action.
  */
 export async function notifyReportReady(
   sessionId: string,
-  generatingCount: number
+  reportId: string,
+  _generatingCount: number,
+  onViewReport?: (sessionId: string, reportId: string) => void
 ): Promise<void> {
-  const message =
-    generatingCount > 1
-      ? `Report ready (${await getSessionLabel(sessionId)})`
-      : 'Report ready';
-  toast.success(message);
+  const rawLabel = await getSessionLabel(sessionId);
+  const { display: labelDisplay, title: labelTitle } = truncateLabel(rawLabel);
+  const message = `Report ready (${labelDisplay})`;
+  const description = labelDisplay !== labelTitle ? labelTitle : undefined;
+  toast.success(message, {
+    ...(description && { description }),
+    // FR-005: Sonner action renders as a focusable button; label "View report" is the accessible name.
+    ...(onViewReport && {
+      action: {
+        label: 'View report',
+        onClick: () => onViewReport(sessionId, reportId),
+      },
+      classNames: {
+        actionButton:
+          'btn btn-sm btn-success font-medium rounded-md px-3 py-1.5',
+      },
+    }),
+  });
   playReportReadySound();
 }

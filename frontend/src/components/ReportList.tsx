@@ -1,23 +1,60 @@
 /**
  * ReportList: report history for the current session with created_at (date-fns).
- * Click to open report view.
+ * Click to open report view. Consumes reportToOpen from context to open a report when
+ * user clicks "View report" in the report-ready toast.
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
 import { FileText } from 'lucide-react';
+import { toast } from 'sonner';
 import { useCurrentSession } from '../contexts/SessionContext';
+import { useReportToOpen } from '../contexts/ReportToOpenContext';
 import { useReportsList } from '../hooks/useReports';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { ReportView } from './ReportView';
 import type { ReportListItem } from '../lib/schemas';
 
+const UNAVAILABLE_MESSAGE = 'Session or report no longer available.';
+
 export function ReportList() {
   const { currentSessionId } = useCurrentSession();
+  const { reportToOpen, clearReportToOpen } = useReportToOpen();
   const { data, isLoading, error } = useReportsList(currentSessionId);
   const [selectedReport, setSelectedReport] = useState<ReportListItem | null>(null);
   const reportModalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(!!selectedReport, reportModalRef);
+
+  useEffect(() => {
+    if (
+      !reportToOpen ||
+      reportToOpen.sessionId !== currentSessionId ||
+      isLoading
+    ) {
+      return;
+    }
+    if (error) {
+      toast.error(UNAVAILABLE_MESSAGE);
+      clearReportToOpen();
+      return;
+    }
+    const reports = data?.reports ?? [];
+    const report = reports.find((r) => r.id === reportToOpen.reportId);
+    if (report) {
+      setSelectedReport(report);
+      clearReportToOpen();
+    } else {
+      toast.error(UNAVAILABLE_MESSAGE);
+      clearReportToOpen();
+    }
+  }, [
+    reportToOpen,
+    currentSessionId,
+    isLoading,
+    error,
+    data?.reports,
+    clearReportToOpen,
+  ]);
 
   if (!currentSessionId) {
     return (

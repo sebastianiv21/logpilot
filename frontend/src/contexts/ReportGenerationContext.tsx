@@ -15,6 +15,7 @@ import {
 } from 'react';
 import { getReport } from '../services/api';
 import { notifyReportReady } from '../lib/reportReadyNotification';
+import { useReportToOpen } from './ReportToOpenContext';
 
 type ReportGenerationContextValue = {
   /** Session ID -> report ID that is currently generating (content empty). */
@@ -31,6 +32,7 @@ const POLL_INTERVAL_MS = 2000;
 export function ReportGenerationProvider({ children }: { children: ReactNode }) {
   const [generatingBySession, setState] = useState<Record<string, string>>({});
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { openReport } = useReportToOpen();
 
   const setGenerating = useCallback((sessionId: string, reportId: string) => {
     setState((prev) => (prev[sessionId] === reportId ? prev : { ...prev, [sessionId]: reportId }));
@@ -65,7 +67,7 @@ export function ReportGenerationProvider({ children }: { children: ReactNode }) 
         try {
           const report = await getReport(sessionId, reportId);
           if (report.content != null && report.content.trim().length > 0) {
-            notifyReportReady(sessionId, generatingCount);
+            notifyReportReady(sessionId, reportId, generatingCount, openReport);
             setState((prev) => {
               const next = { ...prev };
               if (next[sessionId] === reportId) delete next[sessionId];
@@ -87,7 +89,7 @@ export function ReportGenerationProvider({ children }: { children: ReactNode }) 
         intervalRef.current = null;
       }
     };
-  }, [generatingBySession]);
+  }, [generatingBySession, openReport]);
 
   const value: ReportGenerationContextValue = {
     generatingBySession,

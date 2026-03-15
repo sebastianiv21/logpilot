@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { SessionProvider } from './contexts/SessionContext.tsx'
-import { ReportGenerationProvider } from './contexts/ReportGenerationContext.tsx'
 import App from './App.tsx'
 
 // Default theme when no stored preference (system preference or light)
@@ -27,9 +26,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
-        <ReportGenerationProvider>
-          <App />
-        </ReportGenerationProvider>
+        <App />
       </SessionProvider>
     </QueryClientProvider>
   </StrictMode>,
