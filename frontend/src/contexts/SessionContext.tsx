@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import type { UploadResult } from '../lib/schemas';
 
 const STORAGE_KEY = 'logpilot_current_session_id';
 
@@ -16,6 +17,9 @@ type SessionContextValue = {
   /** Session IDs that have had at least one successful upload (in this tab). Used to show "upload first" until logs exist. */
   sessionIdsWithLogs: Set<string>;
   markSessionHasLogs: (sessionId: string) => void;
+  /** Last upload result per session id (in this tab). Used to show upload summary only for current session. */
+  lastUploadResultBySessionId: Record<string, UploadResult>;
+  setLastUploadResult: (sessionId: string, result: UploadResult) => void;
 };
 
 const SessionContext = createContext<SessionContextValue | null>(null);
@@ -41,6 +45,9 @@ function writeStored(id: string | null): void {
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [currentSessionId, setState] = useState<string | null>(readStored);
   const [sessionIdsWithLogs, setSessionIdsWithLogs] = useState<Set<string>>(() => new Set());
+  const [lastUploadResultBySessionId, setLastUploadResultBySessionId] = useState<
+    Record<string, UploadResult>
+  >(() => ({}));
 
   useEffect(() => {
     writeStored(currentSessionId);
@@ -54,14 +61,27 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setSessionIdsWithLogs((prev) => new Set(prev).add(sessionId));
   }, []);
 
+  const setLastUploadResult = useCallback((sessionId: string, result: UploadResult) => {
+    setLastUploadResultBySessionId((prev) => ({ ...prev, [sessionId]: result }));
+  }, []);
+
   const value = useMemo<SessionContextValue>(
     () => ({
       currentSessionId,
       setCurrentSessionId,
       sessionIdsWithLogs,
       markSessionHasLogs,
+      lastUploadResultBySessionId,
+      setLastUploadResult,
     }),
-    [currentSessionId, setCurrentSessionId, sessionIdsWithLogs, markSessionHasLogs]
+    [
+      currentSessionId,
+      setCurrentSessionId,
+      sessionIdsWithLogs,
+      markSessionHasLogs,
+      lastUploadResultBySessionId,
+      setLastUploadResult,
+    ]
   );
 
   return (

@@ -22,7 +22,7 @@
 
 **Purpose**: Confirm structure and dependencies; no new packages per plan.
 
-- [ ] T001 Verify backend and frontend structure per plan.md (backend/app with api/, lib/, services/; frontend/src with components/, contexts/, services/; no new dependencies required)
+- [x] T001 Verify backend and frontend structure per plan.md (backend/app with api/, lib/, services/; frontend/src with components/, contexts/, services/; no new dependencies required)
 
 ---
 
@@ -49,10 +49,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [P] [US1] Add lastUploadResultBySessionId storage (e.g. Map or Record) and setLastUploadResult(sessionId, result) in frontend/src/contexts/SessionContext.tsx for result keyed by session id
-- [ ] T007 [US1] In frontend/src/components/UploadLogs.tsx, display upload result only when result.session_id === currentSessionId; when session changes show result for new session from context (lastUploadResultBySessionId) or empty
-- [ ] T008 [US1] On upload success in frontend/src/components/UploadLogs.tsx, store result in context via setLastUploadResult(variables.sessionId, data) and call markSessionHasLogs(variables.sessionId)
-- [ ] T009 [US1] In frontend/src/components/UploadLogs.tsx ensure upload in progress is tied to originating session; on completion show result only when that session is selected (no cross-session display)
+- [x] T006 [P] [US1] Add lastUploadResultBySessionId storage (e.g. Map or Record) and setLastUploadResult(sessionId, result) in frontend/src/contexts/SessionContext.tsx for result keyed by session id
+- [x] T007 [US1] In frontend/src/components/UploadLogs.tsx, display upload result only when result.session_id === currentSessionId; when session changes show result for new session from context (lastUploadResultBySessionId) or empty
+- [x] T008 [US1] On upload success in frontend/src/components/UploadLogs.tsx, store result in context via setLastUploadResult(variables.sessionId, data) and call markSessionHasLogs(variables.sessionId)
+- [x] T009 [US1] In frontend/src/components/UploadLogs.tsx ensure upload in progress is tied to originating session; on completion show result only when that session is selected (no cross-session display)
 
 **Checkpoint**: User Story 1 is testable: switch sessions and confirm only current session’s result (or empty) is shown.
 

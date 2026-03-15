@@ -41,7 +41,12 @@ function uploadErrorMessage(err: unknown): string {
 }
 
 export function UploadLogs() {
-  const { currentSessionId, markSessionHasLogs } = useCurrentSession();
+  const {
+    currentSessionId,
+    markSessionHasLogs,
+    lastUploadResultBySessionId,
+    setLastUploadResult,
+  } = useCurrentSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const mutation = useMutation({
@@ -52,9 +57,8 @@ export function UploadLogs() {
         toast.error(shortenUploadError(data.error));
         return;
       }
-      // Mark session as having logs so log search can run (T025)
+      setLastUploadResult(variables.sessionId, data);
       markSessionHasLogs(variables.sessionId);
-      // success or partial (backend uses "partial" when some files/lines skipped or rejected)
       toast.success(
         data.status === 'partial'
           ? 'Upload complete. Some files or lines were skipped.'
@@ -92,7 +96,12 @@ export function UploadLogs() {
     );
   }
 
-  const result = mutation.data;
+  const resultForCurrentSession =
+    lastUploadResultBySessionId[currentSessionId ?? ''] ??
+    (mutation.data?.session_id === currentSessionId ? mutation.data : null);
+
+  const isUploadingForCurrentSession =
+    mutation.isPending && mutation.variables?.sessionId === currentSessionId;
 
   return (
     <div className="space-y-4">
@@ -128,35 +137,35 @@ export function UploadLogs() {
         </button>
       </form>
 
-      {mutation.isPending && (
+      {isUploadingForCurrentSession && (
         <div className="flex items-center gap-2 text-base-content/80" role="status" aria-live="polite">
           <span className="loading loading-spinner loading-sm" aria-hidden />
           Uploading…
         </div>
       )}
 
-      {result && !mutation.isPending && (
+      {resultForCurrentSession && !isUploadingForCurrentSession && (
         <div
-          className={`rounded-lg p-4 ${result.status === 'failed' ? 'bg-error text-error-content' : 'bg-success/10 text-base-content'}`}
+          className={`rounded-lg p-4 ${resultForCurrentSession.status === 'failed' ? 'bg-error text-error-content' : 'bg-success/10 text-base-content'}`}
           role="status"
           aria-live="polite"
         >
           <p className="font-medium">
-            {result.status === 'failed'
+            {resultForCurrentSession.status === 'failed'
               ? 'Failed'
-              : result.status === 'partial'
+              : resultForCurrentSession.status === 'partial'
                 ? 'Complete (some files or lines skipped/rejected)'
                 : 'Success'}
           </p>
-          {result.status !== 'failed' ? (
+          {resultForCurrentSession.status !== 'failed' ? (
             <>
-              <UploadSummaryCharts result={result} />
+              <UploadSummaryCharts result={resultForCurrentSession} />
               <p className="mt-2 text-sm text-base-content/70 sr-only">
-                Files processed: {result.files_processed}, skipped: {result.files_skipped}. Lines parsed: {result.lines_parsed}, rejected: {result.lines_rejected}. Parsed coverage: {result.lines_parsed + result.lines_rejected > 0 ? `${Math.round((result.lines_parsed / (result.lines_parsed + result.lines_rejected)) * 100)}%` : '—'}.
+                Files processed: {resultForCurrentSession.files_processed}, skipped: {resultForCurrentSession.files_skipped}. Lines parsed: {resultForCurrentSession.lines_parsed}, rejected: {resultForCurrentSession.lines_rejected}. Parsed coverage: {resultForCurrentSession.lines_parsed + resultForCurrentSession.lines_rejected > 0 ? `${Math.round((resultForCurrentSession.lines_parsed / (resultForCurrentSession.lines_parsed + resultForCurrentSession.lines_rejected)) * 100)}%` : '—'}.
               </p>
             </>
           ) : (
-            <p className="mt-2 text-sm">{shortenUploadError(result.error)}</p>
+            <p className="mt-2 text-sm">{shortenUploadError(resultForCurrentSession.error)}</p>
           )}
         </div>
       )}
