@@ -157,13 +157,12 @@ def export_report(
     if format == "pdf":
         try:
             pdf_bytes = export_pdf(report.content)
-        except RuntimeError as e:
-            if "WeasyPrint" in str(e) or "unavailable" in str(e).lower():
-                raise HTTPException(
-                    status_code=503,
-                    detail="PDF export unavailable: install WeasyPrint and its system dependencies",
-                ) from e
-            raise
+        except Exception as e:
+            logger.exception("PDF export failed for report_id=%s", report_id)
+            raise HTTPException(
+                status_code=503,
+                detail="PDF export failed. Please try again or use Markdown export.",
+            ) from e
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
