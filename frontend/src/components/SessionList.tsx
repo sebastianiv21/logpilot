@@ -75,24 +75,41 @@ function SessionListItem({
   );
 }
 
+function filterSessionsByQuery(sessions: Session[], query: string): Session[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return sessions;
+  return sessions.filter(
+    (s) =>
+      (s.name ?? '').toLowerCase().includes(q) ||
+      s.id.toLowerCase().includes(q) ||
+      (s.external_link ?? '').toLowerCase().includes(q)
+  );
+}
+
 export function SessionList({
   onEditSession,
+  searchQuery = '',
 }: {
   onEditSession: (session: Session) => void;
+  searchQuery?: string;
 }) {
   const { data, isLoading, isError, error } = useSessionsList();
   const { currentSessionId, setCurrentSessionId } = useCurrentSession();
   const [visibleCount, setVisibleCount] = useState<number>(SESSIONS_BATCH_SIZE);
 
   const sessions = data?.sessions ?? [];
-  const visibleSessions = useMemo(
-    () => sessions.slice(0, visibleCount),
-    [sessions, visibleCount]
+  const filteredSessions = useMemo(
+    () => filterSessionsByQuery(sessions, searchQuery),
+    [sessions, searchQuery]
   );
-  const hasMore = visibleCount < sessions.length;
+  const visibleSessions = useMemo(
+    () => filteredSessions.slice(0, visibleCount),
+    [filteredSessions, visibleCount]
+  );
+  const hasMore = visibleCount < filteredSessions.length;
   const hasPrevious = visibleCount > SESSIONS_BATCH_SIZE;
-  const isSinglePage = sessions.length <= SESSIONS_BATCH_SIZE;
-  const showPaginationControls = sessions.length > 0 && !isSinglePage;
+  const isSinglePage = filteredSessions.length <= SESSIONS_BATCH_SIZE;
+  const showPaginationControls = filteredSessions.length > 0 && !isSinglePage;
 
   if (isLoading) {
     return (
@@ -125,7 +142,9 @@ export function SessionList({
   }
 
   const handleLoadMore = () => {
-    setVisibleCount((c) => Math.min(c + SESSIONS_BATCH_SIZE, sessions.length));
+    setVisibleCount((c) =>
+      Math.min(c + SESSIONS_BATCH_SIZE, filteredSessions.length)
+    );
   };
   const handlePrevious = () => {
     setVisibleCount((c) => Math.max(SESSIONS_BATCH_SIZE, c - SESSIONS_BATCH_SIZE));

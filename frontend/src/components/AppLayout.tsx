@@ -1,17 +1,25 @@
 import { useState, useRef } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { FolderOpen, Pencil, ScrollText } from 'lucide-react'
+import { FolderOpen, Pencil, ScrollText, Search } from 'lucide-react'
 import type { Session } from '../lib/schemas'
 import { useFocusTrap } from '../hooks/useFocusTrap'
+import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import { SessionList } from './SessionList'
 import { CreateSessionForm } from './CreateSessionForm'
 import { EditSessionForm } from './EditSessionForm'
 import { HeaderKbLink } from './HeaderKbLink'
 import { ThemeSwitcher } from './ThemeSwitcher'
 
+const SEARCH_DEBOUNCE_MS = 200
+
 export function AppLayout() {
   const location = useLocation()
   const [editingSession, setEditingSession] = useState<Session | null>(null)
+  const [sessionSearchRaw, setSessionSearchRaw] = useState('')
+  const sessionSearchDebounced = useDebouncedValue(
+    sessionSearchRaw.trim(),
+    SEARCH_DEBOUNCE_MS
+  )
   const editModalRef = useRef<HTMLDivElement>(null)
   useFocusTrap(!!editingSession, editModalRef)
   const isKnowledgePage = location.pathname === '/knowledge'
@@ -59,8 +67,28 @@ export function AppLayout() {
             <div className="shrink-0 p-2">
               <CreateSessionForm />
             </div>
+            <div className="shrink-0 p-2">
+              <div className="group flex items-center gap-2 rounded-lg border border-base-300 bg-base-100 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary min-h-8">
+                <Search
+                  size={16}
+                  className="shrink-0 ml-2.5 text-base-content/50"
+                  aria-hidden
+                />
+                <input
+                  type="search"
+                  value={sessionSearchRaw}
+                  onChange={(e) => setSessionSearchRaw(e.target.value)}
+                  placeholder="Search sessions…"
+                  className="border-0 bg-transparent focus:outline-none focus:ring-0 flex-1 min-w-0 py-1.5 pr-2 text-sm"
+                  aria-label="Search sessions by name, ID, or link"
+                />
+              </div>
+            </div>
             <div className="flex-1 min-h-0 overflow-y-auto p-2">
-              <SessionList onEditSession={setEditingSession} />
+              <SessionList
+                onEditSession={setEditingSession}
+                searchQuery={sessionSearchDebounced}
+              />
             </div>
           </aside>
         )}

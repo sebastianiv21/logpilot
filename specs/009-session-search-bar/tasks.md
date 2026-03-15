@@ -23,7 +23,7 @@
 
 **Purpose**: Confirm environment; add debounce hook per research.md (no new npm packages required).
 
-- [ ] T001 Verify frontend dependencies per plan.md; no new packages required for 009 (debounce implemented via small hook)
+- [x] T001 Verify frontend dependencies per plan.md; no new packages required for 009 (debounce implemented via small hook)
 
 ---
 
@@ -33,7 +33,7 @@
 
 **Checkpoint**: Hook available; US1 implementation can use it.
 
-- [ ] T002 [US1] Add useDebouncedValue hook (delay e.g. 200 ms) in frontend/src/hooks/useDebouncedValue.ts; input (value, delayMs), output debounced value per research.md §1
+- [x] T002 [US1] Add useDebouncedValue hook (delay e.g. 200 ms) in frontend/src/hooks/useDebouncedValue.ts; input (value, delayMs), output debounced value per research.md §1
 
 ---
 
@@ -45,8 +45,8 @@
 
 ### Implementation for User Story 1
 
-- [ ] T003 [US1] In SessionList, add optional prop searchQuery (string); when present and non-empty after trim, filter sessions by literal case-insensitive substring match (no regex) on session.name ?? '', session.id, session.external_link ?? ''; when empty after trim, show all sessions. Pagination (visibleCount, Load more) applies to filtered list. In frontend/src/components/SessionList.tsx
-- [ ] T004 [US1] In AppLayout, add search input in a new block directly above the scrollable session list (between CreateSessionForm and the div with overflow-y-auto), same column; wire local state for raw input, useDebouncedValue(rawInput.trim(), 200), pass debounced value to SessionList as searchQuery. Keep scroll region (flex-1 min-h-0 overflow-y-auto) wrapping only SessionList. In frontend/src/components/AppLayout.tsx
+- [x] T003 [US1] In SessionList, add optional prop searchQuery (string); when present and non-empty after trim, filter sessions by literal case-insensitive substring match (no regex) on session.name ?? '', session.id, session.external_link ?? ''; when empty after trim, show all sessions. Pagination (visibleCount, Load more) applies to filtered list. In frontend/src/components/SessionList.tsx
+- [x] T004 [US1] In AppLayout, add search input in a new block directly above the scrollable session list (between CreateSessionForm and the div with overflow-y-auto), same column; wire local state for raw input, useDebouncedValue(rawInput.trim(), 200), pass debounced value to SessionList as searchQuery. Keep scroll region (flex-1 min-h-0 overflow-y-auto) wrapping only SessionList. In frontend/src/components/AppLayout.tsx
 
 **Checkpoint**: User Story 1 complete — search filters list by name/ID/link, trim and debounce work; validate per quickstart §2–3, §5
 
