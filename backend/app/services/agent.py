@@ -46,7 +46,7 @@ Then produce one final answer: a structured incident report in Markdown with the
 
 Rules for the report:
 - Recommended Fix: List concrete steps only. Put non-code actions first (config, restarts, scaling), then code changes as last resort labeled "Last resort (code change):". Do NOT add subheadings or meta-labels in this section (e.g. no "Non-code actions (do these first)", "Immediate actions", "Prefer non-code actions", or similar).
-- Next troubleshooting steps: List only steps a human operator can run or data they can collect.
+- Next troubleshooting steps: Output this section as a Markdown numbered list (1. First step, 2. Second step, 3. ...). List only steps a human operator can run or data they can collect.
   Do NOT assume only Kubernetes. Operators may use Docker (e.g. docker compose).
   Include both K8s and Docker when relevant (e.g. kubectl logs and docker logs).
   Do NOT offer to run queries yourself or ask for pod names/permissions.

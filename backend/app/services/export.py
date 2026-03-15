@@ -5,7 +5,9 @@ from __future__ import annotations
 import html
 import logging
 import re
+from html.parser import HTMLParser
 from io import BytesIO
+from typing import Literal
 
 import markdown
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
@@ -27,25 +29,63 @@ def _strip_tags(html_fragment: str) -> str:
     return html.unescape(text)
 
 
-def _html_blocks_to_flowables_data(html_str: str) -> list[tuple[str, str]]:
-    """Extract block-level elements in order: (tag, plain_text)."""
-    blocks: list[tuple[str, str]] = []
-    # Match <h1>...</h1>, <h2>...</h2>, etc., <p>...</p>, <pre>...</pre>, <li>...</li>
-    pattern = re.compile(
-        r"<(h[1-4]|p|pre|li)[^>]*>(.*?)</\1>",
-        re.DOTALL | re.IGNORECASE,
-    )
-    for m in pattern.finditer(html_str):
-        tag = m.group(1).lower()
-        raw = m.group(2)
-        text = _strip_tags(raw).strip()
-        if text:
-            blocks.append((tag, text))
-    # If no blocks found (e.g. bare text), treat whole thing as one paragraph
+BlockItem = tuple[str, str, Literal["ol", "ul"] | None, int | None]
+
+
+class _ReportHTMLParser(HTMLParser):
+    """Parse HTML from Markdown into (tag, text, list_type, ol_index) for block elements."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.blocks: list[BlockItem] = []
+        self._list_stack: list[Literal["ol", "ul"]] = []
+        self._ol_index = 0
+        self._current_tag: str | None = None
+        self._current_text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        tag_l = tag.lower()
+        if tag_l == "ol":
+            self._list_stack.append("ol")
+            self._ol_index = 0
+        elif tag_l == "ul":
+            self._list_stack.append("ul")
+        elif tag_l in ("h1", "h2", "h3", "h4", "p", "pre", "li"):
+            self._current_tag = tag_l
+            self._current_text = []
+            if tag_l == "li" and self._list_stack and self._list_stack[-1] == "ol":
+                self._ol_index += 1
+
+    def handle_endtag(self, tag: str) -> None:
+        tag_l = tag.lower()
+        if tag_l in ("ol", "ul"):
+            if self._list_stack:
+                self._list_stack.pop()
+        elif tag_l == self._current_tag and self._current_tag is not None:
+            text = _strip_tags("".join(self._current_text)).strip()
+            if text:
+                list_type: Literal["ol", "ul"] | None = (
+                    self._list_stack[-1] if self._list_stack else None
+                )
+                index: int | None = self._ol_index if list_type == "ol" else None
+                self.blocks.append((self._current_tag, text, list_type, index))
+            self._current_tag = None
+            self._current_text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._current_tag is not None:
+            self._current_text.append(data)
+
+
+def _html_blocks_to_flowables_data(html_str: str) -> list[BlockItem]:
+    """Extract block-level elements with list context: (tag, text, list_type, ol_index)."""
+    parser = _ReportHTMLParser()
+    parser.feed(html_str)
+    blocks = parser.blocks
     if not blocks:
         text = _strip_tags(html_str).strip()
         if text:
-            blocks.append(("p", text))
+            blocks = [("p", text, None, None)]
     return blocks
 
 
@@ -102,7 +142,8 @@ def export_pdf(content: str) -> bytes:
     )
 
     story: list = []
-    for tag, text in blocks:
+    for item in blocks:
+        tag, text, list_type, ol_index = item
         escaped = html.escape(text)
         if tag == "h1":
             story.append(Paragraph(escaped, title_style))
@@ -113,10 +154,15 @@ def export_pdf(content: str) -> bytes:
         elif tag == "pre":
             story.append(Preformatted(escaped, code_style))
         elif tag == "li":
-            story.append(Paragraph(f"• {escaped}", body_style))
+            if list_type == "ol" and ol_index is not None:
+                story.append(Paragraph(f"{ol_index}. {escaped}", body_style))
+            else:
+                story.append(Paragraph(f"• {escaped}", body_style))
         else:
             story.append(Paragraph(escaped, body_style))
-        story.append(Spacer(1, 4))
+        # Tighter spacing after list items so lists stay grouped across pages
+        spacer_pt = 2 if tag == "li" else 6
+        story.append(Spacer(1, spacer_pt))
 
     if not story:
         fallback = html.escape(content.replace("\n", "<br/>"))

@@ -24,7 +24,7 @@
 
 **Purpose**: Ensure dependencies and project layout support report visualization work.
 
-- [ ] T001 Verify or add `react-markdown` dependency in `frontend/package.json` (used by ReportView; add if missing per research §6)
+- [x] T001 Verify or add `react-markdown` dependency in `frontend/package.json` (used by ReportView; add if missing per research §6)
 
 ---
 
@@ -34,7 +34,7 @@
 
 **⚠️ CRITICAL**: Agent prompt update blocks correct numbered list in browser, Markdown export, and PDF export.
 
-- [ ] T002 Update system prompt in `backend/app/services/agent.py` to require that the "Next troubleshooting steps" section be output as a Markdown numbered list (e.g. `1. First step`, `2. Second step`); keep all other report rules unchanged
+- [x] T002 Update system prompt in `backend/app/services/agent.py` to require that the "Next troubleshooting steps" section be output as a Markdown numbered list (e.g. `1. First step`, `2. Second step`); keep all other report rules unchanged
 
 **Checkpoint**: New reports will contain numbered troubleshooting steps in raw content; frontend and export can now rely on it.
 
@@ -48,7 +48,7 @@
 
 ### Implementation for User Story 1
 
-- [ ] T003 [US1] Improve report content styling in `frontend/src/components/ReportView.tsx`: clear heading hierarchy (`[&_h1]`, `[&_h2]`, `[&_h3]`), list spacing and indentation, ensure `<ol>` uses `list-decimal` and `<ul>` uses `list-disc`, code/pre monospace and background, add `break-words` or `overflow-wrap: break-word` on report content container for long lines (FR-001, FR-002, FR-006, FR-007); preserve semantic markup for baseline accessibility and readable contrast (FR-008)
+- [x] T003 [US1] Improve report content styling in `frontend/src/components/ReportView.tsx`: clear heading hierarchy (`[&_h1]`, `[&_h2]`, `[&_h3]`), list spacing and indentation, ensure `<ol>` uses `list-decimal` and `<ul>` uses `list-disc`, code/pre monospace and background, add `break-words` or `overflow-wrap: break-word` on report content container for long lines (FR-001, FR-002, FR-006, FR-007); preserve semantic markup for baseline accessibility and readable contrast (FR-008)
 
 **Checkpoint**: User Story 1 is complete; report view is readable and accessible in the browser.
 
@@ -62,7 +62,7 @@
 
 ### Implementation for User Story 2
 
-- [ ] T004 [US2] Update PDF export in `backend/app/services/export.py`: parse HTML from Markdown to distinguish `<ol>` vs `<ul>`; for each `<li>` record whether it belongs to an ordered list and its 1-based index; render `<ol>` items as `"1. text"`, `"2. text"`, etc., and `<ul>` items as `"• text"` in ReportLab flowables (FR-003, FR-005)
+- [x] T004 [US2] Update PDF export in `backend/app/services/export.py`: parse HTML from Markdown to distinguish `<ol>` vs `<ul>`; for each `<li>` record whether it belongs to an ordered list and its 1-based index; render `<ol>` items as `"1. text"`, `"2. text"`, etc., and `<ul>` items as `"• text"` in ReportLab flowables (FR-003, FR-005)
 - [ ] T005 [US2] Optional: Add a small normalizer in `backend/app/services/export.py` that ensures the "Next troubleshooting steps" section uses Markdown numbered list syntax (`1.`, `2.`, …) and call it from `export_markdown` before returning, as robustness fallback when agent output is bullet list there
 
 **Checkpoint**: User Story 2 is complete; troubleshooting steps are numbered in browser (from T002 + T003), Markdown export, and PDF export.
@@ -77,7 +77,7 @@
 
 ### Implementation for User Story 3
 
-- [ ] T006 [US3] Ensure `export_markdown` in `backend/app/services/export.py` returns well-formed content: passthrough of report content; if normalizer from T005 is implemented, apply it before returning so the downloaded `.md` has numbered troubleshooting steps (FR-004)
+- [x] T006 [US3] Ensure `export_markdown` in `backend/app/services/export.py` returns well-formed content: passthrough of report content; if normalizer from T005 is implemented, apply it before returning so the downloaded `.md` has numbered troubleshooting steps (FR-004)
 
 **Checkpoint**: User Story 3 is complete; Markdown export is professional and valid.
 
@@ -91,7 +91,7 @@
 
 ### Implementation for User Story 4
 
-- [ ] T007 [US4] Improve PDF layout and readability in `backend/app/services/export.py`: consistent spacing between sections, margins and line length suitable for print (A4/Letter), and pagination that preserves list numbering across pages for long reports (FR-005, SC-004)
+- [x] T007 [US4] Improve PDF layout and readability in `backend/app/services/export.py`: consistent spacing between sections, margins and line length suitable for print (A4/Letter), and pagination that preserves list numbering across pages for long reports (FR-005, SC-004)
 
 **Checkpoint**: User Stories 1–4 are complete; report visualization meets spec in browser and both exports.
 
@@ -101,8 +101,8 @@
 
 **Purpose**: Export error handling and validation that affect multiple flows.
 
-- [ ] T008 [P] Harden export failure handling in `frontend/src/components/ReportView.tsx`: ensure toast shows a clear, user-friendly error message (e.g. "Export failed. Try again.") when export fails; use backend `detail` when it is a clear message, otherwise generic text. If the export API client in `frontend/src/services/api.ts` surfaces raw errors, ensure ReportView (or the client) maps them to a user-friendly message (FR-009)
-- [ ] T009 Run validation steps from `specs/003-report-visualization-improvement/quickstart.md`: generate report, validate in-browser view, Markdown export, PDF export, and export failure message
+- [x] T008 [P] Harden export failure handling in `frontend/src/components/ReportView.tsx`: ensure toast shows a clear, user-friendly error message (e.g. "Export failed. Try again.") when export fails; use backend `detail` when it is a clear message, otherwise generic text. If the export API client in `frontend/src/services/api.ts` surfaces raw errors, ensure ReportView (or the client) maps them to a user-friendly message (FR-009)
+- [x] T009 Run validation steps from `specs/003-report-visualization-improvement/quickstart.md`: generate report, validate in-browser view, Markdown export, PDF export, and export failure message
 
 ---
 
