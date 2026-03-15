@@ -23,6 +23,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-15
 - No new server storage; optional localStorage for batch-size preference (implementation choice) (007-layout-single-screen-cleanup)
 - TypeScript 5.x (frontend); Python 3.11+ (backend unchanged) + React 18.x, React Router, Vite, Tailwind CSS, DaisyUI, TanStack Query, Sonner (toasts), lucide-reac (008-scrollable-session-list-titles)
 - No new persistence; current session from SessionContext + sessions from existing API (008-scrollable-session-list-titles)
+- TypeScript 5.x (frontend); Python 3.11+ (backend unchanged) + React 18.x, React Router, Vite, Tailwind CSS, DaisyUI, TanStack Query, Sonner, lucide-reac (009-session-search-bar)
+- No new persistence; filter query is ephemeral UI state (search input value) (009-session-search-bar)
 
 - Python 3.11+ (typed) + FastAPI, Loki client (e.g. promtail or push API), Prometheus client, Grafana provisioning API, Qdrant client, OpenAI-compatible LLM client (configurable base URL + API key) (001-log-investigation-mvp)
 
@@ -43,9 +45,9 @@ cd src [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLO
 Python 3.11+ (typed): Follow standard conventions
 
 ## Recent Changes
+- 009-session-search-bar: Added TypeScript 5.x (frontend); Python 3.11+ (backend unchanged) + React 18.x, React Router, Vite, Tailwind CSS, DaisyUI, TanStack Query, Sonner, lucide-reac
 - 008-scrollable-session-list-titles: Added TypeScript 5.x (frontend); Python 3.11+ (backend unchanged) + React 18.x, React Router, Vite, Tailwind CSS, DaisyUI, TanStack Query, Sonner (toasts), lucide-reac
 - 007-layout-single-screen-cleanup: Added TypeScript 5.x (frontend), Python 3.11+ (backend unchanged) + React 18.x, React Router, Vite, Tailwind CSS, DaisyUI, TanStack Query, Sonner, lucide-react; add a charts library (see research.md)
-- 006-layout-navbar-theme: Added TypeScript 5.x (frontend), Python 3.11+ (backend unchanged) + React 18.x, React Router, Vite, Tailwind CSS, DaisyUI, theme-change, TanStack Query, Sonner, lucide-reac
 
 
 <!-- MANUAL ADDITIONS START -->
