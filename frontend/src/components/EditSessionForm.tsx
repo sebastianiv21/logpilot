@@ -82,11 +82,12 @@ export function EditSessionForm({ session, onSuccess, onCancel }: Props) {
           className="btn btn-primary btn-sm flex-1"
           disabled={patchSession.isPending}
           aria-busy={patchSession.isPending}
+          aria-label="Save session changes"
         >
           {patchSession.isPending ? 'Saving…' : 'Save'}
         </button>
         {onCancel && (
-          <button type="button" className="btn btn-ghost btn-sm" onClick={onCancel}>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={onCancel} aria-label="Cancel editing">
             Cancel
           </button>
         )}

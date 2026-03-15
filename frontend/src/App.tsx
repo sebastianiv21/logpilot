@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AppLayout } from './components/AppLayout'
+import { ConnectionBanner } from './components/ConnectionBanner'
 import { KnowledgeIngest } from './components/KnowledgeIngest'
 import { KnowledgeSearch } from './components/KnowledgeSearch'
 import { MetricsLink } from './components/MetricsLink'
@@ -53,6 +54,7 @@ function HomePage() {
 function App() {
   return (
     <BrowserRouter>
+      <ConnectionBanner />
       <Toaster
         toastOptions={{
           unstyled: true,

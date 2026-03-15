@@ -16,7 +16,7 @@ type Props = {
   onClose?: () => void;
 };
 
-export function ReportView({ sessionId, reportId, onClose }: Props) {
+export function ReportView({ sessionId, reportId, onClose: _onClose }: Props) {
   const { data: report, isLoading, error } = useReport(sessionId, reportId, {
     refetchIntervalWhenEmpty: 2000,
   });
@@ -65,6 +65,7 @@ export function ReportView({ sessionId, reportId, onClose }: Props) {
               disabled={!hasContent || exporting !== null}
               aria-busy={exporting === 'markdown'}
               aria-describedby={!hasContent ? 'export-disabled-reason' : undefined}
+              aria-label="Export report as Markdown"
             >
               {exporting === 'markdown' ? 'Exporting…' : 'Export Markdown'}
             </button>
@@ -74,6 +75,8 @@ export function ReportView({ sessionId, reportId, onClose }: Props) {
               onClick={() => handleExport('pdf')}
               disabled={!hasContent || exporting !== null}
               aria-busy={exporting === 'pdf'}
+              aria-describedby={!hasContent ? 'export-disabled-reason' : undefined}
+              aria-label="Export report as PDF"
             >
               {exporting === 'pdf' ? 'Exporting…' : 'Export PDF'}
             </button>

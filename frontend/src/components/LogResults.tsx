@@ -114,6 +114,7 @@ export function LogResults({
             onClick={onLoadMore}
             disabled={loadingMore}
             aria-busy={loadingMore}
+            aria-label="Load more log results"
           >
             {loadingMore ? 'Loading…' : `Load more (up to ${Math.min(currentLimit + 250, 1000)} results)`}
           </button>

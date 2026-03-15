@@ -97,6 +97,7 @@ export function ReportGenerate() {
           disabled={!currentSessionId || generatingForCurrent || generateMutation.isPending}
           aria-busy={generatingForCurrent || generateMutation.isPending}
           aria-describedby="report-generate-status"
+          aria-label="Generate report from incident question"
         >
           {generateMutation.isPending
             ? 'Starting…'

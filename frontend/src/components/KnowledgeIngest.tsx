@@ -31,6 +31,7 @@ export function KnowledgeIngest() {
           disabled={isRunning || starting}
           aria-busy={isRunning || starting}
           aria-describedby="ingest-status"
+          aria-label="Start knowledge base ingestion"
         >
           {starting ? 'Starting…' : isRunning ? 'Ingesting…' : 'Start ingestion'}
         </button>

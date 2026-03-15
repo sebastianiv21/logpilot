@@ -145,10 +145,10 @@
 
 **Purpose**: Accessibility, error handling, and validation of full flow
 
-- [ ] T040 [P] Ensure keyboard navigation and logical focus order for main flows (session list and selection, upload, log search form, report trigger and view, export) per FR-013 in frontend/src/components/
-- [ ] T041 [P] Add meaningful labels or aria attributes for screen readers on main interactive elements (buttons, links, form inputs) per FR-013 in frontend/src/components/
-- [ ] T042 Ensure backend-unavailable and network errors show clear, user-friendly message and retry or “check connection” guidance (FR-011) in frontend (e.g. API client or global handler). Include retry/recovery UI where applicable (e.g. retry button or "Check connection" link) so users can recover without full reload.
-- [ ] T043 Run quickstart.md validation: start backend and frontend, validate session list, create session, upload, log search, metrics link, knowledge ingest/search, report generate and export. Where applicable, confirm success criteria SC-001–SC-007 (e.g. session create+select in under one minute, clear upload result, export within typical time).
+- [X] T040 [P] Ensure keyboard navigation and logical focus order for main flows (session list and selection, upload, log search form, report trigger and view, export) per FR-013 in frontend/src/components/
+- [X] T041 [P] Add meaningful labels or aria attributes for screen readers on main interactive elements (buttons, links, form inputs) per FR-013 in frontend/src/components/
+- [X] T042 Ensure backend-unavailable and network errors show clear, user-friendly message and retry or “check connection” guidance (FR-011) in frontend (e.g. API client or global handler). Include retry/recovery UI where applicable (e.g. retry button or "Check connection" link) so users can recover without full reload.
+- [X] T043 Run quickstart.md validation: start backend and frontend, validate session list, create session, upload, log search, metrics link, knowledge ingest/search, report generate and export. Where applicable, confirm success criteria SC-001–SC-007 (e.g. session create+select in under one minute, clear upload result, export within typical time).
 
 ---
 

@@ -72,20 +72,37 @@ async function parseErrorResponse(res: Response): Promise<ApiError> {
   return new ApiError(res.status, detail);
 }
 
+/** User-facing message when fetch fails (network error, CORS, etc.). */
+export const NETWORK_ERROR_MESSAGE =
+  'Unable to reach server. Check your connection and try again.';
+
+/** True if error indicates backend unavailable or network failure (for retry/connection UI). */
+export function isConnectionError(err: unknown): boolean {
+  if (err instanceof ApiError) {
+    return err.status === 0 || err.status === 502 || err.status === 503 || err.status === 504;
+  }
+  return false;
+}
+
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
   const base = getBaseUrl();
   const url = path.startsWith('http') ? path : `${base}${path.startsWith('/') ? path : `/${path}`}`;
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      Accept: 'application/json',
-      ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
-      ...options.headers,
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      ...options,
+      headers: {
+        Accept: 'application/json',
+        ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+        ...options.headers,
+      },
+    });
+  } catch (e) {
+    throw new ApiError(0, NETWORK_ERROR_MESSAGE, NETWORK_ERROR_MESSAGE);
+  }
   if (!res.ok) {
     throw await parseErrorResponse(res);
   }
