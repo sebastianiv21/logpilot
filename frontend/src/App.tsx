@@ -13,14 +13,11 @@ function HomePage() {
   const { currentSessionId } = useCurrentSession()
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">LogPilot</h1>
-        <p className="mt-2 text-base-content/80">
-          {currentSessionId
-            ? 'Upload logs or switch session in the sidebar.'
-            : 'Select or create a session to get started.'}
+      {!currentSessionId && (
+        <p className="text-base-content/80">
+          Select or create a session to get started.
         </p>
-      </div>
+      )}
       {currentSessionId && <UploadLogs />}
       {currentSessionId && (
         <section className="space-y-2 mt-8 border-t border-base-300 pt-6" aria-labelledby="logs-metrics-heading">

@@ -6,6 +6,14 @@ import { SessionProvider } from './contexts/SessionContext.tsx'
 import { ReportGenerationProvider } from './contexts/ReportGenerationContext.tsx'
 import App from './App.tsx'
 
+// Default theme when no stored preference (system preference or light)
+if (!localStorage.getItem('theme')) {
+  const dark =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
