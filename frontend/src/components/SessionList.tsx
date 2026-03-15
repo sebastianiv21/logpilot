@@ -75,24 +75,51 @@ function SessionListItem({
   );
 }
 
+function filterSessionsByQuery(sessions: Session[], query: string): Session[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return sessions;
+  return sessions.filter(
+    (s) =>
+      (s.name ?? '').toLowerCase().includes(q) ||
+      s.id.toLowerCase().includes(q) ||
+      (s.external_link ?? '').toLowerCase().includes(q)
+  );
+}
+
 export function SessionList({
   onEditSession,
+  searchQuery = '',
 }: {
   onEditSession: (session: Session) => void;
+  searchQuery?: string;
 }) {
   const { data, isLoading, isError, error } = useSessionsList();
   const { currentSessionId, setCurrentSessionId } = useCurrentSession();
   const [visibleCount, setVisibleCount] = useState<number>(SESSIONS_BATCH_SIZE);
 
   const sessions = data?.sessions ?? [];
-  const visibleSessions = useMemo(
-    () => sessions.slice(0, visibleCount),
-    [sessions, visibleCount]
+  const filteredSessions = useMemo(
+    () => filterSessionsByQuery(sessions, searchQuery),
+    [sessions, searchQuery]
   );
-  const hasMore = visibleCount < sessions.length;
+  const visibleSessions = useMemo(
+    () => filteredSessions.slice(0, visibleCount),
+    [filteredSessions, visibleCount]
+  );
+  const hasMore = visibleCount < filteredSessions.length;
   const hasPrevious = visibleCount > SESSIONS_BATCH_SIZE;
-  const isSinglePage = sessions.length <= SESSIONS_BATCH_SIZE;
-  const showPaginationControls = sessions.length > 0 && !isSinglePage;
+  const isSinglePage = filteredSessions.length <= SESSIONS_BATCH_SIZE;
+  const showPaginationControls = filteredSessions.length > 0 && !isSinglePage;
+
+  const searchActive = searchQuery.trim() !== '';
+  const liveRegionText =
+    !searchActive
+      ? ''
+      : filteredSessions.length === 0
+        ? 'No sessions match your search.'
+        : filteredSessions.length === 1
+          ? '1 session'
+          : `${filteredSessions.length} sessions`;
 
   if (isLoading) {
     return (
@@ -124,8 +151,31 @@ export function SessionList({
     );
   }
 
+  if (
+    filteredSessions.length === 0 &&
+    searchQuery.trim() !== ''
+  ) {
+    return (
+      <div className="space-y-2">
+        <div
+          className="sr-only"
+          aria-live="polite"
+          aria-atomic="true"
+          role="status"
+        >
+          {liveRegionText}
+        </div>
+        <div className="text-sm text-base-content/60 p-2">
+          No sessions match your search.
+        </div>
+      </div>
+    );
+  }
+
   const handleLoadMore = () => {
-    setVisibleCount((c) => Math.min(c + SESSIONS_BATCH_SIZE, sessions.length));
+    setVisibleCount((c) =>
+      Math.min(c + SESSIONS_BATCH_SIZE, filteredSessions.length)
+    );
   };
   const handlePrevious = () => {
     setVisibleCount((c) => Math.max(SESSIONS_BATCH_SIZE, c - SESSIONS_BATCH_SIZE));
@@ -133,6 +183,16 @@ export function SessionList({
 
   return (
     <div className="space-y-2">
+      {liveRegionText ? (
+        <div
+          className="sr-only"
+          aria-live="polite"
+          aria-atomic="true"
+          role="status"
+        >
+          {liveRegionText}
+        </div>
+      ) : null}
       <ul className="space-y-2 p-0 list-none" aria-label="Session list">
         {visibleSessions.map((session) => (
           <li key={session.id}>
