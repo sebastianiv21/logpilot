@@ -11,16 +11,22 @@ import { useCurrentSession } from './contexts/SessionContext'
 
 function HomePage() {
   const { currentSessionId } = useCurrentSession()
-  return (
-    <div className="space-y-6">
-      {!currentSessionId && (
+  if (!currentSessionId) {
+    return (
+      <div className="space-y-6">
         <p className="text-base-content/80">
           Select or create a session to get started.
         </p>
-      )}
-      {currentSessionId && <UploadLogs />}
-      {currentSessionId && (
-        <section className="space-y-2 mt-8 border-t border-base-300 pt-6" aria-labelledby="logs-metrics-heading">
+      </div>
+    )
+  }
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+      <div className="min-w-0">
+        <UploadLogs />
+      </div>
+      <div className="flex flex-col gap-6 min-w-0">
+        <section className="space-y-2 border-t border-base-300 pt-6 lg:border-t-0 lg:pt-0" aria-labelledby="logs-metrics-heading">
           <h2 id="logs-metrics-heading" className="text-xl font-semibold">
             Logs &amp; metrics
           </h2>
@@ -29,16 +35,14 @@ function HomePage() {
           </p>
           <MetricsLink />
         </section>
-      )}
-      {currentSessionId && (
-        <section className="space-y-6 mt-8 border-t border-base-300 pt-6" aria-labelledby="reports-heading">
+        <section className="space-y-6 border-t border-base-300 pt-6" aria-labelledby="reports-heading">
           <h2 id="reports-heading" className="text-xl font-semibold">
             Reports
           </h2>
           <ReportGenerate />
           <ReportList />
         </section>
-      )}
+      </div>
     </div>
   )
 }

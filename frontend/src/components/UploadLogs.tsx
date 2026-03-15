@@ -6,6 +6,7 @@ import { ApiError } from '../services/api';
 import { uploadLogs } from '../services/api';
 import { useCurrentSession } from '../contexts/SessionContext';
 import type { UploadResult } from '../lib/schemas';
+import { UploadSummaryCharts } from './UploadSummaryCharts';
 
 const MAX_ERROR_LENGTH = 120;
 
@@ -148,18 +149,12 @@ export function UploadLogs() {
                 : 'Success'}
           </p>
           {result.status !== 'failed' ? (
-            <ul className="mt-2 list-inside list-disc text-sm">
-              <li>Files processed: {result.files_processed}</li>
-              <li>Files skipped: {result.files_skipped}</li>
-              <li>Lines parsed: {result.lines_parsed}</li>
-              <li>Lines rejected: {result.lines_rejected}</li>
-              <li>
-                Parsed coverage:{' '}
-                {result.lines_parsed + result.lines_rejected > 0
-                  ? `${Math.round((result.lines_parsed / (result.lines_parsed + result.lines_rejected)) * 100)}%`
-                  : '—'}
-              </li>
-            </ul>
+            <>
+              <UploadSummaryCharts result={result} />
+              <p className="mt-2 text-sm text-base-content/70 sr-only">
+                Files processed: {result.files_processed}, skipped: {result.files_skipped}. Lines parsed: {result.lines_parsed}, rejected: {result.lines_rejected}. Parsed coverage: {result.lines_parsed + result.lines_rejected > 0 ? `${Math.round((result.lines_parsed / (result.lines_parsed + result.lines_rejected)) * 100)}%` : '—'}.
+              </p>
+            </>
           ) : (
             <p className="mt-2 text-sm">{shortenUploadError(result.error)}</p>
           )}

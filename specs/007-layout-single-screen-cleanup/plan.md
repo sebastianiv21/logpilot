@@ -7,7 +7,7 @@
 
 ## Summary
 
-Deliver a single-screen session view, paginated sessions and KB search (Load more + optional Previous), Back to Home inside the knowledge space content, top-bar home link and app icon, deduplicated copy/icons, and visual upload/processing summary via a charts library. Layout uses right-side space (horizontal/multi-column); no collapsible sections—scroll if needed. Frontend-focused; backend may gain optional pagination params for sessions/KB search (see research and contracts). Batch size default 10, user choice 10/20/50; same pagination pattern for both lists.
+Deliver a single-screen session view, paginated sessions and KB search (Load more + optional Previous), Back to Home inside the knowledge space content, top-bar home link and app icon, deduplicated copy/icons, and visual upload/processing summary via a charts library. Layout uses right-side space (horizontal/multi-column); no collapsible sections—scroll if needed. Frontend-focused; backend may gain optional pagination params for sessions/KB search (see research and contracts). Batch size fixed at 10 (no user control); same pagination pattern for both lists.
 
 ## Technical Context
 

@@ -15,8 +15,7 @@
 - Q: Which pagination pattern for sessions list and KB search? → A: Same pattern for both — "Load more" with optional "Previous" or back-to-start if needed.
 - Q: How should we use space to achieve single-screen layout? → A: Take advantage of the space on the right, e.g. moving some sections to the right (use horizontal layout).
 - Q: If content still doesn't fit after rearranging (including right-side space), what should we do? → A: Rearrange only; no collapsible or compact sections. If it still doesn't fit, scrolling is acceptable.
-- Q: Default page/batch size for sessions list and KB search? → A: 10 items per batch.
-- Q: Should users be able to change batch size in this feature? → A: Yes; allow user to choose batch size (e.g. dropdown 10 / 20 / 50).
+- Q: Default page/batch size for sessions list and KB search? → A: 10 items per batch (fixed; no user control).
 - Q: Should upload/processing stats (files processed, lines parsed, rejected, coverage) be presented visually? → A: Yes; use a charts library to make this information more visual (any suitable library is acceptable).
 
 ## User Scenarios & Testing *(mandatory)*
@@ -50,8 +49,6 @@ A user searches the knowledge base and sees results in a paginated list (e.g., a
 
 1. **Given** the user is on the knowledge base search, **When** they run a query, **Then** results are shown in pages (or a fixed-size batch with an option to load more), not as a single infinite scroll.
 2. **Given** search results are displayed, **When** there are more results than one page, **Then** the user can navigate to the next (and optionally previous) page or load the next batch via a clear control.
-3. **Given** the user is on the session view or KB search, **When** they want to change how many items appear per batch, **Then** they can select a batch size (e.g. 10 / 20 / 50) via a clear control (e.g. dropdown).
-
 ---
 
 ### User Story 3 - Back to Home Inside Knowledge Space (Priority: P3)
@@ -119,7 +116,6 @@ A user can always return to the home/session view by clicking the application na
 - **FR-008**: The application name (e.g. "LogPilot") in the top navigation bar MUST be clickable and MUST navigate the user to the home/session view.
 - **FR-009**: The top navigation bar MUST display an application icon (e.g. representing logs or the product) next to or with the application name; implementation may use Lucide React for the icon (e.g. logs-related).
 - **FR-010**: The sessions list in the sidebar MUST be presented in a paginated manner (fixed page size with "Load more" and optional "Previous" or back-to-start), not as an unbounded scroll-only list; the same pagination pattern applies to both the sessions list and KB search results.
-- **FR-011**: The user MUST be able to choose the batch size (e.g. via a dropdown or control offering options such as 10 / 20 / 50) for both the sessions list and KB search results.
 - **FR-012**: The upload/processing summary (files processed, files skipped, lines parsed, lines rejected, parsed coverage) MUST be presented in a visual form (e.g. charts or graphs) so that the information is easier to scan; implementation may use any suitable charts library.
 
 ### Key Entities *(include if feature involves data)*
@@ -139,7 +135,6 @@ A user can always return to the home/session view by clicking the application na
 - **SC-004**: Affected screens have no unnecessary repeated headings or body copy, and distinct actions use distinct icons or labels so that icon reuse does not cause confusion.
 - **SC-005**: From any view, users can reach the home/session view by clicking the application name in the top bar, and the top bar shows an application icon (e.g. logs-related) with the application name.
 - **SC-006**: Users can navigate the sessions list in discrete pages or batches, with visible pagination or load-more controls.
-- **SC-007**: Users can select the batch size (e.g. 10 / 20 / 50) for sessions list and KB search results.
 - **SC-008**: Upload/processing summary (files processed, skipped, lines parsed, rejected, coverage) is presented visually (e.g. charts or graphs) for easier scanning; any suitable charts library may be used.
 
 ## Assumptions
@@ -149,6 +144,6 @@ A user can always return to the home/session view by clicking the application na
 - If single-screen cannot be achieved by rearrangement alone (including right-side space), scrolling is acceptable; collapsible or compact sections are out of scope for this feature.
 - The sessions list in the sidebar is paginated in this feature (fixed page size with next/previous or "Load more"); the single-screen goal applies to the overall layout including the main content (upload, logs & metrics, reports).
 - "Back to Home" is the expected label or equivalent (e.g., "Back to sessions"); the exact wording can follow existing product language.
-- Default pagination batch size is 10 items for both the sessions list and KB search results; users can choose batch size (e.g. dropdown 10 / 20 / 50) in this feature.
+- Pagination batch size is fixed at 10 items for both the sessions list and KB search results; no user-adjustable batch size control.
 - Both the sessions list and KB search use the same pagination pattern: "Load more" for the next batch, with optional "Previous" or back-to-start when applicable.
 - A charts library (choice left to implementation/plan) is used to present the upload/processing summary (files processed, skipped, lines parsed, rejected, parsed coverage) visually for better scanability.

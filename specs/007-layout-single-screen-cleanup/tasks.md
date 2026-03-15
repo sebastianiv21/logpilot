@@ -23,16 +23,16 @@
 
 **Purpose**: Add charts library and any shared tooling.
 
-- [ ] T001 Add recharts dependency to frontend in frontend/package.json
-- [ ] T002 [P] Create useBatchSize hook (default 10, options 10/20/50, optional localStorage key logpilot_batch_size) in frontend/src/hooks/useBatchSize.ts
+- [x] T001 Add recharts dependency to frontend in frontend/package.json
+- [x] T002 [P] Use fixed batch size 10 for sessions list (no batch size control); was useBatchSize hook, removed per product decision
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Shared batch-size state used by US1 and US2. No other blocking prerequisites.
+**Purpose**: No shared batch-size hook; batch size is fixed at 10 in each component.
 
-**Checkpoint**: Complete Phase 1 (T001–T002); then user story implementation can begin.
+**Checkpoint**: Complete Phase 1 (T001); then user story implementation can begin.
 
 ---
 
@@ -44,11 +44,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T003 [US1] Implement main content grid layout (CSS Grid, two columns at desktop) for Upload logs, Logs & metrics, Reports in frontend/src/App.tsx HomePage
-- [ ] T004 [US1] Add sessions list pagination (visibleCount state, Load more, optional Previous) using useBatchSize in frontend/src/components/SessionList.tsx; hide or disable Load more and Previous when there are zero or only one page of sessions
-- [ ] T005 [US1] Add batch size dropdown (10/20/50) to SessionList in frontend/src/components/SessionList.tsx
-- [ ] T006 [US1] Create UploadSummaryCharts component (Recharts: files processed/skipped, lines parsed/rejected, parsed coverage %) in frontend/src/components/UploadSummaryCharts.tsx
-- [ ] T007 [US1] Use UploadSummaryCharts in UploadLogs for success/partial result in frontend/src/components/UploadLogs.tsx
+- [x] T003 [US1] Implement main content grid layout (CSS Grid, two columns at desktop) for Upload logs, Logs & metrics, Reports in frontend/src/App.tsx HomePage
+- [x] T004 [US1] Add sessions list pagination (visibleCount state, Load more, optional Previous) with fixed batch size 10 in frontend/src/components/SessionList.tsx; hide or disable Load more and Previous when there are zero or only one page of sessions
+- [x] T005 [US1] Batch size control removed; fixed at 10 per product decision
+- [x] T006 [US1] Create UploadSummaryCharts component (Recharts: files processed/skipped, lines parsed/rejected, parsed coverage %) in frontend/src/components/UploadSummaryCharts.tsx
+- [x] T007 [US1] Use UploadSummaryCharts in UploadLogs for success/partial result in frontend/src/components/UploadLogs.tsx
 
 **Checkpoint**: User Story 1 is fully functional and testable independently.
 
@@ -62,8 +62,8 @@
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US2] Add KB search results pagination (visibleCount/range, Load more, optional Previous) using useBatchSize in frontend/src/components/KnowledgeSearch.tsx; hide or disable Load more and Previous when there are zero or only one page of results
-- [ ] T009 [US2] Add batch size dropdown (10/20/50) to KB search UI in frontend/src/components/KnowledgeSearch.tsx
+- [ ] T008 [US2] Add KB search results pagination (visibleCount/range, Load more, optional Previous) with fixed batch size 10 in frontend/src/components/KnowledgeSearch.tsx; hide or disable Load more and Previous when there are zero or only one page of results
+- [x] T009 [US2] Batch size control removed; fixed at 10 per product decision (no dropdown for KB search)
 
 **Checkpoint**: User Stories 1 and 2 both work independently.
 
@@ -129,8 +129,8 @@
 
 - **Phase 1 (Setup)**: No dependencies — start immediately.
 - **Phase 2**: Empty; T001–T002 complete before Phase 3.
-- **Phase 3 (US1)**: Depends on T001, T002.
-- **Phase 4 (US2)**: Depends on T002 (useBatchSize).
+- **Phase 3 (US1)**: Depends on T001.
+- **Phase 4 (US2)**: No dependency on Phase 1 batch logic (fixed 10 in component).
 - **Phase 5 (US3)**: No dependency on US1/US2; can start after Phase 2.
 - **Phase 6 (US4)**: No dependency on other stories.
 - **Phase 7 (US5)**: No dependency on other stories.
@@ -138,8 +138,8 @@
 
 ### User Story Dependencies
 
-- **US1 (P1)**: After T001, T002. Blocks nothing.
-- **US2 (P2)**: After T002. Independent of US1.
+- **US1 (P1)**: After T001. Blocks nothing.
+- **US2 (P2)**: Independent of US1; use fixed batch size 10 in KnowledgeSearch.
 - **US3 (P3)**: Can start after Phase 2; touches AppLayout and KnowledgePage only.
 - **US4 (P4)**: Can start after Phase 2; touches KnowledgePage and ReportGenerate only.
 - **US5 (P5)**: Can start after Phase 2; touches AppLayout only.

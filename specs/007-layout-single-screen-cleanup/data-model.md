@@ -11,9 +11,9 @@
 **Source**: Existing `Session[]` from GET /sessions; no backend schema change required for frontend pagination.
 
 - **Sessions**: Array of `Session` (id, name, created_at, external_link, etc.). Fetched in full (or via optional limit/offset if backend adds it).
-- **Batch size**: User choice 10 | 20 | 50; default 10. Stored in component state or optional localStorage key (e.g. `logpilot_sessions_batch_size`).
-- **Visible range**: Client state (e.g. `visibleCount` or `offset`/`limit`) for "Load more" and "Previous". First batch = first `batchSize` items; Load more increases visible count by `batchSize`; Previous decreases or resets to first batch.
-- **Validation**: Batch size must be one of 10, 20, 50. Visible range ≥ 0 and ≤ length of sessions list.
+- **Batch size**: Fixed at 10; no user-adjustable control.
+- **Visible range**: Client state (e.g. `visibleCount`) for "Load more" and "Previous". First batch = first 10 items; Load more adds 10; Previous goes back one batch.
+- **Validation**: Visible range ≥ 0 and ≤ length of sessions list.
 
 No new backend entities. If backend later adds pagination, request params could be `limit` and `offset` (or `cursor`); response could include `sessions`, `total`, `has_more`.
 
@@ -24,9 +24,9 @@ No new backend entities. If backend later adds pagination, request params could 
 **Source**: Existing KB search API (e.g. returns a list of results). Same pagination pattern as sessions.
 
 - **Results**: Array of search result items (content, score, metadata, etc.). Either full response paginated in UI, or API supports `limit`/`offset` and returns a page.
-- **Batch size**: User choice 10 | 20 | 50; default 10. Can share a single "batch size" preference with sessions or be separate (spec says "for both"; implementation may use one shared preference).
+- **Batch size**: Fixed at 10; same as sessions list (no user control).
 - **Visible range**: Same pattern as sessions—first batch, Load more, optional Previous.
-- **Validation**: Batch size 10 | 20 | 50; visible range within result length.
+- **Validation**: Visible range within result length.
 
 No new backend entities. If the search API already has a `limit` (and optionally `offset`) parameter, use it and request next page on Load more; otherwise paginate in frontend over the returned list.
 
@@ -60,11 +60,9 @@ No new backend fields. Validation: numbers ≥ 0; coverage in [0, 100] or N/A.
 
 ---
 
-## 6. Batch size preference (optional persistence)
+## 6. Batch size (fixed)
 
-- **Key**: e.g. `logpilot_batch_size` or shared with sessions/KB.
-- **Values**: 10 | 20 | 50.
-- **Default**: 10 when key missing.
-- **Scope**: Apply to both sessions list and KB search (same pattern per spec). Optional to persist; can be component state only for MVP.
+- **Value**: 10 for both sessions list and KB search.
+- **Scope**: No user control; fixed at 10 per product decision.
 
-No server-side storage; client-only (localStorage or state).
+No persistence; constant in code.

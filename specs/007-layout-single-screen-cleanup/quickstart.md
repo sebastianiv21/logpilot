@@ -27,19 +27,17 @@ Minimal steps to run and validate layout, pagination, Back to Home placement, to
 ## 2. Validate sessions list pagination
 
 1. With **multiple sessions** (create several if needed), open the **Sessions** sidebar.
-2. Confirm sessions are shown in **batches** (e.g. first 10) with a **"Load more"** control.
+2. Confirm sessions are shown in **batches of 10** with a **"Load more"** control.
 3. Click **Load more**; confirm the next batch appears.
 4. If available, confirm **Previous** (or back-to-start) returns to the previous batch or first batch.
-5. Confirm a **batch size** control (e.g. dropdown 10 / 20 / 50) is present and changes the number of items per batch.
 
 ---
 
-## 3. Validate KB search pagination and batch size
+## 3. Validate KB search pagination
 
 1. Navigate to the **knowledge** page (e.g. `/knowledge`).
 2. Run a **search** that returns enough results to span more than one batch.
-3. Confirm results are shown in **batches** with **Load more** (and optional **Previous**).
-4. Confirm **batch size** (10 / 20 / 50) can be changed and applies to the search results.
+3. Confirm results are shown in **batches of 10** with **Load more** (and optional **Previous**).
 
 ---
 
@@ -74,5 +72,5 @@ Minimal steps to run and validate layout, pagination, Back to Home placement, to
 
 ## Optional: accessibility
 
-1. Use **keyboard only**: Tab to Load more, Previous, batch size dropdown, Back to Home, and LogPilot link; activate and confirm behavior.
+1. Use **keyboard only**: Tab to Load more, Previous, Back to Home, and LogPilot link; activate and confirm behavior.
 2. Confirm chart summary has labels or text alternative for key values.

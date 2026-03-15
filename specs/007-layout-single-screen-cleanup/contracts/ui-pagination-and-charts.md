@@ -12,16 +12,13 @@ Describes the UI behavior and props for paginated lists and the upload/processin
 **Components**: SessionList, KnowledgeSearch (or equivalent list that displays sessions / search results).
 
 **Behavior**:
-- List is divided into batches of size `batchSize` (10 | 20 | 50); default 10.
+- List is divided into batches of size **10** (fixed; no user control).
 - First batch is shown initially.
 - **Load more**: Button or control that appends the next batch (or requests next page if backend supports it). Disabled or hidden when no more items.
 - **Previous** (or back-to-start): Optional control to show the previous batch or jump to first batch. Hidden or disabled when on first batch.
-- **Batch size selector**: Dropdown or control allowing user to choose 10, 20, or 50. Applies to the list; may be shared across sessions and KB search.
 
 **Props (advisory)**:
-- `batchSize: number` — one of 10, 20, 50.
-- `onBatchSizeChange?: (size: number) => void` — when user changes batch size.
-- Items: from existing data (sessions array or search results array); slicing or paging is component-internal or via hook.
+- Items: from existing data (sessions array or search results array); slicing or paging is component-internal; batch size is constant 10.
 
 **Accessibility**: Buttons have clear labels (e.g. "Load more sessions", "Previous"); batch size control has aria-label. List region has appropriate role and semantics.
 

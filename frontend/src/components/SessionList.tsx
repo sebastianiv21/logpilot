@@ -1,8 +1,11 @@
+import { useState, useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
 import { Check, Pencil } from 'lucide-react';
 import type { Session } from '../lib/schemas';
 import { useSessionsList } from '../hooks/useSessions';
 import { useCurrentSession } from '../contexts/SessionContext';
+
+const SESSIONS_BATCH_SIZE = 10;
 
 function SessionListItem({
   session,
@@ -79,6 +82,17 @@ export function SessionList({
 }) {
   const { data, isLoading, isError, error } = useSessionsList();
   const { currentSessionId, setCurrentSessionId } = useCurrentSession();
+  const [visibleCount, setVisibleCount] = useState<number>(SESSIONS_BATCH_SIZE);
+
+  const sessions = data?.sessions ?? [];
+  const visibleSessions = useMemo(
+    () => sessions.slice(0, visibleCount),
+    [sessions, visibleCount]
+  );
+  const hasMore = visibleCount < sessions.length;
+  const hasPrevious = visibleCount > SESSIONS_BATCH_SIZE;
+  const isSinglePage = sessions.length <= SESSIONS_BATCH_SIZE;
+  const showPaginationControls = sessions.length > 0 && !isSinglePage;
 
   if (isLoading) {
     return (
@@ -102,8 +116,6 @@ export function SessionList({
     );
   }
 
-  const sessions = data?.sessions ?? [];
-
   if (sessions.length === 0) {
     return (
       <div className="text-sm text-base-content/60 p-2" aria-live="polite">
@@ -112,18 +124,51 @@ export function SessionList({
     );
   }
 
+  const handleLoadMore = () => {
+    setVisibleCount((c) => Math.min(c + SESSIONS_BATCH_SIZE, sessions.length));
+  };
+  const handlePrevious = () => {
+    setVisibleCount((c) => Math.max(SESSIONS_BATCH_SIZE, c - SESSIONS_BATCH_SIZE));
+  };
+
   return (
-    <ul className="space-y-2 p-0 list-none" aria-label="Session list">
-      {sessions.map((session) => (
-        <li key={session.id}>
-          <SessionListItem
-            session={session}
-            isCurrent={currentSessionId === session.id}
-            onSelect={() => setCurrentSessionId(session.id)}
-            onEdit={() => onEditSession(session)}
-          />
-        </li>
-      ))}
-    </ul>
+    <div className="space-y-2">
+      <ul className="space-y-2 p-0 list-none" aria-label="Session list">
+        {visibleSessions.map((session) => (
+          <li key={session.id}>
+            <SessionListItem
+              session={session}
+              isCurrent={currentSessionId === session.id}
+              onSelect={() => setCurrentSessionId(session.id)}
+              onEdit={() => onEditSession(session)}
+            />
+          </li>
+        ))}
+      </ul>
+      {showPaginationControls && (
+        <div className="flex flex-wrap gap-2 pt-2">
+          {hasPrevious && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={handlePrevious}
+              aria-label="Previous page of sessions"
+            >
+              Previous
+            </button>
+          )}
+          {hasMore && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={handleLoadMore}
+              aria-label="Load more sessions"
+            >
+              Load more
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

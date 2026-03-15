@@ -40,8 +40,8 @@ Resolves: charts library for upload/processing summary, layout approach for righ
 
 **Decision**: Implement **frontend-driven pagination** with "Load more" and optional "Previous" (or back-to-start):
 
-- **Sessions list**: Keep using `getSessions()` (full list). Slice in UI into batches of size `batchSize` (10/20/50). Show first batch; "Load more" appends next batch; "Previous" (or "Back to start") shows previous batch or resets to first batch. No backend API change required for MVP; if backend later adds `?limit=&offset=` (or cursor), frontend can switch to server-driven pagination.
-- **KB search**: Existing API likely returns a list; add `limit` (and optionally `offset`) to the search request if the backend supports it; otherwise paginate in frontend over the returned list with the same batch-size control. Spec requires same pattern for both (Load more + optional Previous); default batch size 10, user choice 10/20/50.
+- **Sessions list**: Keep using `getSessions()` (full list). Slice in UI into batches of size 10 (fixed). Show first batch; "Load more" appends next batch; "Previous" (or "Back to start") shows previous batch or resets to first batch. No backend API change required for MVP; if backend later adds `?limit=&offset=` (or cursor), frontend can switch to server-driven pagination.
+- **KB search**: Existing API likely returns a list; add `limit` (and optionally `offset`) to the search request if the backend supports it; otherwise paginate in frontend over the returned list with the same pattern. Spec requires same pattern for both (Load more + optional Previous); batch size fixed at 10 (no user control).
 
 **Rationale**: Spec: "Same pattern for both — Load more with optional Previous or back-to-start". Frontend pagination over full list is acceptable for medium-sized lists and avoids backend changes in the first slice; backend can add params later for scale.
 
@@ -49,7 +49,7 @@ Resolves: charts library for upload/processing summary, layout approach for righ
 - **Backend-only pagination from day one**: Requires API changes and more coordination; frontend pagination delivers the UX quickly.
 - **Infinite scroll**: Spec explicitly rejects infinite scroll for these lists.
 
-**Integration**: SessionList: state for `visibleCount` or `pageStart`/`pageEnd`, batch size from dropdown (10/20/50), "Load more" and "Previous" buttons. KnowledgeSearch: same pattern on the result list; if the search API supports limit/offset, pass batch size as limit and track offset for Load more.
+**Integration**: SessionList: state for `visibleCount`, fixed batch size 10, "Load more" and "Previous" buttons. KnowledgeSearch: same pattern on the result list (fixed batch size 10); if the search API supports limit/offset, pass 10 as limit and track offset for Load more.
 
 ---
 
