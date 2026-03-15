@@ -150,11 +150,12 @@ export function LogSearchForm({ onResult, disabled }: LogSearchFormProps) {
       </label>
       <button
         type="submit"
-        className="btn btn-primary btn-sm"
+        className="btn btn-primary btn-sm flex items-center gap-2"
         disabled={disabled || mutation.isPending}
         aria-busy={mutation.isPending}
         aria-label="Search logs"
       >
+        {mutation.isPending && <span className="loading loading-spinner loading-sm" aria-hidden />}
         {mutation.isPending ? 'Searching…' : 'Search'}
       </button>
     </form>

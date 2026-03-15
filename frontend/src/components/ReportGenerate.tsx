@@ -93,12 +93,15 @@ export function ReportGenerate() {
         </div>
         <button
           type="submit"
-          className="btn btn-primary"
+          className="btn btn-primary flex items-center gap-2"
           disabled={!currentSessionId || generatingForCurrent || generateMutation.isPending}
           aria-busy={generatingForCurrent || generateMutation.isPending}
           aria-describedby="report-generate-status"
           aria-label="Generate report from incident question"
         >
+          {(generateMutation.isPending || generatingForCurrent) && (
+            <span className="loading loading-spinner loading-sm" aria-hidden />
+          )}
           {generateMutation.isPending
             ? 'Starting…'
             : generatingForCurrent

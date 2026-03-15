@@ -79,11 +79,12 @@ export function EditSessionForm({ session, onSuccess, onCancel }: Props) {
       <div className="flex gap-2 pt-1">
         <button
           type="submit"
-          className="btn btn-primary btn-sm flex-1"
+          className="btn btn-primary btn-sm flex-1 flex items-center justify-center gap-2"
           disabled={patchSession.isPending}
           aria-busy={patchSession.isPending}
           aria-label="Save session changes"
         >
+          {patchSession.isPending && <span className="loading loading-spinner loading-sm" aria-hidden />}
           {patchSession.isPending ? 'Saving…' : 'Save'}
         </button>
         {onCancel && (

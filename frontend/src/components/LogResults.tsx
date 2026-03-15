@@ -110,12 +110,13 @@ export function LogResults({
         <div className="flex justify-center pt-2">
           <button
             type="button"
-            className="btn btn-sm btn-ghost"
+            className="btn btn-sm btn-ghost flex items-center gap-2"
             onClick={onLoadMore}
             disabled={loadingMore}
             aria-busy={loadingMore}
             aria-label="Load more log results"
           >
+            {loadingMore && <span className="loading loading-spinner loading-sm" aria-hidden />}
             {loadingMore ? 'Loading…' : `Load more (up to ${Math.min(currentLimit + 250, 1000)} results)`}
           </button>
         </div>

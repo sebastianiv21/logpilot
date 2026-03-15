@@ -78,11 +78,12 @@ export function CreateSessionForm({ onSuccess }: Props) {
       </div>
       <button
         type="submit"
-        className="btn btn-primary btn-sm w-full"
+        className="btn btn-primary btn-sm w-full flex items-center justify-center gap-2"
         disabled={createSession.isPending}
         aria-busy={createSession.isPending}
         aria-label="Create new session"
       >
+        {createSession.isPending && <span className="loading loading-spinner loading-sm" aria-hidden />}
         {createSession.isPending ? 'Creating…' : 'Create session'}
       </button>
       {createSession.isError && (

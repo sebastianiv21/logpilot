@@ -55,7 +55,14 @@ export function ReportView({ sessionId, reportId, onClose: _onClose }: Props) {
   return (
     <div className="flex flex-col flex-1 min-h-0 mt-2">
       {isLoading && !report && (
-        <p className="text-base-content/70 text-sm">Loading report…</p>
+        <p
+          className="flex items-center gap-2 text-base-content/70 text-sm"
+          role="status"
+          aria-busy="true"
+        >
+          <span className="loading loading-spinner loading-sm" aria-hidden />
+          Loading report…
+        </p>
       )}
       {error && (
         <p className="text-error text-sm" role="alert">

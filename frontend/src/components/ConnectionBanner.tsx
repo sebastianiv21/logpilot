@@ -27,12 +27,13 @@ export function ConnectionBanner() {
       <span>{message}</span>
       <button
         type="button"
-        className="btn btn-sm btn-ghost btn-active"
+        className="btn btn-sm btn-ghost btn-active flex items-center gap-2"
         onClick={() => refetch()}
         disabled={isFetching}
         aria-busy={isFetching}
         aria-label="Retry connection"
       >
+        {isFetching && <span className="loading loading-spinner loading-sm" aria-hidden />}
         {isFetching ? 'Checking…' : 'Retry'}
       </button>
       <span className="text-sm opacity-90">Check your network and backend, then retry.</span>

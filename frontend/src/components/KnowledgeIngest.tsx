@@ -26,23 +26,29 @@ export function KnowledgeIngest() {
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
-          className="btn btn-primary"
+          className="btn btn-primary flex items-center gap-2"
           onClick={() => startIngest(undefined)}
           disabled={isRunning || starting}
           aria-busy={isRunning || starting}
           aria-describedby="ingest-status"
           aria-label="Start knowledge base ingestion"
         >
+          {(starting || isRunning) && <span className="loading loading-spinner loading-sm" aria-hidden />}
           {starting ? 'Starting…' : isRunning ? 'Ingesting…' : 'Start ingestion'}
         </button>
         <span
           id="ingest-status"
-          className="text-sm text-base-content/70"
+          className="text-sm text-base-content/70 flex items-center gap-2"
+          role="status"
           aria-live="polite"
         >
-          {statusLoading && !status
-            ? 'Loading status…'
-            : statusError
+          {statusLoading && !status ? (
+            <>
+              <span className="loading loading-spinner loading-sm" aria-hidden />
+              Loading status…
+            </>
+          ) : (
+            statusError
               ? 'Failed to load status'
               : isRunning
                 ? 'Ingest in progress (this may take several minutes)'
@@ -52,7 +58,8 @@ export function KnowledgeIngest() {
                     ? `Last run failed: ${errorMessage}`
                     : isIdle
                       ? 'Idle — run ingestion to populate the knowledge base'
-                      : null}
+                      : null
+          )}
         </span>
       </div>
     </section>

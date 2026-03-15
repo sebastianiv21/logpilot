@@ -97,11 +97,12 @@ export function KnowledgeSearch() {
         </div>
         <button
           type="submit"
-          className="btn btn-primary"
+          className="btn btn-primary flex items-center gap-2"
           disabled={searchMutation.isPending}
           aria-busy={searchMutation.isPending}
           aria-label="Search knowledge base"
         >
+          {searchMutation.isPending && <span className="loading loading-spinner loading-sm" aria-hidden />}
           {searchMutation.isPending ? 'Searching…' : 'Search'}
         </button>
       </form>

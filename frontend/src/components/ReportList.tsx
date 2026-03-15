@@ -24,7 +24,18 @@ export function ReportList() {
     );
   }
 
-  if (isLoading) return <p className="text-base-content/70 text-sm">Loading reports…</p>;
+  if (isLoading) {
+    return (
+      <p
+        className="flex items-center gap-2 text-base-content/70 text-sm"
+        role="status"
+        aria-busy="true"
+      >
+        <span className="loading loading-spinner loading-sm" aria-hidden />
+        Loading reports…
+      </p>
+    );
+  }
   if (error) {
     return (
       <p className="text-error text-sm" role="alert">

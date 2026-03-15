@@ -23,9 +23,9 @@
 
 **Purpose**: Dependencies and shared utilities for the feature
 
-- [ ] T001 Add lucide-react dependency to frontend/package.json (install and verify)
-- [ ] T002 [P] Add report-ready sound asset at frontend/public/report-ready.ogg and create playReportReadySound with throttle/queue in frontend/src/lib/sound.ts
-- [ ] T003 Create report-ready notification helper (toast.success with context-aware message + playReportReadySound) in frontend/src/lib/reportReadyNotification.ts; ensure sound is throttled/queued when multiple reports ready in quick succession (per contracts/report-ready-notification.md)
+- [x] T001 Add lucide-react dependency to frontend/package.json (install and verify)
+- [x] T002 [P] Add report-ready sound asset at frontend/public/report-ready.ogg and create playReportReadySound with throttle/queue in frontend/src/lib/sound.ts
+- [x] T003 Create report-ready notification helper (toast.success with context-aware message + playReportReadySound) in frontend/src/lib/reportReadyNotification.ts; ensure sound is throttled/queued when multiple reports ready in quick succession (per contracts/report-ready-notification.md)
 
 ---
 
@@ -45,16 +45,16 @@
 
 ### Implementation for User Story 1
 
-- [ ] T004 [P] [US1] Add visual loading indicator (spinner or skeleton) and aria-busy/role="status" in frontend/src/components/SessionList.tsx
-- [ ] T005 [P] [US1] Add visual loading indicator (spinner or skeleton) and aria-busy/role="status" in frontend/src/components/ReportList.tsx
-- [ ] T006 [P] [US1] Add visual loading indicator (spinner or skeleton) and aria-busy/role="status" in frontend/src/components/ReportView.tsx
-- [ ] T007 [P] [US1] Add or ensure visual loading indicator for "Load more" and aria-busy in frontend/src/components/LogResults.tsx
-- [ ] T008 [P] [US1] Add or ensure visual loading indicator and aria-busy in frontend/src/components/KnowledgeIngest.tsx
-- [ ] T009 [P] [US1] Ensure visible loading state and aria-busy in frontend/src/components/ReportGenerate.tsx
-- [ ] T010 [P] [US1] Add visual loading indicator (e.g. spinner) when checking connection in frontend/src/components/ConnectionBanner.tsx
-- [ ] T011 [P] [US1] Ensure visible loading (spinner) and aria-busy in frontend/src/components/CreateSessionForm.tsx and frontend/src/components/EditSessionForm.tsx
-- [ ] T012 [P] [US1] Ensure visible loading and aria-busy for search actions in frontend/src/components/LogSearchForm.tsx and frontend/src/components/KnowledgeSearch.tsx
-- [ ] T013 [US1] Verify frontend/src/components/UploadLogs.tsx has visible spinner and aria-busy/role="status" (enhance if needed)
+- [x] T004 [P] [US1] Add visual loading indicator (spinner or skeleton) and aria-busy/role="status" in frontend/src/components/SessionList.tsx
+- [x] T005 [P] [US1] Add visual loading indicator (spinner or skeleton) and aria-busy/role="status" in frontend/src/components/ReportList.tsx
+- [x] T006 [P] [US1] Add visual loading indicator (spinner or skeleton) and aria-busy/role="status" in frontend/src/components/ReportView.tsx
+- [x] T007 [P] [US1] Add or ensure visual loading indicator for "Load more" and aria-busy in frontend/src/components/LogResults.tsx
+- [x] T008 [P] [US1] Add or ensure visual loading indicator and aria-busy in frontend/src/components/KnowledgeIngest.tsx
+- [x] T009 [P] [US1] Ensure visible loading state and aria-busy in frontend/src/components/ReportGenerate.tsx
+- [x] T010 [P] [US1] Add visual loading indicator (e.g. spinner) when checking connection in frontend/src/components/ConnectionBanner.tsx
+- [x] T011 [P] [US1] Ensure visible loading (spinner) and aria-busy in frontend/src/components/CreateSessionForm.tsx and frontend/src/components/EditSessionForm.tsx
+- [x] T012 [P] [US1] Ensure visible loading and aria-busy for search actions in frontend/src/components/LogSearchForm.tsx and frontend/src/components/KnowledgeSearch.tsx
+- [x] T013 [US1] Verify frontend/src/components/UploadLogs.tsx has visible spinner and aria-busy/role="status" (enhance if needed)
 
 **Checkpoint**: User Story 1 is independently testable; all major async flows show clear loading cues.
 
@@ -68,8 +68,8 @@
 
 ### Implementation for User Story 2
 
-- [ ] T014 [US2] In frontend/src/contexts/ReportGenerationContext.tsx, when poll detects report content ready, call report-ready notification helper (toast + sound) before clearing that session from generatingBySession
-- [ ] T015 [US2] Ensure report-ready toast message is context-aware: include session name or id when multiple sessions have reports generating (per contracts/report-ready-notification.md); resolve session label via getSession(sessionId) from frontend/src/services/api.ts when building the message (Session has name and id)
+- [x] T014 [US2] In frontend/src/contexts/ReportGenerationContext.tsx, when poll detects report content ready, call report-ready notification helper (toast + sound) before clearing that session from generatingBySession
+- [x] T015 [US2] Ensure report-ready toast message is context-aware: include session name or id when multiple sessions have reports generating (per contracts/report-ready-notification.md); resolve session label via getSession(sessionId) from frontend/src/services/api.ts when building the message (Session has name and id)
 
 **Checkpoint**: User Story 2 is independently testable; report ready triggers toast and subtle sound (sound best-effort for accessibility).
 

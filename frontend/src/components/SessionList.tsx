@@ -79,7 +79,13 @@ export function SessionList({
 
   if (isLoading) {
     return (
-      <div className="text-sm text-base-content/60 p-2" aria-live="polite">
+      <div
+        className="flex items-center gap-2 text-sm text-base-content/60 p-2"
+        role="status"
+        aria-busy="true"
+        aria-live="polite"
+      >
+        <span className="loading loading-spinner loading-sm" aria-hidden />
         Loading sessions…
       </div>
     );

@@ -109,10 +109,12 @@ export function UploadLogs() {
         </label>
         <button
           type="submit"
-          className="btn btn-primary"
+          className="btn btn-primary flex items-center gap-2"
           disabled={mutation.isPending}
           aria-busy={mutation.isPending}
+          aria-label="Upload log archive"
         >
+          {mutation.isPending && <span className="loading loading-spinner loading-sm" aria-hidden />}
           {mutation.isPending ? 'Uploading…' : 'Upload'}
         </button>
       </form>
