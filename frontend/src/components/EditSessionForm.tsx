@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Save } from 'lucide-react';
 import { EditSessionFormSchema, type EditSessionFormValues } from '../lib/schemas';
 import type { Session } from '../lib/schemas';
 import { usePatchSession } from '../hooks/useSessions';
@@ -84,7 +85,11 @@ export function EditSessionForm({ session, onSuccess, onCancel }: Props) {
           aria-busy={patchSession.isPending}
           aria-label="Save session changes"
         >
-          {patchSession.isPending && <span className="loading loading-spinner loading-sm" aria-hidden />}
+          {patchSession.isPending ? (
+            <span className="loading loading-spinner loading-sm" aria-hidden />
+          ) : (
+            <Save size={18} aria-hidden />
+          )}
           {patchSession.isPending ? 'Saving…' : 'Save'}
         </button>
         {onCancel && (

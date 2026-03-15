@@ -3,6 +3,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { WifiOff, RefreshCw } from 'lucide-react';
 import { getSessions, isConnectionError } from '../services/api';
 
 export function ConnectionBanner() {
@@ -24,6 +25,7 @@ export function ConnectionBanner() {
       className="bg-error text-error-content px-4 py-2 flex flex-wrap items-center justify-center gap-3"
       role="alert"
     >
+      <WifiOff size={18} aria-hidden />
       <span>{message}</span>
       <button
         type="button"
@@ -33,7 +35,11 @@ export function ConnectionBanner() {
         aria-busy={isFetching}
         aria-label="Retry connection"
       >
-        {isFetching && <span className="loading loading-spinner loading-sm" aria-hidden />}
+        {isFetching ? (
+          <span className="loading loading-spinner loading-sm" aria-hidden />
+        ) : (
+          <RefreshCw size={18} aria-hidden />
+        )}
         {isFetching ? 'Checking…' : 'Retry'}
       </button>
       <span className="text-sm opacity-90">Check your network and backend, then retry.</span>

@@ -5,6 +5,7 @@
 
 import { useState, useRef } from 'react';
 import { format } from 'date-fns';
+import { FileText } from 'lucide-react';
 import { useCurrentSession } from '../contexts/SessionContext';
 import { useReportsList } from '../hooks/useReports';
 import { useFocusTrap } from '../hooks/useFocusTrap';
@@ -48,7 +49,8 @@ export function ReportList() {
 
   return (
     <section className="space-y-2" aria-labelledby="report-list-heading">
-      <h2 id="report-list-heading" className="text-xl font-semibold">
+      <h2 id="report-list-heading" className="text-xl font-semibold flex items-center gap-2">
+        <FileText size={18} aria-hidden />
         Report history
       </h2>
       {reports.length === 0 ? (
@@ -59,10 +61,11 @@ export function ReportList() {
             <li key={report.id}>
               <button
                 type="button"
-                className="btn btn-ghost btn-sm justify-start w-full text-left"
+                className="btn btn-ghost btn-sm justify-start w-full text-left flex items-center gap-2"
                 onClick={() => setSelectedReport(report)}
                 aria-label={`View report from ${format(new Date(report.created_at), 'PPp')}`}
               >
+                <FileText size={18} aria-hidden />
                 <span className="truncate">
                   {format(new Date(report.created_at), 'PPp')}
                 </span>

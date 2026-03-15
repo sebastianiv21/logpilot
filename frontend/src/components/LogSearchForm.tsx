@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { Search } from 'lucide-react';
 import { queryLogs } from '../services/api';
 import { useCurrentSession } from '../contexts/SessionContext';
 import {
@@ -155,7 +156,11 @@ export function LogSearchForm({ onResult, disabled }: LogSearchFormProps) {
         aria-busy={mutation.isPending}
         aria-label="Search logs"
       >
-        {mutation.isPending && <span className="loading loading-spinner loading-sm" aria-hidden />}
+        {mutation.isPending ? (
+          <span className="loading loading-spinner loading-sm" aria-hidden />
+        ) : (
+          <Search size={18} aria-hidden />
+        )}
         {mutation.isPending ? 'Searching…' : 'Search'}
       </button>
     </form>

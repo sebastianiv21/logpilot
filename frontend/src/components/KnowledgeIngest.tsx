@@ -3,6 +3,7 @@
  * last result or error message (FR-007).
  */
 
+import { Database } from 'lucide-react'
 import { useKnowledgeIngest } from '../hooks/useKnowledgeIngest'
 
 export function KnowledgeIngest() {
@@ -17,7 +18,8 @@ export function KnowledgeIngest() {
 
   return (
     <section className="space-y-3" aria-labelledby="knowledge-ingest-heading">
-      <h2 id="knowledge-ingest-heading" className="text-xl font-semibold">
+      <h2 id="knowledge-ingest-heading" className="text-xl font-semibold flex items-center gap-2">
+        <Database size={18} aria-hidden />
         Knowledge base
       </h2>
       <p className="text-base-content/80 text-sm">
@@ -33,7 +35,11 @@ export function KnowledgeIngest() {
           aria-describedby="ingest-status"
           aria-label="Start knowledge base ingestion"
         >
-          {(starting || isRunning) && <span className="loading loading-spinner loading-sm" aria-hidden />}
+          {(starting || isRunning) ? (
+            <span className="loading loading-spinner loading-sm" aria-hidden />
+          ) : (
+            <Database size={18} aria-hidden />
+          )}
           {starting ? 'Starting…' : isRunning ? 'Ingesting…' : 'Start ingestion'}
         </button>
         <span

@@ -83,14 +83,14 @@
 
 ### Implementation for User Story 3
 
-- [ ] T016 [P] [US3] Add lucide-react icons to frontend/src/components/AppLayout.tsx (sessions section, nav)
-- [ ] T017 [P] [US3] Add lucide-react icons to frontend/src/components/SessionList.tsx for session-related actions
-- [ ] T018 [P] [US3] Add lucide-react icons to frontend/src/components/ReportList.tsx and frontend/src/components/ReportView.tsx (reports, export actions)
-- [ ] T019 [P] [US3] Add lucide-react icons to frontend/src/components/UploadLogs.tsx and frontend/src/components/ReportGenerate.tsx
-- [ ] T020 [P] [US3] Add lucide-react icons to frontend/src/components/KnowledgeIngest.tsx and frontend/src/components/KnowledgeSearch.tsx
-- [ ] T021 [P] [US3] Add lucide-react icons to frontend/src/components/LogSearchForm.tsx and frontend/src/components/ConnectionBanner.tsx
-- [ ] T022 [P] [US3] Add lucide-react icons to frontend/src/components/CreateSessionForm.tsx and frontend/src/components/EditSessionForm.tsx
-- [ ] T023 [US3] Use consistent icon size (e.g. size={18} or className w-4 h-4) across all icon usages in frontend/src/components
+- [x] T016 [P] [US3] Add lucide-react icons to frontend/src/components/AppLayout.tsx (sessions section, nav)
+- [x] T017 [P] [US3] Add lucide-react icons to frontend/src/components/SessionList.tsx for session-related actions
+- [x] T018 [P] [US3] Add lucide-react icons to frontend/src/components/ReportList.tsx and frontend/src/components/ReportView.tsx (reports, export actions)
+- [x] T019 [P] [US3] Add lucide-react icons to frontend/src/components/UploadLogs.tsx and frontend/src/components/ReportGenerate.tsx
+- [x] T020 [P] [US3] Add lucide-react icons to frontend/src/components/KnowledgeIngest.tsx and frontend/src/components/KnowledgeSearch.tsx
+- [x] T021 [P] [US3] Add lucide-react icons to frontend/src/components/LogSearchForm.tsx and frontend/src/components/ConnectionBanner.tsx
+- [x] T022 [P] [US3] Add lucide-react icons to frontend/src/components/CreateSessionForm.tsx and frontend/src/components/EditSessionForm.tsx
+- [x] T023 [US3] Use consistent icon size (e.g. size={18} or className w-4 h-4) across all icon usages in frontend/src/components
 
 **Checkpoint**: User Story 3 is independently testable; icons are consistent and purposeful.
 

@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
+import { FileDown } from 'lucide-react';
 import { useReport } from '../hooks/useReports';
 import { useReportGeneration } from '../contexts/ReportGenerationContext';
 import { ApiError, exportReport, downloadBlob } from '../services/api';
@@ -74,24 +75,26 @@ export function ReportView({ sessionId, reportId, onClose: _onClose }: Props) {
           <div className="flex flex-wrap gap-2 mb-3">
             <button
               type="button"
-              className="btn btn-sm btn-outline"
+              className="btn btn-sm btn-outline flex items-center gap-2"
               onClick={() => handleExport('markdown')}
               disabled={!hasContent || exporting !== null}
               aria-busy={exporting === 'markdown'}
               aria-describedby={!hasContent ? 'export-disabled-reason' : undefined}
               aria-label="Export report as Markdown"
             >
+              <FileDown size={18} aria-hidden />
               {exporting === 'markdown' ? 'Exporting…' : 'Export Markdown'}
             </button>
             <button
               type="button"
-              className="btn btn-sm btn-outline"
+              className="btn btn-sm btn-outline flex items-center gap-2"
               onClick={() => handleExport('pdf')}
               disabled={!hasContent || exporting !== null}
               aria-busy={exporting === 'pdf'}
               aria-describedby={!hasContent ? 'export-disabled-reason' : undefined}
               aria-label="Export report as PDF"
             >
+              <FileDown size={18} aria-hidden />
               {exporting === 'pdf' ? 'Exporting…' : 'Export PDF'}
             </button>
           </div>

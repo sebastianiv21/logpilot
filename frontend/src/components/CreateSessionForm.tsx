@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Plus } from 'lucide-react';
 import { CreateSessionFormSchema, type CreateSessionFormValues } from '../lib/schemas';
 import { useCreateSession } from '../hooks/useSessions';
 import { useCurrentSession } from '../contexts/SessionContext';
@@ -83,7 +84,11 @@ export function CreateSessionForm({ onSuccess }: Props) {
         aria-busy={createSession.isPending}
         aria-label="Create new session"
       >
-        {createSession.isPending && <span className="loading loading-spinner loading-sm" aria-hidden />}
+        {createSession.isPending ? (
+          <span className="loading loading-spinner loading-sm" aria-hidden />
+        ) : (
+          <Plus size={18} aria-hidden />
+        )}
         {createSession.isPending ? 'Creating…' : 'Create session'}
       </button>
       {createSession.isError && (

@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { Outlet } from 'react-router-dom'
+import { FolderOpen, Pencil } from 'lucide-react'
 import { useCurrentSession } from '../contexts/SessionContext'
 import type { Session } from '../lib/schemas'
 import { useFocusTrap } from '../hooks/useFocusTrap'
@@ -23,7 +24,10 @@ export function AppLayout() {
       </a>
       <aside className="w-64 bg-base-200 flex flex-col border-r border-base-300">
         <div className="p-4 border-b border-base-300">
-          <h2 className="font-semibold text-base">Sessions</h2>
+          <h2 className="font-semibold text-base flex items-center gap-2">
+            <FolderOpen size={18} aria-hidden />
+            Sessions
+          </h2>
           <p className="text-sm text-base-content/70 mt-1" aria-live="polite">
             {currentSessionId
               ? `Current: ${currentSessionId.slice(0, 8)}…`
@@ -46,7 +50,10 @@ export function AppLayout() {
       {editingSession && (
         <dialog open className="modal modal-open" id="edit-session-modal" aria-modal="true" aria-labelledby="edit-session-title">
           <div className="modal-box" ref={editModalRef} role="document">
-            <h3 id="edit-session-title" className="font-semibold text-lg">Edit session</h3>
+            <h3 id="edit-session-title" className="font-semibold text-lg flex items-center gap-2">
+              <Pencil size={18} aria-hidden />
+              Edit session
+            </h3>
             <EditSessionForm
               session={editingSession}
               onSuccess={() => setEditingSession(null)}

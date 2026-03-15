@@ -5,6 +5,7 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Search } from 'lucide-react'
 import { useKnowledgeIngestStatus } from '../hooks/useKnowledgeIngest'
 import { useKnowledgeSearch } from '../hooks/useKnowledgeSearch'
 import {
@@ -58,7 +59,8 @@ export function KnowledgeSearch() {
 
   return (
     <section className="space-y-4" aria-labelledby="knowledge-search-heading">
-      <h2 id="knowledge-search-heading" className="text-xl font-semibold">
+      <h2 id="knowledge-search-heading" className="text-xl font-semibold flex items-center gap-2">
+        <Search size={18} aria-hidden />
         Search knowledge base
       </h2>
       <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3">
@@ -102,7 +104,11 @@ export function KnowledgeSearch() {
           aria-busy={searchMutation.isPending}
           aria-label="Search knowledge base"
         >
-          {searchMutation.isPending && <span className="loading loading-spinner loading-sm" aria-hidden />}
+          {searchMutation.isPending ? (
+            <span className="loading loading-spinner loading-sm" aria-hidden />
+          ) : (
+            <Search size={18} aria-hidden />
+          )}
           {searchMutation.isPending ? 'Searching…' : 'Search'}
         </button>
       </form>
