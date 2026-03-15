@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS session_upload_summary (
     lines_rejected INTEGER NOT NULL,
     error TEXT,
     updated_at TEXT NOT NULL,
+    uploaded_file_name TEXT,
     FOREIGN KEY (session_id) REFERENCES sessions(id)
 );
 """
@@ -56,6 +57,14 @@ def get_connection(db_path: str | Path) -> sqlite3.Connection:
     return conn
 
 
+def _ensure_upload_summary_has_file_name(conn: sqlite3.Connection) -> None:
+    """Add uploaded_file_name column to session_upload_summary if missing (for existing DBs)."""
+    cur = conn.execute("PRAGMA table_info(session_upload_summary)")
+    columns = [row[1] for row in cur.fetchall()]
+    if "uploaded_file_name" not in columns:
+        conn.execute("ALTER TABLE session_upload_summary ADD COLUMN uploaded_file_name TEXT")
+
+
 def init_schema(conn: sqlite3.Connection) -> None:
     """Create sessions, reports, session_log_extent, and session_upload_summary tables if they do not exist."""
     conn.executescript(
@@ -64,6 +73,7 @@ def init_schema(conn: sqlite3.Connection) -> None:
         + SCHEMA_SESSION_LOG_EXTENT
         + SCHEMA_SESSION_UPLOAD_SUMMARY
     )
+    _ensure_upload_summary_has_file_name(conn)
     conn.commit()
 
 

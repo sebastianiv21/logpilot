@@ -23,7 +23,7 @@
 
 **Purpose**: Ensure environment and branch for feature work.
 
-- [ ] T001 Ensure on branch `013-merge-upload-logs-layout` and backend/frontend dependencies installed (per plan.md)
+- [x] T001 Ensure on branch `013-merge-upload-logs-layout` and backend/frontend dependencies installed (per plan.md)
 
 ---
 
@@ -33,9 +33,9 @@
 
 **⚠️ CRITICAL**: No user story work that depends on API can complete until upload-summary returns `uploaded_file_name` and `updated_at`.
 
-- [ ] T002 [P] Add `uploaded_file_name` column (TEXT, nullable) to `session_upload_summary` schema in backend/app/lib/db.py (extend SCHEMA_SESSION_UPLOAD_SUMMARY and ensure migration/init adds column for existing DBs)
-- [ ] T003 Include `uploaded_file_name` in get_upload_summary return dict and in upsert_upload_summary parameters/INSERT in backend/app/lib/repositories.py
-- [ ] T004 Add `uploaded_file_name` and `updated_at` to UploadResultResponse; in get_upload_summary return both from repo; in upload_logs pass file.filename to upsert_upload_summary and include uploaded_file_name and updated_at in response in backend/app/api/upload.py
+- [x] T002 [P] Add `uploaded_file_name` column (TEXT, nullable) to `session_upload_summary` schema in backend/app/lib/db.py (extend SCHEMA_SESSION_UPLOAD_SUMMARY and ensure migration/init adds column for existing DBs)
+- [x] T003 Include `uploaded_file_name` in get_upload_summary return dict and in upsert_upload_summary parameters/INSERT in backend/app/lib/repositories.py
+- [x] T004 Add `uploaded_file_name` and `updated_at` to UploadResultResponse; in get_upload_summary return both from repo; in upload_logs pass file.filename to upsert_upload_summary and include uploaded_file_name and updated_at in response in backend/app/api/upload.py
 
 **Checkpoint**: GET/POST upload-summary return uploaded_file_name and updated_at; frontend can show file name, upload time, and use upload-summary for report gate.
 
@@ -47,7 +47,7 @@
 
 **Independent Test**: Open app, select a session; confirm one section with heading "Logs & metrics" that includes upload (file picker, upload button, latest result) and the "Open in Grafana" control.
 
-- [ ] T005 [P] [US1] Merge upload and Logs & metrics into one section with single visible heading "Logs & metrics" containing UploadLogs and MetricsLink in frontend/src/App.tsx (remove duplicate "Logs & metrics" block; single section with one h2)
+- [x] T005 [P] [US1] Merge upload and Logs & metrics into one section with single visible heading "Logs & metrics" containing UploadLogs and MetricsLink in frontend/src/App.tsx (remove duplicate "Logs & metrics" block; single section with one h2)
 
 **Checkpoint**: User Story 1 is done; one merged "Logs & metrics" section visible.
 

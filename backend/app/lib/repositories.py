@@ -179,7 +179,7 @@ class SessionRepository:
         try:
             row = conn.execute(
                 "SELECT session_id, status, files_processed, files_skipped, "
-                "lines_parsed, lines_rejected, error, updated_at "
+                "lines_parsed, lines_rejected, error, updated_at, uploaded_file_name "
                 "FROM session_upload_summary WHERE session_id = ?",
                 (session_id,),
             ).fetchone()
@@ -194,6 +194,7 @@ class SessionRepository:
                 "lines_rejected": int(row["lines_rejected"]),
                 "error": row["error"],
                 "updated_at": row["updated_at"],
+                "uploaded_file_name": row["uploaded_file_name"],
             }
         finally:
             if self._own_conn and self._conn is None:
@@ -208,6 +209,7 @@ class SessionRepository:
         lines_parsed: int,
         lines_rejected: int,
         error: str | None = None,
+        uploaded_file_name: str | None = None,
     ) -> None:
         """Insert or replace the last upload summary for the session."""
         now = _iso_now()
@@ -215,13 +217,14 @@ class SessionRepository:
         try:
             conn.execute(
                 "INSERT INTO session_upload_summary "
-                "(session_id, status, files_processed, files_skipped, lines_parsed, lines_rejected, error, updated_at) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
+                "(session_id, status, files_processed, files_skipped, lines_parsed, lines_rejected, error, updated_at, uploaded_file_name) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) "
                 "ON CONFLICT(session_id) DO UPDATE SET "
                 "status=excluded.status, files_processed=excluded.files_processed, "
                 "files_skipped=excluded.files_skipped, lines_parsed=excluded.lines_parsed, "
-                "lines_rejected=excluded.lines_rejected, error=excluded.error, updated_at=excluded.updated_at",
-                (session_id, status, files_processed, files_skipped, lines_parsed, lines_rejected, error, now),
+                "lines_rejected=excluded.lines_rejected, error=excluded.error, updated_at=excluded.updated_at, "
+                "uploaded_file_name=excluded.uploaded_file_name",
+                (session_id, status, files_processed, files_skipped, lines_parsed, lines_rejected, error, now, uploaded_file_name),
             )
             conn.commit()
         finally:
