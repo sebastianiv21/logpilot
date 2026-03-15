@@ -141,9 +141,8 @@ export const KnowledgeSearchResponseSchema = z.object({
 });
 export type KnowledgeSearchResponse = z.infer<typeof KnowledgeSearchResponseSchema>;
 
-/** Form schema for knowledge search: query (min 1), optional limit (1–100). */
+/** Form schema for knowledge search: query (min 1). Result count is fixed; no user limit control. */
 export const KnowledgeSearchFormSchema = z.object({
   query: z.string().min(1, 'Enter a search query'),
-  limit: z.number().min(1).max(100).optional(),
 });
 export type KnowledgeSearchFormValues = z.infer<typeof KnowledgeSearchFormSchema>;
