@@ -65,7 +65,7 @@ export function ReportGenerationProvider({ children }: { children: ReactNode }) 
         try {
           const report = await getReport(sessionId, reportId);
           if (report.content != null && report.content.trim().length > 0) {
-            notifyReportReady(sessionId, generatingCount);
+            notifyReportReady(sessionId, reportId, generatingCount);
             setState((prev) => {
               const next = { ...prev };
               if (next[sessionId] === reportId) delete next[sessionId];

@@ -21,7 +21,7 @@
 
 **Purpose**: Verify frontend structure and dependencies per plan.
 
-- [ ] T001 Verify frontend structure and Sonner usage per plan in `frontend/` (no new project init; feature is frontend-only)
+- [x] T001 Verify frontend structure and Sonner usage per plan in `frontend/` (no new project init; feature is frontend-only)
 
 ---
 
@@ -29,9 +29,9 @@
 
 **Purpose**: Report-to-open mechanism and provider order so ReportGenerationContext can pass openReport to the toast. Must complete before user story implementation.
 
-- [ ] T002 [P] Add ReportToOpenContext with state `reportToOpen: { sessionId: string, reportId: string } | null`, `openReport(sessionId, reportId)`, and `clearReportToOpen()` in `frontend/src/contexts/ReportToOpenContext.tsx`
-- [ ] T003 Add ReportToOpenProvider in `frontend/src/App.tsx` inside BrowserRouter (so it can use useNavigate); provider consumes SessionContext and implements openReport by setting currentSessionId, setting reportToOpen, and navigating to `/`
-- [ ] T004 Move ReportGenerationProvider from `frontend/src/main.tsx` into `frontend/src/App.tsx` so it sits inside ReportToOpenProvider; wrap Routes (and Toaster/ConnectionBanner) with ReportGenerationProvider in App
+- [x] T002 [P] Add ReportToOpenContext with state `reportToOpen: { sessionId: string, reportId: string } | null`, `openReport(sessionId, reportId)`, and `clearReportToOpen()` in `frontend/src/contexts/ReportToOpenContext.tsx`
+- [x] T003 Add ReportToOpenProvider in `frontend/src/App.tsx` inside BrowserRouter (so it can use useNavigate); provider consumes SessionContext and implements openReport by setting currentSessionId, setting reportToOpen, and navigating to `/`
+- [x] T004 Move ReportGenerationProvider from `frontend/src/main.tsx` into `frontend/src/App.tsx` so it sits inside ReportToOpenProvider; wrap Routes (and Toaster/ConnectionBanner) with ReportGenerationProvider in App
 - [ ] T005 Update ReportGenerationContext to consume ReportToOpenContext and pass `openReport` into `notifyReportReady` when calling it (pass reportId and onViewReport) in `frontend/src/contexts/ReportGenerationContext.tsx`
 
 **Checkpoint**: Foundation ready — report-to-open context and provider order in place; ReportGenerationContext can call notifyReportReady with openReport.
@@ -46,8 +46,8 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Update `notifyReportReady` in `frontend/src/lib/reportReadyNotification.ts` to always include session identity in the message: use `getSessionLabel(sessionId)` for every toast (remove the `generatingCount > 1` branch so message is always e.g. "Report ready (Session name)" or "Report ready (abc12def)"); when the session name is very long, truncate for display and provide the full value via tooltip or title per FR-004
-- [ ] T007 [US1] Add `reportId: string` parameter to `notifyReportReady` in `frontend/src/lib/reportReadyNotification.ts` and add optional `onViewReport?: (sessionId: string, reportId: string) => void` for Phase 4; keep existing `getSessionLabel` fallback when session name cannot be resolved (per FR-001). Update the call in `frontend/src/contexts/ReportGenerationContext.tsx` to pass reportId and generatingCount to notifyReportReady, omitting onViewReport until Phase 4, so the app compiles after Phase 3
+- [x] T006 [US1] Update `notifyReportReady` in `frontend/src/lib/reportReadyNotification.ts` to always include session identity in the message: use `getSessionLabel(sessionId)` for every toast (remove the `generatingCount > 1` branch so message is always e.g. "Report ready (Session name)" or "Report ready (abc12def)"); when the session name is very long, truncate for display and provide the full value via tooltip or title per FR-004
+- [x] T007 [US1] Add `reportId: string` parameter to `notifyReportReady` in `frontend/src/lib/reportReadyNotification.ts` and add optional `onViewReport?: (sessionId: string, reportId: string) => void` for Phase 4; keep existing `getSessionLabel` fallback when session name cannot be resolved (per FR-001). Update the call in `frontend/src/contexts/ReportGenerationContext.tsx` to pass reportId and generatingCount to notifyReportReady, omitting onViewReport until Phase 4, so the app compiles after Phase 3
 
 **Checkpoint**: User Story 1 complete — every report-ready toast shows session identity; notifyReportReady accepts reportId and optional onViewReport for US2.
 
