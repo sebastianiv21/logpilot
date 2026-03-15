@@ -41,7 +41,7 @@ export function HeaderKbLink() {
   const ariaSuffix = getStatusAriaSuffix(state)
 
   const dotClasses = [
-    'shrink-0 w-2 h-2 rounded-full',
+    'absolute -right-0.5 -bottom-0.5 w-3 h-3 rounded-full border-2 border-base-100',
     state === 'red' && 'bg-error',
     state === 'yellow' && 'bg-warning animate-pulse',
     state === 'green' && 'bg-success',
@@ -52,16 +52,18 @@ export function HeaderKbLink() {
   return (
     <Link
       to="/knowledge"
-      className="flex items-center gap-1.5 p-2 rounded-lg hover:bg-base-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-base-100"
+      className="relative flex items-center justify-center p-2 rounded-lg hover:bg-base-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-base-100"
       title="Knowledge base"
       aria-label={`Knowledge base, ${ariaSuffix}`}
     >
-      <Database size={20} aria-hidden />
-      <span
-        className={dotClasses}
-        aria-hidden
-        role="status"
-      />
+      <span className="relative inline-flex">
+        <Database size={20} aria-hidden />
+        <span
+          className={dotClasses}
+          aria-hidden
+          role="status"
+        />
+      </span>
     </Link>
   )
 }

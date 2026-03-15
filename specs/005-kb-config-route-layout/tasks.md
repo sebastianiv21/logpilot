@@ -80,8 +80,8 @@
 
 **Purpose**: Accessibility and quickstart validation
 
-- [ ] T010 Ensure status indicator pulsating effect for "in progress" (yellow/ochre) is implemented (e.g. Tailwind `animate-pulse` or custom keyframes) in `frontend/src/components/HeaderKbLink.tsx`.
-- [ ] T011 Run the validation steps in `specs/005-kb-config-route-layout/quickstart.md` (upper-right control, tooltip, navigation, return link, main screen without KB, direct URL, keyboard/accessibility).
+- [x] T010 Ensure status indicator pulsating effect for "in progress" (yellow/ochre) is implemented (e.g. Tailwind `animate-pulse` or custom keyframes) in `frontend/src/components/HeaderKbLink.tsx`.
+- [x] T011 Run the validation steps in `specs/005-kb-config-route-layout/quickstart.md` (upper-right control, tooltip, navigation, return link, main screen without KB, direct URL, keyboard/accessibility).
 
 ---
 
