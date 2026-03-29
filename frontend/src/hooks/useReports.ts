@@ -69,6 +69,7 @@ export function useGenerateReport(
         session_id: data.session_id,
         created_at: data.created_at,
         content: data.content ?? '',
+        question: null,
       });
       onReportCreated?.(data.id);
     },

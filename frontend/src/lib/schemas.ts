@@ -86,6 +86,7 @@ export const ReportSchema = z.object({
   id: z.string(),
   session_id: z.string(),
   content: z.string(),
+  question: z.string().nullable().optional(),
   created_at: z.string(),
 });
 export type Report = z.infer<typeof ReportSchema>;
@@ -94,6 +95,8 @@ export const ReportListItemSchema = z.object({
   id: z.string(),
   session_id: z.string(),
   created_at: z.string(),
+  question_preview: z.string().nullable().optional(),
+  has_question: z.boolean(),
 });
 export type ReportListItem = z.infer<typeof ReportListItemSchema>;
 

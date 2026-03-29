@@ -18,12 +18,18 @@ from reportlab.platypus import Paragraph, Preformatted, SimpleDocTemplate, Space
 logger = logging.getLogger(__name__)
 
 
+def _sanitize_markdown_content(content: str) -> str:
+    """Normalize line endings and strip characters that commonly break PDF generation."""
+    return content.replace("\r\n", "\n").replace("\r", "\n").replace("\x00", "").strip()
+
+
 def export_markdown(content: str) -> str:
     """Return report content as Markdown with consistent formatting for viewers."""
     if not content or not content.strip():
         return ""
+    content = _sanitize_markdown_content(content)
     # Normalize: collapse 3+ newlines to 2, ensure single trailing newline
-    normalized = re.sub(r"\n{3,}", "\n\n", content.strip())
+    normalized = re.sub(r"\n{3,}", "\n\n", content)
     return normalized + "\n"
 
 
@@ -203,7 +209,8 @@ def _pdf_footer_later(canvas, doc) -> None:
 
 def export_pdf(content: str) -> bytes:
     """Render report Markdown to PDF using ReportLab (pure Python, no system deps)."""
-    html_str = markdown.markdown(content, extensions=["extra"])
+    content = _sanitize_markdown_content(content)
+    html_str = markdown.markdown(content, extensions=["extra", "sane_lists"])
     blocks = _html_blocks_to_flowables_data(html_str)
 
     buf = BytesIO()
@@ -252,6 +259,7 @@ def export_pdf(content: str) -> bytes:
         fontSize=10,
         leading=12,
         spaceAfter=6,
+        wordWrap="CJK",
     )
     code_style = ParagraphStyle(
         "ReportCode",

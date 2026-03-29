@@ -98,13 +98,20 @@ export function ReportList() {
             <li key={report.id}>
               <button
                 type="button"
-                className="btn btn-ghost btn-sm justify-start w-full text-left flex items-center gap-2"
+                className="btn btn-ghost h-auto min-h-0 py-2 justify-start w-full text-left flex items-start gap-2"
                 onClick={() => setSelectedReport(report)}
                 aria-label={`View report from ${format(new Date(report.created_at), 'PPp')}`}
               >
                 <FileText size={18} aria-hidden />
-                <span className="truncate">
-                  {format(new Date(report.created_at), 'PPp')}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-medium">
+                    {format(new Date(report.created_at), 'PPp')}
+                  </span>
+                  <span className="block truncate text-xs text-base-content/70">
+                    {report.has_question
+                      ? (report.question_preview ?? 'Question unavailable')
+                      : 'No incident question recorded'}
+                  </span>
                 </span>
               </button>
             </li>

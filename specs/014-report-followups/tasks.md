@@ -21,8 +21,8 @@
 
 **Purpose**: Prepare report-focused test scaffolding and task execution baseline
 
-- [ ] T001 Create report feature test skeleton files in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/tests/contract/test_api_reports.py`, `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/tests/unit/test_export.py`, and `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/tests/report-flow.test.tsx`
-- [ ] T002 [P] Review and align report contract fixtures with `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/specs/014-report-followups/contracts/report-history-and-export.md`
+- [X] T001 Create report feature test skeleton files in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/tests/contract/test_api_reports.py`, `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/tests/unit/test_export.py`, and `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/tests/report-flow.test.tsx`
+- [X] T002 [P] Review and align report contract fixtures with `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/specs/014-report-followups/contracts/report-history-and-export.md`
 
 ---
 
@@ -32,12 +32,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Update the SQLite reports schema and additive migration for persisted questions in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/lib/db.py`
-- [ ] T004 Update the report domain model to carry question metadata in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/models/report.py`
-- [ ] T005 Update report repository create/list/get helpers for question persistence and preview derivation in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/lib/repositories.py`
-- [ ] T006 Update report API request/response models for history preview and detail question fields in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/api/reports.py`
-- [ ] T007 [P] Update frontend report schemas for history preview and detail question fields in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/lib/schemas.ts`
-- [ ] T008 [P] Update frontend report API client types for the expanded report payloads in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/services/api.ts`
+- [X] T003 Update the SQLite reports schema and additive migration for persisted questions in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/lib/db.py`
+- [X] T004 Update the report domain model to carry question metadata in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/models/report.py`
+- [X] T005 Update report repository create/list/get helpers for question persistence and preview derivation in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/lib/repositories.py`
+- [X] T006 Update report API request/response models for history preview and detail question fields in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/api/reports.py`
+- [X] T007 [P] Update frontend report schemas for history preview and detail question fields in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/lib/schemas.ts`
+- [X] T008 [P] Update frontend report API client types for the expanded report payloads in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/services/api.ts`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -51,14 +51,14 @@
 
 ### Tests for User Story 1
 
-- [ ] T009 [P] [US1] Add backend contract coverage for report generation/detail responses with the new report section expectations in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/tests/contract/test_api_reports.py`
-- [ ] T010 [P] [US1] Add backend unit coverage for Markdown export preserving the coding-agent fix prompt in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/tests/unit/test_export.py`
-- [ ] T011 [P] [US1] Add backend unit coverage for coding-agent fix prompt alignment with evidence and uncertainty in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/tests/unit/test_agent.py`
+- [X] T009 [P] [US1] Add backend contract coverage for report generation/detail responses with the new report section expectations in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/tests/contract/test_api_reports.py`
+- [X] T010 [P] [US1] Add backend unit coverage for Markdown export preserving the coding-agent fix prompt in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/tests/unit/test_export.py`
+- [X] T011 [P] [US1] Add backend unit coverage for coding-agent fix prompt alignment with evidence and uncertainty in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/tests/unit/test_agent.py`
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] Extend required report sections and prompt instructions for `Coding agent fix prompt` generation in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/services/agent.py`
-- [ ] T013 [US1] Render the full report detail with the expanded section contract and optional incident-question context in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/components/ReportView.tsx`
+- [X] T012 [US1] Extend required report sections and prompt instructions for `Coding agent fix prompt` generation in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/services/agent.py`
+- [X] T013 [US1] Render the full report detail with the expanded section contract and optional incident-question context in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/components/ReportView.tsx`
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -72,15 +72,15 @@
 
 ### Tests for User Story 2
 
-- [ ] T014 [P] [US2] Add backend contract coverage for report list history preview fields and legacy fallback behavior in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/tests/contract/test_api_reports.py`
-- [ ] T015 [P] [US2] Add frontend interaction coverage for report history preview rendering and on-demand full question display in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/tests/report-flow.test.tsx`
+- [X] T014 [P] [US2] Add backend contract coverage for report list history preview fields and legacy fallback behavior in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/tests/contract/test_api_reports.py`
+- [X] T015 [P] [US2] Add frontend interaction coverage for report history preview rendering and on-demand full question display in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/tests/report-flow.test.tsx`
 
 ### Implementation for User Story 2
 
-- [ ] T016 [US2] Implement question preview derivation and legacy-safe history access in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/lib/repositories.py`
-- [ ] T017 [US2] Return question preview and `has_question` metadata from the report list endpoint in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/api/reports.py`
-- [ ] T018 [US2] Update report list query typing and caching for the new history metadata in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/hooks/useReports.ts`
-- [ ] T019 [US2] Render report history previews and on-demand question context without surfacing the coding-agent prompt in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/components/ReportList.tsx`
+- [X] T016 [US2] Implement question preview derivation and legacy-safe history access in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/lib/repositories.py`
+- [X] T017 [US2] Return question preview and `has_question` metadata from the report list endpoint in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/api/reports.py`
+- [X] T018 [US2] Update report list query typing and caching for the new history metadata in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/hooks/useReports.ts`
+- [X] T019 [US2] Render report history previews and on-demand question context without surfacing the coding-agent prompt in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/components/ReportList.tsx`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -94,12 +94,12 @@
 
 ### Tests for User Story 3
 
-- [ ] T020 [P] [US3] Add frontend coverage for report copy success and clipboard failure feedback in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/tests/report-flow.test.tsx`
+- [X] T020 [P] [US3] Add frontend coverage for report copy success and clipboard failure feedback in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/tests/report-flow.test.tsx`
 
 ### Implementation for User Story 3
 
-- [ ] T021 [US3] Add a compact report copy control using the session-ID interaction pattern in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/components/ReportView.tsx`
-- [ ] T022 [US3] Ensure report detail data loading exposes the exact Markdown content required for clipboard copy in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/hooks/useReports.ts`
+- [X] T021 [US3] Add a compact report copy control using the session-ID interaction pattern in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/components/ReportView.tsx`
+- [X] T022 [US3] Ensure report detail data loading exposes the exact Markdown content required for clipboard copy in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/hooks/useReports.ts`
 
 **Checkpoint**: At this point, User Stories 1, 2, and 3 should all work independently
 
@@ -113,15 +113,15 @@
 
 ### Tests for User Story 4
 
-- [ ] T023 [P] [US4] Add backend unit fixtures covering long question text, coding-agent prompt sections, ordered steps, and code blocks in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/tests/unit/test_export.py`
-- [ ] T024 [P] [US4] Add frontend coverage for PDF export failure messaging in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/tests/report-flow.test.tsx`
-- [ ] T025 [US4] Define a representative PDF export fixture matrix and pass criteria for SC-004 in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/specs/014-report-followups/quickstart.md`
+- [X] T023 [P] [US4] Add backend unit fixtures covering long question text, coding-agent prompt sections, ordered steps, and code blocks in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/tests/unit/test_export.py`
+- [X] T024 [P] [US4] Add frontend coverage for PDF export failure messaging in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/tests/report-flow.test.tsx`
+- [X] T025 [US4] Define a representative PDF export fixture matrix and pass criteria for SC-004 in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/specs/014-report-followups/quickstart.md`
 
 ### Implementation for User Story 4
 
-- [ ] T026 [US4] Harden PDF export flowables and failure handling for expanded report content in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/services/export.py`
-- [ ] T027 [US4] Keep the export endpoint failure mapping stable and user-friendly for PDF failures in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/api/reports.py`
-- [ ] T028 [US4] Align report export UI states and messages with the hardened backend behavior in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/components/ReportView.tsx`
+- [X] T026 [US4] Harden PDF export flowables and failure handling for expanded report content in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/services/export.py`
+- [X] T027 [US4] Keep the export endpoint failure mapping stable and user-friendly for PDF failures in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend/app/api/reports.py`
+- [X] T028 [US4] Align report export UI states and messages with the hardened backend behavior in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend/src/components/ReportView.tsx`
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -131,10 +131,10 @@
 
 **Purpose**: Final cleanup and validation across all stories
 
-- [ ] T029 [P] Document report follow-up validation notes and execution steps in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/specs/014-report-followups/quickstart.md`
-- [ ] T030 Run frontend and backend automated checks for the feature from `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend` and `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend`
+- [X] T029 [P] Document report follow-up validation notes and execution steps in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/specs/014-report-followups/quickstart.md`
+- [X] T030 Run frontend and backend automated checks for the feature from `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/frontend` and `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/backend`
 - [ ] T031 Run the end-to-end manual validation flow for report generation, history preview, copy, and export using `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/specs/014-report-followups/quickstart.md`
-- [ ] T032 Record PDF export fixture-matrix pass/fail results against the SC-004 acceptance threshold in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/specs/014-report-followups/quickstart.md`
+- [X] T032 Record PDF export fixture-matrix pass/fail results against the SC-004 acceptance threshold in `/Users/sebastianiv21/Documents/projects/appsmith/logpilot/specs/014-report-followups/quickstart.md`
 
 ---
 

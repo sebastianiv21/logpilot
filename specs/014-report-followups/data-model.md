@@ -83,12 +83,12 @@ Required logical sections:
 3. `Uncertainty`
 4. `Supporting Evidence`
 5. `Recommended Fix`
-6. `Coding agent fix prompt`
-7. `Next troubleshooting steps`
+6. `Next troubleshooting steps`
+7. `Coding agent fix prompt`
 
 **Rules**
 
-- `Coding agent fix prompt` appears only in the full generated report and its exports.
+- `Coding agent fix prompt` appears only in the full generated report and its exports, and it is always the final section.
 - `Next troubleshooting steps` remains an ordered Markdown list.
 - The full report Markdown is the source for both viewport copy and exported Markdown/PDF.
 

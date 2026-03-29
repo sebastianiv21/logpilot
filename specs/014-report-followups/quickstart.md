@@ -78,6 +78,26 @@ Expected results:
 - Markdown export mirrors the report content.
 - PDF export completes successfully for normal reports.
 
+### PDF fixture matrix for SC-004
+
+Use this matrix for representative PDF-export validation:
+
+| Fixture | Focus | Expected Result |
+|--------|-------|-----------------|
+| Short structured report | Basic section rendering | PDF exports successfully and includes all major headings |
+| Long incident question | Long inline text wrapping | Question context remains readable without layout breakage |
+| Mixed prose and code blocks | Markdown variety | Code blocks and prose remain readable and ordered steps stay numbered |
+
+### Current automated fixture snapshot
+
+| Fixture | Result | Source |
+|--------|--------|--------|
+| Short structured report | PASS | `backend/tests/unit/test_export.py` |
+| Long incident question | PASS | `backend/tests/unit/test_export.py` |
+| Mixed prose and code blocks | PASS | `backend/tests/unit/test_export.py` |
+
+Current automated fixture pass rate: `3/3` (100%). Manual export checks are still recommended before release.
+
 ---
 
 ## 5. Validate failure handling

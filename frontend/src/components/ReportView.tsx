@@ -3,10 +3,10 @@
  * Export only when report has content; show "generating…" or disable export when not ready (FR-010).
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
-import { FileDown } from 'lucide-react';
+import { Copy, FileDown } from 'lucide-react';
 import { useReport } from '../hooks/useReports';
 import { useReportGeneration } from '../contexts/ReportGenerationContext';
 import { ApiError, exportReport, downloadBlob } from '../services/api';
@@ -23,12 +23,26 @@ export function ReportView({ sessionId, reportId }: Props) {
   });
   const { clearGenerating } = useReportGeneration();
   const [exporting, setExporting] = useState<'markdown' | 'pdf' | null>(null);
+  const [copying, setCopying] = useState(false);
 
   const hasContent = report?.content != null && report.content.trim().length > 0;
 
   useEffect(() => {
     if (hasContent) clearGenerating(sessionId);
   }, [hasContent, sessionId, clearGenerating]);
+
+  const handleCopy = async () => {
+    if (!hasContent || !report) return;
+    setCopying(true);
+    try {
+      await navigator.clipboard.writeText(report.content);
+      toast.success('Report copied');
+    } catch {
+      toast.error('Copy failed', { description: 'Clipboard access is unavailable.' });
+    } finally {
+      setCopying(false);
+    }
+  };
 
   const handleExport = async (format: 'markdown' | 'pdf') => {
     if (!hasContent) return;
@@ -72,7 +86,19 @@ export function ReportView({ sessionId, reportId }: Props) {
       )}
       {report && (
         <>
-          <div className="flex flex-wrap gap-2 mb-3">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <button
+              type="button"
+              className="btn btn-ghost btn-xs btn-square"
+              onClick={handleCopy}
+              disabled={!hasContent || copying || exporting !== null}
+              aria-busy={copying}
+              aria-describedby={!hasContent ? 'export-disabled-reason' : undefined}
+              aria-label="Copy report as Markdown"
+              title="Copy report as Markdown"
+            >
+              <Copy size={14} aria-hidden />
+            </button>
             <button
               type="button"
               className="btn btn-sm btn-outline flex items-center gap-2"
@@ -103,6 +129,14 @@ export function ReportView({ sessionId, reportId }: Props) {
               Still generating. Export when content is ready.
             </p>
           )}
+          {report.question && (
+            <div className="mb-3 rounded border border-base-300 bg-base-100 px-3 py-2">
+              <p className="text-xs font-medium uppercase tracking-wide text-base-content/60">
+                Incident question
+              </p>
+              <p className="mt-1 text-sm text-base-content">{report.question}</p>
+            </div>
+          )}
           <div className="flex-1 overflow-auto rounded border border-base-300 bg-base-200 p-4 min-w-0">
             {hasContent ? (
               <div
@@ -121,7 +155,7 @@ export function ReportView({ sessionId, reportId }: Props) {
                   [&_pre]:leading-relaxed [&_pre]:min-h-0
                   [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:border-0 [&_pre_code]:rounded-none
                   [&_pre_code]:break-all"
-                style={{ overflowWrap: 'break-word' } as React.CSSProperties}
+                style={{ overflowWrap: 'break-word' } as CSSProperties}
               >
                 <ReactMarkdown>{report.content}</ReactMarkdown>
               </div>

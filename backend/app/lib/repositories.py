@@ -29,8 +29,25 @@ def _row_to_report(row: sqlite3.Row) -> Report:
         id=row["id"],
         session_id=row["session_id"],
         content=row["content"],
+        question=row["question"] if "question" in row.keys() else None,
         created_at=row["created_at"],
     )
+
+
+def _normalize_question(question: str | None) -> str | None:
+    if question is None:
+        return None
+    normalized = " ".join(question.split()).strip()
+    return normalized or None
+
+
+def _question_preview(question: str | None, max_length: int = 96) -> str | None:
+    normalized = _normalize_question(question)
+    if normalized is None:
+        return None
+    if len(normalized) <= max_length:
+        return normalized
+    return normalized[: max_length - 1].rstrip() + "…"
 
 
 class SessionRepository:
@@ -246,26 +263,34 @@ class ReportRepository:
         init_schema(conn)
         return conn
 
-    def create(self, session_id: str, content: str) -> Report:
+    def create(self, session_id: str, content: str, question: str | None = None) -> Report:
         rid = str(uuid.uuid4())
         now = _iso_now()
+        normalized_question = _normalize_question(question)
         conn = self._connection()
         try:
             conn.execute(
-                "INSERT INTO reports (id, session_id, content, created_at) VALUES (?, ?, ?, ?)",
-                (rid, session_id, content, now),
+                "INSERT INTO reports (id, session_id, content, question, created_at) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (rid, session_id, content, normalized_question, now),
             )
             conn.commit()
         finally:
             if self._own_conn and self._conn is None:
                 conn.close()
-        return Report(id=rid, session_id=session_id, content=content, created_at=now)
+        return Report(
+            id=rid,
+            session_id=session_id,
+            content=content,
+            question=normalized_question,
+            created_at=now,
+        )
 
     def list_by_session(self, session_id: str) -> list[Report]:
         conn = self._connection()
         try:
             rows = conn.execute(
-                "SELECT id, session_id, content, created_at FROM reports "
+                "SELECT id, session_id, content, question, created_at FROM reports "
                 "WHERE session_id = ? ORDER BY created_at DESC",
                 (session_id,),
             ).fetchall()
@@ -279,13 +304,13 @@ class ReportRepository:
         try:
             if session_id is not None:
                 row = conn.execute(
-                    "SELECT id, session_id, content, created_at FROM reports "
+                    "SELECT id, session_id, content, question, created_at FROM reports "
                     "WHERE id = ? AND session_id = ?",
                     (report_id, session_id),
                 ).fetchone()
             else:
                 row = conn.execute(
-                    "SELECT id, session_id, content, created_at FROM reports WHERE id = ?",
+                    "SELECT id, session_id, content, question, created_at FROM reports WHERE id = ?",
                     (report_id,),
                 ).fetchone()
             if row is None:
@@ -308,3 +333,8 @@ class ReportRepository:
         finally:
             if self._own_conn and self._conn is None:
                 conn.close()
+
+    @staticmethod
+    def question_preview(question: str | None, max_length: int = 96) -> str | None:
+        """Return a normalized, truncated preview for report history."""
+        return _question_preview(question, max_length=max_length)

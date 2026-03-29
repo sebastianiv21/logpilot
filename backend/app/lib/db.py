@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS reports (
     id TEXT PRIMARY KEY,
     session_id TEXT NOT NULL,
     content TEXT NOT NULL,
+    question TEXT,
     created_at TEXT NOT NULL,
     FOREIGN KEY (session_id) REFERENCES sessions(id)
 );
@@ -65,6 +66,14 @@ def _ensure_upload_summary_has_file_name(conn: sqlite3.Connection) -> None:
         conn.execute("ALTER TABLE session_upload_summary ADD COLUMN uploaded_file_name TEXT")
 
 
+def _ensure_reports_have_question(conn: sqlite3.Connection) -> None:
+    """Add question column to reports if missing (for existing DBs)."""
+    cur = conn.execute("PRAGMA table_info(reports)")
+    columns = [row[1] for row in cur.fetchall()]
+    if "question" not in columns:
+        conn.execute("ALTER TABLE reports ADD COLUMN question TEXT")
+
+
 def init_schema(conn: sqlite3.Connection) -> None:
     """Create sessions, reports, session_log_extent, and session_upload_summary tables if they do not exist."""
     conn.executescript(
@@ -73,6 +82,7 @@ def init_schema(conn: sqlite3.Connection) -> None:
         + SCHEMA_SESSION_LOG_EXTENT
         + SCHEMA_SESSION_UPLOAD_SUMMARY
     )
+    _ensure_reports_have_question(conn)
     _ensure_upload_summary_has_file_name(conn)
     conn.commit()
 

@@ -11,6 +11,7 @@ class Report:
     id: str
     session_id: str
     content: str
+    question: str | None
     created_at: str
 
     def to_api(self, include_content: bool = True) -> dict[str, Any]:
@@ -19,6 +20,7 @@ class Report:
             "id": self.id,
             "session_id": self.session_id,
             "created_at": self.created_at,
+            "question": self.question,
         }
         if include_content:
             out["content"] = self.content

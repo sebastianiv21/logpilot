@@ -25,7 +25,7 @@ As an engineer reading a generated incident report, I want the report to include
 
 **Acceptance Scenarios**:
 
-1. **Given** a report is generated for an incident, **When** the user opens the report, **Then** the report includes a dedicated coding-agent fix prompt section that tells a coding agent what to fix based on the incident findings.
+1. **Given** a report is generated for an incident, **When** the user opens the report, **Then** the report ends with a dedicated coding-agent fix prompt section that tells a coding agent what to fix based on the incident findings.
 2. **Given** the same report is exported, **When** the user opens the exported content, **Then** the coding-agent fix prompt is preserved as part of the full report content rather than omitted from export.
 3. **Given** the report includes uncertainty or partial evidence, **When** the coding-agent fix prompt is shown, **Then** the prompt reflects the report context without overstating certainty or inventing unsupported fixes.
 
@@ -92,7 +92,7 @@ As an engineer exporting a report as PDF, I want the export to complete successf
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST include a dedicated coding-agent fix prompt in each generated report so the report contains an explicit handoff for a coding agent based on the incident findings.
+- **FR-001**: The system MUST include a dedicated coding-agent fix prompt as the final section in each generated report so the report contains an explicit handoff for a coding agent based on the incident findings.
 - **FR-002**: The coding-agent fix prompt MUST remain aligned with the report’s findings, evidence, and uncertainty and MUST NOT imply unsupported certainty or omit relevant investigation context.
 - **FR-003**: The system MUST preserve the coding-agent fix prompt in every user-visible representation of the report that is intended to show the full report content, including the rendered viewport report and exported report outputs.
 - **FR-004**: The coding-agent fix prompt MUST appear only within the full generated report experience and its full-report exports; the report history list MUST NOT display that prompt.

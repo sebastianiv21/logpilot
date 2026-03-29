@@ -244,7 +244,7 @@ export async function searchKnowledge(
 
 // --- Reports (contracts/api.md) ---
 
-/** GET /sessions/{session_id}/reports — list reports (no content). */
+/** GET /sessions/{session_id}/reports — list reports with history preview metadata. */
 export async function getReports(sessionId: string): Promise<ReportList> {
   const raw = await apiFetch<unknown>(
     `/sessions/${encodeURIComponent(sessionId)}/reports`
@@ -252,7 +252,7 @@ export async function getReports(sessionId: string): Promise<ReportList> {
   return ReportListSchema.parse(raw);
 }
 
-/** GET /sessions/{session_id}/reports/{report_id} — single report with content (empty while generating). */
+/** GET /sessions/{session_id}/reports/{report_id} — single report with content and optional full incident question. */
 export async function getReport(
   sessionId: string,
   reportId: string

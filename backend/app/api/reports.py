@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/sessions", tags=["sessions", "reports"])
 _session_repo = SessionRepository()
 _report_repo = ReportRepository()
+PDF_EXPORT_FAILURE_DETAIL = "PDF export failed. Please try again or use Markdown export."
 
 
 class GenerateReportBody(BaseModel):
@@ -40,6 +41,8 @@ class ReportListItem(BaseModel):
     id: str
     session_id: str
     created_at: str
+    question_preview: str | None = None
+    has_question: bool
 
 
 class ReportListResponse(BaseModel):
@@ -54,6 +57,7 @@ class ReportDetailResponse(BaseModel):
     id: str
     session_id: str
     content: str
+    question: str | None = None
     created_at: str
 
 
@@ -65,7 +69,13 @@ def list_reports(session_id: str) -> ReportListResponse:
     reports = _report_repo.list_by_session(session_id)
     return ReportListResponse(
         reports=[
-            ReportListItem(id=r.id, session_id=r.session_id, created_at=r.created_at)
+            ReportListItem(
+                id=r.id,
+                session_id=r.session_id,
+                created_at=r.created_at,
+                question_preview=_report_repo.question_preview(r.question),
+                has_question=r.question is not None,
+            )
             for r in reports
         ]
     )
@@ -81,6 +91,7 @@ def get_report(session_id: str, report_id: str) -> ReportDetailResponse:
         id=report.id,
         session_id=report.session_id,
         content=report.content,
+        question=report.question,
         created_at=report.created_at,
     )
 
@@ -116,17 +127,20 @@ def generate_report(
     """
     if _session_repo.get(session_id) is None:
         raise HTTPException(status_code=404, detail="Session not found")
+    question = body.question.strip()
+    if not question:
+        raise HTTPException(status_code=422, detail="Incident question cannot be empty")
     if not config.LLM_API_KEY:
         raise HTTPException(
             status_code=503,
             detail="Report generation unavailable: LLM not configured",
         )
-    report = _report_repo.create(session_id=session_id, content="")
+    report = _report_repo.create(session_id=session_id, content="", question=question)
     background_tasks.add_task(
         _run_report_generation,
         session_id=session_id,
         report_id=report.id,
-        question=body.question,
+        question=question,
     )
     return GenerateReportResponse(
         id=report.id,
@@ -161,7 +175,7 @@ def export_report(
             logger.exception("PDF export failed for report_id=%s", report_id)
             raise HTTPException(
                 status_code=503,
-                detail="PDF export failed. Please try again or use Markdown export.",
+                detail=PDF_EXPORT_FAILURE_DETAIL,
             ) from e
         return Response(
             content=pdf_bytes,

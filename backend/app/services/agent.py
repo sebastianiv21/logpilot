@@ -23,6 +23,7 @@ REPORT_SECTIONS = [
     "Supporting Evidence",
     "Recommended Fix",
     "Next troubleshooting steps",
+    "Coding agent fix prompt",
 ]
 
 # Delimiter so tool content is never interpreted as instructions (prompt injection resistance)
@@ -43,6 +44,7 @@ Then produce one final answer: a structured incident report in Markdown with the
 ## Supporting Evidence
 ## Recommended Fix
 ## Next troubleshooting steps
+## Coding agent fix prompt
 
 Rules for the report:
 - Recommended Fix: List concrete steps only. Put non-code actions first (config, restarts, scaling), then code changes as last resort labeled "Last resort (code change):". Do NOT add subheadings or meta-labels in this section (e.g. no "Non-code actions (do these first)", "Immediate actions", "Prefer non-code actions", or similar).
@@ -51,6 +53,7 @@ Rules for the report:
   Include both K8s and Docker when relevant (e.g. kubectl logs and docker logs).
   Do NOT offer to run queries yourself or ask for pod names/permissions.
   Do not use "I can run...", "tell me...", "give me permission...". Report is read-only.
+- Coding agent fix prompt: Write a concise implementation-oriented prompt for a coding agent. Base it on the Incident Summary, Possible Root Cause, Uncertainty, and Supporting Evidence sections. Preserve uncertainty explicitly, do not invent fixes unsupported by evidence, and make the prompt usable as a direct handoff. This section must be the final section of the report.
 - Uncertainty: What is unknown or ambiguous given the evidence (e.g. missing logs, multiple plausible causes). Use this section; leave "Not determined" only if there is no meaningful uncertainty to state.
 - Formatting: Use Markdown so code and paths are visible as such in the report:
   - Wrap file paths, environment variable names, short error messages, log line excerpts, and inline code in single backticks (e.g. `ECONNREFUSED 127.0.0.1:8080`, `src/app/config.yaml`, `QueryFailedError: duplicate key...`).

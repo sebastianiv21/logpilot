@@ -87,7 +87,7 @@ Returns the full report payload used for viewport rendering, Markdown copy, and 
   "session_id": "session-uuid",
   "created_at": "2026-03-29T12:34:56Z",
   "question": "Why did checkout requests start timing out after the deploy?",
-  "content": "## Incident Summary\n...\n## Coding agent fix prompt\n...\n## Next troubleshooting steps\n1. ..."
+  "content": "## Incident Summary\n...\n## Next troubleshooting steps\n1. ...\n## Coding agent fix prompt\n..."
 }
 ```
 
@@ -108,13 +108,13 @@ Full-report Markdown must preserve these sections for viewport rendering and exp
 - `Uncertainty`
 - `Supporting Evidence`
 - `Recommended Fix`
-- `Coding agent fix prompt`
 - `Next troubleshooting steps`
+- `Coding agent fix prompt`
 
 ### Additional rules
 
 - `Next troubleshooting steps` MUST remain an ordered Markdown list.
-- `Coding agent fix prompt` MUST appear only in full-report surfaces, not in report-history rows.
+- `Coding agent fix prompt` MUST appear only in full-report surfaces, not in report-history rows, and it MUST be the final section.
 - Markdown copy uses this exact content, not a separate transformed representation.
 
 ---
