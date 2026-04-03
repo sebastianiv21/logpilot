@@ -20,6 +20,9 @@ def upsert_chunks(
     content_key: str = "content",
     embedding_key: str = "embedding",
     source_path_key: str = "source_path",
+    source_key_key: str = "source_key",
+    file_hash_key: str = "file_hash",
+    chunk_index_key: str = "chunk_index",
     document_type_key: str = "document_type",
     metadata_key: str = "metadata",
 ) -> None:
@@ -38,20 +41,24 @@ def upsert_chunks(
         rows.append((
             ch.get(content_key, ""),
             ch.get(source_path_key) or None,
+            ch.get(source_key_key) or None,
+            ch.get(file_hash_key) or None,
+            ch.get(chunk_index_key),
             ch.get(document_type_key) or None,
             json.dumps(ch.get(metadata_key) or {}),
             np.array(embedding, dtype=np.float32),
         ))
 
     with get_pool().connection() as conn:
-        for i in range(0, len(rows), UPSERT_BATCH_SIZE):
-            batch = rows[i : i + UPSERT_BATCH_SIZE]
-            conn.executemany(
-                "INSERT INTO knowledge_chunks "
-                "(content, source_path, document_type, metadata, embedding) "
-                "VALUES (%s, %s, %s, %s::jsonb, %s)",
-                batch,
-            )
+        with conn.cursor() as cur:
+            for i in range(0, len(rows), UPSERT_BATCH_SIZE):
+                batch = rows[i : i + UPSERT_BATCH_SIZE]
+                cur.executemany(
+                    "INSERT INTO knowledge_chunks "
+                    "(content, source_path, source_key, file_hash, chunk_index, document_type, metadata, embedding) "
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb, %s)",
+                    batch,
+                )
         conn.commit()
 
     logger.debug("Upserted %d knowledge chunks", len(rows))
@@ -62,6 +69,7 @@ def search(
     limit: int = 10,
     *,
     document_type_filter: str | list[str] | None = None,
+    source_filter: str | list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """
     Semantic search over knowledge_chunks using cosine similarity (HNSW index).
@@ -72,53 +80,64 @@ def search(
 
     with get_pool().connection() as conn:
         conn.execute("SET hnsw.ef_search = 40")
+        where_parts: list[str] = []
+        params: list[Any] = [query_vec]
 
-        if document_type_filter is None:
-            rows = conn.execute(
-                "SELECT content, source_path, document_type, metadata, "
-                "1 - (embedding <=> %s) AS score "
-                "FROM knowledge_chunks "
-                "ORDER BY embedding <=> %s "
-                "LIMIT %s",
-                (query_vec, query_vec, limit),
-            ).fetchall()
-        elif isinstance(document_type_filter, str):
-            rows = conn.execute(
-                "SELECT content, source_path, document_type, metadata, "
-                "1 - (embedding <=> %s) AS score "
-                "FROM knowledge_chunks "
-                "WHERE document_type = %s "
-                "ORDER BY embedding <=> %s "
-                "LIMIT %s",
-                (query_vec, document_type_filter, query_vec, limit),
-            ).fetchall()
-        else:
-            # list[str] — match any type in the list
-            rows = conn.execute(
-                "SELECT content, source_path, document_type, metadata, "
-                "1 - (embedding <=> %s) AS score "
-                "FROM knowledge_chunks "
-                "WHERE document_type = ANY(%s) "
-                "ORDER BY embedding <=> %s "
-                "LIMIT %s",
-                (query_vec, list(document_type_filter), query_vec, limit),
-            ).fetchall()
+        if source_filter is not None:
+            if isinstance(source_filter, str):
+                where_parts.append("source_key = %s")
+                params.append(source_filter)
+            else:
+                where_parts.append("source_key = ANY(%s)")
+                params.append(list(source_filter))
+
+        if document_type_filter is not None:
+            if isinstance(document_type_filter, str):
+                where_parts.append("document_type = %s")
+                params.append(document_type_filter)
+            else:
+                where_parts.append("document_type = ANY(%s)")
+                params.append(list(document_type_filter))
+
+        where_clause = f"WHERE {' AND '.join(where_parts)} " if where_parts else ""
+        query = (
+            "SELECT content, source_path, source_key, document_type, metadata, "
+            "1 - (embedding <=> %s) AS score "
+            "FROM knowledge_chunks "
+            f"{where_clause}"
+            "ORDER BY embedding <=> %s "
+            "LIMIT %s"
+        )
+        params.extend([query_vec, limit])
+        rows = conn.execute(query, tuple(params)).fetchall()
 
     return [
         {
             "content": row[0],
             "source_path": row[1] or "",
-            "document_type": row[2] or "",
-            "metadata": row[3] or {},
-            "score": float(row[4]),
+            "source_key": row[2] or "",
+            "document_type": row[3] or "",
+            "metadata": row[4] or {},
+            "score": float(row[5]),
         }
         for row in rows
     ]
 
 
-def delete_all() -> None:
-    """Delete all knowledge chunks (e.g. before a full re-ingest)."""
+def delete_all(source_key: str) -> None:
+    """Delete all knowledge chunks for one source."""
     with get_pool().connection() as conn:
-        conn.execute("DELETE FROM knowledge_chunks")
+        conn.execute("DELETE FROM knowledge_chunks WHERE source_key = %s", (source_key,))
         conn.commit()
-    logger.debug("Deleted all knowledge chunks")
+    logger.debug("Deleted all knowledge chunks for %s", source_key)
+
+
+def delete_file(source_key: str, source_path: str) -> None:
+    """Delete chunks for one file within a source."""
+    with get_pool().connection() as conn:
+        conn.execute(
+            "DELETE FROM knowledge_chunks WHERE source_key = %s AND source_path = %s",
+            (source_key, source_path),
+        )
+        conn.commit()
+    logger.debug("Deleted knowledge chunks for %s:%s", source_key, source_path)

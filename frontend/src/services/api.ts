@@ -5,7 +5,7 @@
 
 import {
   GenerateReportResponseSchema,
-  KnowledgeIngestStatusSchema,
+  KnowledgeSourcesStatusSchema,
   KnowledgeSearchResponseSchema,
   LogsQueryResponseSchema,
   ReportListSchema,
@@ -14,7 +14,7 @@ import {
 } from '../lib/schemas';
 import type {
   GenerateReportResponse,
-  KnowledgeIngestStatus,
+  KnowledgeSourcesStatus,
   KnowledgeSearchResponse,
   LogsQueryRequest,
   LogsQueryResponse,
@@ -208,25 +208,35 @@ export async function getLogsRange(sessionId: string): Promise<LogsRangeResponse
 
 // --- Knowledge (contracts/api.md) ---
 
-export type KnowledgeIngestBody = { sources?: string[] };
+export type KnowledgeIngestBody = {
+  source: 'code' | 'docs';
+  mode?: 'incremental' | 'force';
+};
 
-/** POST /knowledge/ingest — start background ingest. Returns 202; poll GET /knowledge/ingest/status. */
+/** POST /knowledge/ingest — start background ingest for one source. */
 export async function startKnowledgeIngest(
-  body: KnowledgeIngestBody = {}
+  body: KnowledgeIngestBody
 ): Promise<{ message: string }> {
   return apiFetch<{ message: string }>('/knowledge/ingest', {
     method: 'POST',
-    body: JSON.stringify({ sources: body.sources ?? [] }),
+    body: JSON.stringify({
+      source: body.source,
+      mode: body.mode ?? 'incremental',
+    }),
   });
 }
 
-/** GET /knowledge/ingest/status — running | idle, last_result, error. */
-export async function getKnowledgeIngestStatus(): Promise<KnowledgeIngestStatus> {
-  const raw = await apiFetch<unknown>('/knowledge/ingest/status');
-  return KnowledgeIngestStatusSchema.parse(raw);
+/** GET /knowledge/sources/status — source-specific KB status. */
+export async function getKnowledgeSourcesStatus(): Promise<KnowledgeSourcesStatus> {
+  const raw = await apiFetch<unknown>('/knowledge/sources/status');
+  return KnowledgeSourcesStatusSchema.parse(raw);
 }
 
-export type KnowledgeSearchBody = { query: string; limit?: number };
+export type KnowledgeSearchBody = {
+  query: string;
+  limit?: number;
+  source_filter?: 'all' | 'code' | 'docs';
+};
 
 /** POST /knowledge/search — semantic search; returns chunks with content, source_path, metadata. */
 export async function searchKnowledge(
@@ -237,6 +247,7 @@ export async function searchKnowledge(
     body: JSON.stringify({
       query: body.query,
       limit: body.limit ?? 10,
+      source_filter: body.source_filter ?? 'all',
     }),
   });
   return KnowledgeSearchResponseSchema.parse(raw);

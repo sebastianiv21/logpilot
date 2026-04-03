@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
 set -e
 
-# When running in Docker: rewrite KNOWLEDGE_SOURCES so host paths become container paths.
-# - If KNOWLEDGE_SOURCES_MOUNT is set: we mounted that parent at /knowledge; replace it in KNOWLEDGE_SOURCES.
-# - Else: we mounted a single path at /knowledge; use /knowledge.
-if [ -n "${KNOWLEDGE_SOURCES_MOUNT}" ]; then
-  base="${KNOWLEDGE_SOURCES_MOUNT%/}"
-  export KNOWLEDGE_SOURCES="${KNOWLEDGE_SOURCES//$base/\/knowledge}"
-else
-  export KNOWLEDGE_SOURCES="/knowledge"
+# When running in Docker: rewrite configured knowledge paths so host paths become container paths.
+# KNOWLEDGE_MOUNT_ROOT is mounted at /knowledge, and any configured code/doc source path
+# under that root is rewritten to the container path.
+if [ -n "${KNOWLEDGE_MOUNT_ROOT}" ]; then
+  base="${KNOWLEDGE_MOUNT_ROOT%/}"
+  if [ -n "${KNOWLEDGE_CODE_SOURCES}" ]; then
+    export KNOWLEDGE_CODE_SOURCES="${KNOWLEDGE_CODE_SOURCES//$base/\/knowledge}"
+  fi
+  if [ -n "${KNOWLEDGE_DOC_SOURCES}" ]; then
+    export KNOWLEDGE_DOC_SOURCES="${KNOWLEDGE_DOC_SOURCES//$base/\/knowledge}"
+  fi
 fi
 
 exec "$@"

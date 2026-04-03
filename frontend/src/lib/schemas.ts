@@ -121,22 +121,33 @@ export const ReportGenerateFormSchema = z.object({
 export type ReportGenerateFormValues = z.infer<typeof ReportGenerateFormSchema>;
 
 // --- Knowledge ---
-export const KnowledgeIngestStatusSchema = z.object({
-  status: z.enum(['running', 'idle']),
-  last_result: z
-    .object({
-      chunks_ingested: z.number().optional(),
-      files_processed: z.number().optional(),
-    })
-    .nullable()
-    .optional(),
-  error: z.string().nullable().optional(),
+export const KnowledgeSourceStatusSchema = z.object({
+  source_key: z.enum(['code', 'docs']),
+  display_name: z.string(),
+  configured_paths: z.array(z.string()),
+  status: z.enum(['idle', 'running', 'ready', 'failed']),
+  last_started_at: z.string().nullable().optional(),
+  last_completed_at: z.string().nullable().optional(),
+  last_error: z.string().nullable().optional(),
+  last_chunks_ingested: z.number().default(0),
+  last_files_processed: z.number().default(0),
+  last_files_skipped_unchanged: z.number().default(0),
+  last_files_deleted: z.number().default(0),
+  last_embedding_model: z.string().nullable().optional(),
+  last_embedding_dimension: z.number().nullable().optional(),
+  last_ingest_mode: z.enum(['incremental', 'force']).nullable().optional(),
 });
-export type KnowledgeIngestStatus = z.infer<typeof KnowledgeIngestStatusSchema>;
+export type KnowledgeSourceStatus = z.infer<typeof KnowledgeSourceStatusSchema>;
+
+export const KnowledgeSourcesStatusSchema = z.object({
+  sources: z.array(KnowledgeSourceStatusSchema),
+});
+export type KnowledgeSourcesStatus = z.infer<typeof KnowledgeSourcesStatusSchema>;
 
 export const KnowledgeSearchChunkSchema = z.object({
   content: z.string(),
   source_path: z.string(),
+  source_key: z.enum(['code', 'docs']).optional().default('docs'),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type KnowledgeSearchChunk = z.infer<typeof KnowledgeSearchChunkSchema>;

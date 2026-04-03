@@ -86,8 +86,8 @@ services:
     env_file:
       - .env
     volumes:
-      # Mount: KNOWLEDGE_SOURCES_MOUNT (parent) or single KNOWLEDGE_SOURCES; entrypoint rewrites paths to /knowledge
-      - ${KNOWLEDGE_SOURCES_MOUNT:-${KNOWLEDGE_SOURCES:-./knowledge}}:/knowledge:ro
+      # Mount the common parent for configured knowledge paths; entrypoint rewrites code/doc paths to /knowledge
+      - ${KNOWLEDGE_MOUNT_ROOT:-./knowledge}:/knowledge:ro
     deploy:
       resources:
         limits:

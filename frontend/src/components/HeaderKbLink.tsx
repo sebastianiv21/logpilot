@@ -5,17 +5,14 @@
 
 import { Link } from 'react-router-dom'
 import { Database } from 'lucide-react'
-import { useKnowledgeIngestStatus } from '../hooks/useKnowledgeIngest'
+import { useKnowledgeSourcesStatus } from '../hooks/useKnowledgeIngest'
+import type { KnowledgeSourceStatus } from '../lib/schemas'
 
 type IndicatorState = 'red' | 'yellow' | 'green'
 
-function getIndicatorState(
-  status: 'running' | 'idle' | undefined,
-  lastResult: unknown,
-  error: string | null | undefined
-): IndicatorState {
-  if (status === 'running') return 'yellow'
-  if (status === 'idle' && lastResult && !error) return 'green'
+function getIndicatorState(sources: KnowledgeSourceStatus[] | undefined): IndicatorState {
+  if (sources?.some((source) => source.status === 'running')) return 'yellow'
+  if (sources?.some((source) => source.status === 'ready')) return 'green'
   return 'red'
 }
 
@@ -33,11 +30,8 @@ function getStatusAriaSuffix(state: IndicatorState): string {
 }
 
 export function HeaderKbLink() {
-  const { data } = useKnowledgeIngestStatus()
-  const status = data?.status
-  const lastResult = data?.last_result
-  const error = data?.error
-  const state = getIndicatorState(status, lastResult, error)
+  const { data } = useKnowledgeSourcesStatus()
+  const state = getIndicatorState(data?.sources)
   const ariaSuffix = getStatusAriaSuffix(state)
 
   const dotClasses = [

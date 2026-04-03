@@ -1,16 +1,18 @@
-"""Chunking and embedding for docs/repo content; coordinates with pgvector store."""
+"""Chunking and embedding for persisted code/docs knowledge sources."""
 
 from __future__ import annotations
 
 import logging
+import hashlib
 from pathlib import Path
 from typing import Any
 
 from openai import OpenAI
 
 from app.lib.config import config
-from app.lib.pg_vector_store import delete_all, upsert_chunks
+from app.lib.pg_vector_store import delete_all, delete_file, upsert_chunks
 from app.lib.pg_vector_store import search as pg_search
+from app.lib.repositories import KnowledgeRepository
 
 logger = logging.getLogger(__name__)
 
@@ -62,14 +64,23 @@ DOCS_EXTENSIONS = {
     ".txt",
 }
 
-# Union: ingest both repo and docs file types from any source path
+SOURCE_EXTENSIONS = {
+    "code": REPO_EXTENSIONS,
+    "docs": DOCS_EXTENSIONS,
+}
+SOURCE_DISPLAY_NAMES = {
+    "code": "Code",
+    "docs": "Documentation",
+}
+
+# Union: ingest all supported file types when needed in tests
 KNOWN_EXTENSIONS = REPO_EXTENSIONS | DOCS_EXTENSIONS
 
 DEFAULT_CHUNK_SIZE = 800
 DEFAULT_CHUNK_OVERLAP = 100
 
 
-def _collect_files(sources: list[Path]) -> list[Path]:
+def _collect_files(sources: list[Path], allowed_extensions: set[str] = KNOWN_EXTENSIONS) -> list[Path]:
     """Return list of readable files under source paths with known extensions."""
     out: list[Path] = []
     for root in sources:
@@ -77,11 +88,11 @@ def _collect_files(sources: list[Path]) -> list[Path]:
             logger.warning("Knowledge source path does not exist: %s", root)
             continue
         if root.is_file():
-            if root.suffix.lower() in KNOWN_EXTENSIONS:
+            if root.suffix.lower() in allowed_extensions:
                 out.append(root)
             continue
         for path in root.rglob("*"):
-            if path.is_file() and path.suffix.lower() in KNOWN_EXTENSIONS:
+            if path.is_file() and path.suffix.lower() in allowed_extensions:
                 out.append(path)
     return out
 
@@ -166,72 +177,108 @@ def _get_embeddings(texts: list[str]) -> list[list[float]]:
     return all_embeddings
 
 
-def chunk_and_embed_sources(
-    sources: list[Path],
+def _fingerprint_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _chunk_file(
+    source_key: str,
+    path: Path,
+    text: str,
     *,
     chunk_size: int = DEFAULT_CHUNK_SIZE,
     chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
-) -> list[dict[str, Any]]:
-    """
-    Discover files under sources, chunk text, produce embeddings. Returns list of
-    dicts with content, embedding, source_path, document_type, metadata.
-    """
-    files = _collect_files(sources)
-    if not files:
-        logger.warning("No files found under knowledge sources: %s", sources)
+) -> tuple[str, list[dict[str, Any]]]:
+    rel_path = str(path)
+    doc_type = _document_type(path)
+    file_hash = _fingerprint_text(text)
+    meta: dict[str, Any] = {
+        "filename": path.name,
+        "source_key": source_key,
+    }
+    chunks = [
+        {
+            "content": raw_chunk,
+            "source_path": rel_path,
+            "source_key": source_key,
+            "file_hash": file_hash,
+            "chunk_index": idx,
+            "document_type": doc_type,
+            "metadata": meta,
+        }
+        for idx, raw_chunk in enumerate(_chunk_text(text, chunk_size, chunk_overlap))
+    ]
+    return file_hash, chunks
+
+
+def _embed_chunks(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    if not chunks:
         return []
+    embeddings = _get_embeddings([chunk["content"] for chunk in chunks])
+    if len(embeddings) != len(chunks):
+        raise RuntimeError(f"Embedding count {len(embeddings)} != chunk count {len(chunks)}")
+    for idx, chunk in enumerate(chunks):
+        chunk["embedding"] = embeddings[idx]
+    return chunks
 
-    all_chunks: list[dict[str, Any]] = []
-    texts_to_embed: list[str] = []
-    chunk_meta: list[tuple[str, str, dict]] = []  # (source_path, document_type, metadata)
 
+def ingest(source_key: str, *, mode: str = "incremental") -> dict[str, Any]:
+    """Ingest one source bucket with incremental fingerprinting by default."""
+    if source_key not in SOURCE_EXTENSIONS:
+        raise ValueError(f"Unknown knowledge source: {source_key}")
+
+    sources = config.knowledge_sources_by_key.get(source_key, [])
+    files = _collect_files(sources, SOURCE_EXTENSIONS[source_key])
+    repo = KnowledgeRepository()
+    tracked_files = repo.list_tracked_files(source_key)
+
+    if mode == "force":
+        delete_all(source_key)
+        repo.delete_tracked_files_for_source(source_key)
+        tracked_files = {}
+
+    discovered: dict[str, tuple[str, list[dict[str, Any]]]] = {}
     for path in files:
         text = _read_text(path)
         if text is None:
             continue
-        try:
-            rel_path = str(path)
-        except Exception:
-            rel_path = path.name
-        doc_type = _document_type(path)
-        meta: dict[str, Any] = {"filename": path.name}
-        for raw_chunk in _chunk_text(text, chunk_size, chunk_overlap):
-            all_chunks.append(
-                {
-                    "content": raw_chunk,
-                    "source_path": rel_path,
-                    "document_type": doc_type,
-                    "metadata": meta,
-                }
-            )
-            texts_to_embed.append(raw_chunk)
-            chunk_meta.append((rel_path, doc_type, meta))
+        discovered[str(path)] = _chunk_file(source_key, path, text)
 
-    if not texts_to_embed:
-        return []
+    files_deleted = 0
+    for stale_path in set(tracked_files) - set(discovered):
+        delete_file(source_key, stale_path)
+        repo.delete_tracked_file(source_key, stale_path)
+        files_deleted += 1
 
-    embeddings = _get_embeddings(texts_to_embed)
-    if len(embeddings) != len(all_chunks):
-        raise RuntimeError(f"Embedding count {len(embeddings)} != chunk count {len(all_chunks)}")
-    for i, ch in enumerate(all_chunks):
-        ch["embedding"] = embeddings[i]
+    files_processed = 0
+    files_skipped_unchanged = 0
+    chunks_ingested = 0
 
-    return all_chunks
+    for source_path, (file_hash, chunks) in discovered.items():
+        tracked = tracked_files.get(source_path)
+        if mode != "force" and tracked and tracked["content_hash"] == file_hash:
+            files_skipped_unchanged += 1
+            continue
 
+        delete_file(source_key, source_path)
+        embedded_chunks = _embed_chunks(chunks)
+        if embedded_chunks:
+            upsert_chunks(embedded_chunks)
+        repo.upsert_tracked_file(source_key, source_path, file_hash, len(embedded_chunks))
+        files_processed += 1
+        chunks_ingested += len(embedded_chunks)
 
-def ingest(sources: list[Path], *, replace: bool = True) -> dict[str, Any]:
-    """
-    Ingest sources into Qdrant: chunk, embed, upsert. If replace is True, clear
-    collection first (full refresh). Returns summary: chunks_ingested, files_processed.
-    """
-    if replace:
-        delete_all()
-    chunks = chunk_and_embed_sources(sources)
-    if not chunks:
-        return {"chunks_ingested": 0, "files_processed": 0}
-    upsert_chunks(chunks)
-    files_count = len({c["source_path"] for c in chunks})
-    return {"chunks_ingested": len(chunks), "files_processed": files_count}
+    return {
+        "source_key": source_key,
+        "display_name": SOURCE_DISPLAY_NAMES[source_key],
+        "chunks_ingested": chunks_ingested,
+        "files_processed": files_processed,
+        "files_skipped_unchanged": files_skipped_unchanged,
+        "files_deleted": files_deleted,
+        "embedding_model": config.EMBEDDING_MODEL,
+        "embedding_dimension": config.EMBEDDING_DIMENSION,
+        "mode": mode,
+    }
 
 
 def search_knowledge(
@@ -239,6 +286,7 @@ def search_knowledge(
     limit: int = 10,
     *,
     document_type_filter: str | list[str] | None = None,
+    source_filter: str | list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """
     Embed the query and run semantic search; return chunks with content, source_path, metadata.
@@ -257,4 +305,5 @@ def search_knowledge(
         vectors[0],
         limit=limit,
         document_type_filter=document_type_filter,
+        source_filter=source_filter,
     )

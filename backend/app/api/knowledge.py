@@ -1,42 +1,39 @@
-"""POST /knowledge/ingest and POST /knowledge/search — repeatable ingestion and semantic search."""
+"""Knowledge ingest/search API with persisted per-source status."""
 
 from __future__ import annotations
 
 import logging
-from pathlib import Path
+from typing import Literal
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
 
 from app.lib.config import config
+from app.lib.repositories import KnowledgeRepository
 from app.services import knowledge as knowledge_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/knowledge", tags=["knowledge"])
-
-# In-memory state for async ingest (avoids long-running request timeouts)
-_ingest_running = False
-_ingest_last_result: dict | None = None
-_ingest_error: str | None = None
+knowledge_repo = KnowledgeRepository()
 
 
 class IngestRequest(BaseModel):
-    """Optional list of source paths; if empty, config KNOWLEDGE_SOURCES is used."""
+    """Request body for starting ingest of one configured source."""
 
-    sources: list[str] = Field(default_factory=list, description="Paths to docs/repo roots")
-
-
-class IngestResponse(BaseModel):
-    """Response for POST /knowledge/ingest (sync or 202 body)."""
-
-    chunks_ingested: int
-    files_processed: int
+    source: Literal["code", "docs"] = Field(..., description="Knowledge source to ingest")
+    mode: Literal["incremental", "force"] = Field(
+        default="incremental",
+        description="Incremental skips unchanged files; force refreshes the selected source",
+    )
 
 
 class IngestAcceptedResponse(BaseModel):
     """Response when ingest is started in background (202)."""
 
-    message: str = "Ingest started in background; may take several minutes. Poll GET /knowledge/ingest/status for result."
+    message: str = (
+        "Ingest started in background; may take several minutes. "
+        "Poll GET /knowledge/sources/status for result."
+    )
 
 
 class SearchRequest(BaseModel):
@@ -44,6 +41,10 @@ class SearchRequest(BaseModel):
 
     query: str = Field(..., min_length=1, description="Search query")
     limit: int = Field(default=10, ge=1, le=100, description="Max chunks to return")
+    source_filter: Literal["all", "code", "docs"] = Field(
+        default="all",
+        description="Filter results to one knowledge source or search all",
+    )
 
 
 class ChunkResult(BaseModel):
@@ -51,6 +52,7 @@ class ChunkResult(BaseModel):
 
     content: str
     source_path: str
+    source_key: str
     metadata: dict = Field(default_factory=dict)
 
 
@@ -60,18 +62,38 @@ class SearchResponse(BaseModel):
     chunks: list[ChunkResult]
 
 
-def _run_ingest(sources: list[Path]) -> None:
-    global _ingest_running, _ingest_last_result, _ingest_error
+class KnowledgeSourceStatus(BaseModel):
+    """Persisted status for one knowledge source."""
+
+    source_key: Literal["code", "docs"]
+    display_name: str
+    configured_paths: list[str]
+    status: Literal["idle", "running", "ready", "failed"]
+    last_started_at: str | None = None
+    last_completed_at: str | None = None
+    last_error: str | None = None
+    last_chunks_ingested: int = 0
+    last_files_processed: int = 0
+    last_files_skipped_unchanged: int = 0
+    last_files_deleted: int = 0
+    last_embedding_model: str | None = None
+    last_embedding_dimension: int | None = None
+    last_ingest_mode: Literal["incremental", "force"] | None = None
+
+
+class KnowledgeSourcesStatusResponse(BaseModel):
+    """Response for GET /knowledge/sources/status."""
+
+    sources: list[KnowledgeSourceStatus]
+
+
+def _run_ingest(source_key: str, mode: str) -> None:
     try:
-        result = knowledge_service.ingest(sources, replace=True)
-        _ingest_last_result = result
-        _ingest_error = None
-    except Exception as e:
+        result = knowledge_service.ingest(source_key, mode=mode)
+        knowledge_repo.mark_completed(source_key, result)
+    except Exception as exc:
         logger.exception("Background ingest failed")
-        _ingest_error = str(e)
-        _ingest_last_result = None
-    finally:
-        _ingest_running = False
+        knowledge_repo.mark_failed(source_key, str(exc), mode)
 
 
 @router.post(
@@ -81,77 +103,60 @@ def _run_ingest(sources: list[Path]) -> None:
     summary="Start knowledge ingest (async)",
 )
 def ingest_knowledge(body: IngestRequest, background_tasks: BackgroundTasks) -> IngestAcceptedResponse:
-    """
-    Start ingestion in the background. Ingest can take several minutes (many embedding
-    API calls). Returns immediately; poll GET /knowledge/ingest/status for progress and result.
-    """
-    global _ingest_running
-    if body.sources:
-        sources = [Path(p) for p in body.sources]
-    else:
-        sources = config.knowledge_sources
-    if not sources:
+    """Start one source ingest in the background."""
+    source = knowledge_repo.get_source(body.source)
+    if source is None:
+        raise HTTPException(status_code=404, detail="Knowledge source not found")
+    if not source["configured_paths"]:
         raise HTTPException(
             status_code=400,
-            detail="No sources provided and KNOWLEDGE_SOURCES not configured",
+            detail=f"No configured paths for knowledge source '{body.source}'",
         )
     if not config.LLM_API_KEY:
         raise HTTPException(
             status_code=503,
             detail="Embeddings unavailable: LLM_API_KEY not set",
         )
-    if _ingest_running:
+    if source["status"] == "running":
         raise HTTPException(
             status_code=409,
-            detail="Ingest already in progress; poll GET /knowledge/ingest/status",
+            detail=f"Ingest already in progress for '{body.source}'",
         )
-    _ingest_running = True
-    background_tasks.add_task(_run_ingest, sources)
+    knowledge_repo.mark_started(body.source, body.mode)
+    background_tasks.add_task(_run_ingest, body.source, body.mode)
     return IngestAcceptedResponse()
 
 
-class IngestStatusResponse(BaseModel):
-    """Status of the last or current ingest."""
-
-    status: str = Field(..., description="running | idle")
-    last_result: IngestResponse | None = Field(None, description="Result of last completed ingest")
-    error: str | None = Field(None, description="Error message if last run failed")
-
-
-@router.get("/ingest/status", response_model=IngestStatusResponse)
-def ingest_status() -> IngestStatusResponse:
-    """Return whether ingest is running and the result of the last completed run."""
-    last = None
-    if _ingest_last_result is not None:
-        last = IngestResponse(
-            chunks_ingested=_ingest_last_result["chunks_ingested"],
-            files_processed=_ingest_last_result["files_processed"],
-        )
-    return IngestStatusResponse(
-        status="running" if _ingest_running else "idle",
-        last_result=last,
-        error=_ingest_error,
+@router.get("/sources/status", response_model=KnowledgeSourcesStatusResponse)
+def sources_status() -> KnowledgeSourcesStatusResponse:
+    """Return status for all configured knowledge sources."""
+    return KnowledgeSourcesStatusResponse(
+        sources=[KnowledgeSourceStatus(**source) for source in knowledge_repo.list_sources()]
     )
 
 
 @router.post("/search", response_model=SearchResponse)
 def search_knowledge(body: SearchRequest) -> SearchResponse:
-    """
-    Semantic search over the knowledge base. Returns chunks with content, source_path, metadata.
-    """
+    """Semantic search over the knowledge base."""
     if not config.LLM_API_KEY:
         raise HTTPException(
             status_code=503,
             detail="Search unavailable: LLM_API_KEY not set",
         )
-    chunks = knowledge_service.search_knowledge(query=body.query, limit=body.limit)
+    source_filter = None if body.source_filter == "all" else body.source_filter
+    chunks = knowledge_service.search_knowledge(
+        query=body.query,
+        limit=body.limit,
+        source_filter=source_filter,
+    )
     return SearchResponse(
         chunks=[
             ChunkResult(
-                content=c["content"],
-                source_path=c["source_path"],
-                metadata=c.get("metadata", {}),
+                content=chunk["content"],
+                source_path=chunk["source_path"],
+                source_key=chunk.get("source_key", ""),
+                metadata=chunk.get("metadata", {}),
             )
-            for c in chunks
+            for chunk in chunks
         ],
     )

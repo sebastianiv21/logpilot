@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Search } from 'lucide-react'
-import { useKnowledgeIngestStatus } from '../hooks/useKnowledgeIngest'
+import { useKnowledgeSourcesStatus } from '../hooks/useKnowledgeIngest'
 import { useKnowledgeSearch } from '../hooks/useKnowledgeSearch'
 import {
   KnowledgeSearchFormSchema,
@@ -22,6 +22,9 @@ function ChunkCard({ chunk }: { chunk: KnowledgeSearchChunk }) {
   return (
     <div className="card bg-base-200 border border-base-300 overflow-hidden">
       <div className="card-body p-3">
+        <div className="badge badge-outline badge-sm w-fit">
+          {chunk.source_key === 'code' ? 'Code' : 'Docs'}
+        </div>
         <p className="text-sm whitespace-pre-wrap break-words">{chunk.content}</p>
         <p className="text-xs text-base-content/60 mt-1 font-mono">
           {chunk.source_path}
@@ -37,17 +40,18 @@ function ChunkCard({ chunk }: { chunk: KnowledgeSearchChunk }) {
 }
 
 export function KnowledgeSearch() {
-  const { data: ingestStatus } = useKnowledgeIngestStatus()
+  const { data: sourcesStatus } = useKnowledgeSourcesStatus()
   const searchMutation = useKnowledgeSearch()
   const [visibleCount, setVisibleCount] = useState(KB_SEARCH_BATCH_SIZE)
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'code' | 'docs'>('all')
 
   const form = useForm<KnowledgeSearchFormValues>({
     resolver: zodResolver(KnowledgeSearchFormSchema),
     defaultValues: { query: '' },
   })
 
-  const hasIngestRun =
-    ingestStatus?.last_result != null || (ingestStatus?.error != null && ingestStatus?.status === 'idle')
+  const hasReadyKnowledge = sourcesStatus?.sources.some((source) => source.status === 'ready') ?? false
+  const hasIngestRun = sourcesStatus?.sources.some((source) => source.last_completed_at || source.last_error) ?? false
   const chunks = searchMutation.data?.chunks ?? []
   const hasSearched = searchMutation.isSuccess
   const isEmptyResult = hasSearched && chunks.length === 0
@@ -71,6 +75,7 @@ export function KnowledgeSearch() {
     searchMutation.mutate({
       query: values.query.trim(),
       limit: 50,
+      source_filter: sourceFilter,
     })
   })
 
@@ -122,6 +127,18 @@ export function KnowledgeSearch() {
           {searchMutation.isPending ? 'Searching…' : 'Search'}
         </button>
       </form>
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Knowledge source filters">
+        {(['all', 'code', 'docs'] as const).map((option) => (
+          <button
+            key={option}
+            type="button"
+            className={`btn btn-sm ${sourceFilter === option ? 'btn-primary' : 'btn-ghost'}`}
+            onClick={() => setSourceFilter(option)}
+          >
+            {option === 'all' ? 'All' : option === 'code' ? 'Code' : 'Docs'}
+          </button>
+        ))}
+      </div>
 
       {searchMutation.isError && (
         <div className="alert alert-error" role="alert">
@@ -140,7 +157,7 @@ export function KnowledgeSearch() {
           No knowledge yet. Run ingestion first.
         </p>
       )}
-      {hasIngestRun && hasSearched && isEmptyResult && (
+      {hasReadyKnowledge && hasSearched && isEmptyResult && (
         <p className="text-base-content/70 text-sm">
           No results match your query. Try different keywords.
         </p>

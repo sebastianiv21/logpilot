@@ -43,13 +43,27 @@ class Config:
     EMBEDDING_MODEL: str = (os.environ.get("EMBEDDING_MODEL") or "text-embedding-3-small").strip()
     EMBEDDING_DIMENSION: int = int(os.environ.get("EMBEDDING_DIMENSION", "1536").strip() or "1536")
 
-    # Knowledge ingest default paths (env KNOWLEDGE_SOURCES: comma-separated paths)
-    @property
-    def knowledge_sources(self) -> list[Path]:
-        raw = os.environ.get("KNOWLEDGE_SOURCES", "").strip()
-        if not raw:
-            return []
+    # Knowledge ingest default paths (env: comma-separated paths)
+    @staticmethod
+    def _split_paths(raw: str) -> list[Path]:
         return [Path(p.strip()) for p in raw.split(",") if p.strip()]
+
+    @property
+    def knowledge_code_sources(self) -> list[Path]:
+        raw = os.environ.get("KNOWLEDGE_CODE_SOURCES", "").strip()
+        return self._split_paths(raw) if raw else []
+
+    @property
+    def knowledge_doc_sources(self) -> list[Path]:
+        raw = os.environ.get("KNOWLEDGE_DOC_SOURCES", "").strip()
+        return self._split_paths(raw) if raw else []
+
+    @property
+    def knowledge_sources_by_key(self) -> dict[str, list[Path]]:
+        return {
+            "code": self.knowledge_code_sources,
+            "docs": self.knowledge_doc_sources,
+        }
 
 
 # Singleton for app use

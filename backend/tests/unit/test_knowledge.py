@@ -98,6 +98,15 @@ class TestCollectFiles:
         assert ".foo" not in exts
         assert len(found) == 3
 
+    def test_collects_only_allowed_extensions_for_source(self, tmp_path):
+        (tmp_path / "readme.md").write_text("# Doc")
+        (tmp_path / "script.py").write_text("print(1)")
+        docs_only = _collect_files([tmp_path], DOCS_EXTENSIONS)
+        repo_only = _collect_files([tmp_path], REPO_EXTENSIONS)
+
+        assert {path.name for path in docs_only} == {"readme.md"}
+        assert {path.name for path in repo_only} == {"readme.md", "script.py"}
+
     def test_single_file_source(self, tmp_path):
         md_file = tmp_path / "one.md"
         md_file.write_text("# One")

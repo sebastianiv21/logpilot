@@ -1,6 +1,6 @@
 # LogPilot
 
-Local-first log investigation platform: upload compressed log archives, parse and store in Loki, derive metrics for Prometheus, provision Grafana dashboards, index docs/repo in Qdrant, and use an AI agent to produce structured incident reports. Full stack runs via Docker Compose; reports are exportable as Markdown or PDF.
+Local-first log investigation platform: upload compressed log archives, parse and store in Loki, derive metrics for Prometheus, provision Grafana dashboards, index code/docs in PostgreSQL with pgvector, and use an AI agent to produce structured incident reports. Full stack runs via Docker Compose; reports are exportable as Markdown or PDF.
 
 ## Prerequisites
 
@@ -47,8 +47,9 @@ For detailed steps (knowledge ingest, report generation, export), see **[Quickst
 | `PROMETHEUS_URL` | No* | Prometheus URL (default: `http://localhost:9090`) |
 | `QDRANT_URL` | No* | Qdrant URL (default: `http://localhost:6333`) |
 | `DATA_DIR` | No | Directory for SQLite and temp files (default: `./data`) |
-| `KNOWLEDGE_SOURCES` | No | Comma-separated paths for knowledge ingest |
-| `KNOWLEDGE_SOURCES_MOUNT` | No | Docker: parent path mounted at `/knowledge` for multiple sources |
+| `KNOWLEDGE_CODE_SOURCES` | No | Comma-separated paths for code ingest |
+| `KNOWLEDGE_DOC_SOURCES` | No | Comma-separated paths for documentation ingest |
+| `KNOWLEDGE_MOUNT_ROOT` | No | Docker: common parent path mounted at `/knowledge` for code/docs sources |
 
 \* Defaults are correct when running the backend on the host against `docker compose` services; in Docker, the compose file sets URLs to service names.
 
@@ -63,7 +64,7 @@ docker compose up -d loki prometheus grafana qdrant
 cd backend && uv run fastapi dev app/main.py
 ```
 
-Set `LOKI_URL`, `PROMETHEUS_URL`, `QDRANT_URL` in `.env` to `http://localhost:3100`, etc.
+Set `LOKI_URL` and `PROMETHEUS_URL` in `.env` to `http://localhost:3100`, etc.
 
 ## Running tests
 

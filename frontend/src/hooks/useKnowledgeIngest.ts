@@ -1,33 +1,32 @@
 /**
- * useKnowledgeIngest: trigger ingest mutation, poll GET /knowledge/ingest/status until idle,
- * show success/error via Sonner (FR-007).
+ * useKnowledgeIngest: trigger ingest mutation, poll per-source status, and toast on completion.
  */
 
 import {
-  useQuery,
   useMutation,
+  useQuery,
   useQueryClient,
-  type UseQueryResult,
   type UseMutationResult,
+  type UseQueryResult,
 } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import {
-  getKnowledgeIngestStatus,
+  getKnowledgeSourcesStatus,
   startKnowledgeIngest,
   type KnowledgeIngestBody,
 } from '../services/api';
-import type { KnowledgeIngestStatus } from '../lib/schemas';
+import type { KnowledgeSourcesStatus } from '../lib/schemas';
 
-const knowledgeIngestStatusKey = ['knowledge', 'ingest', 'status'] as const;
+const knowledgeSourcesStatusKey = ['knowledge', 'sources', 'status'] as const;
 
-export function useKnowledgeIngestStatus(): UseQueryResult<KnowledgeIngestStatus> {
+export function useKnowledgeSourcesStatus(): UseQueryResult<KnowledgeSourcesStatus> {
   return useQuery({
-    queryKey: knowledgeIngestStatusKey,
-    queryFn: getKnowledgeIngestStatus,
+    queryKey: knowledgeSourcesStatusKey,
+    queryFn: getKnowledgeSourcesStatus,
     refetchInterval: (query) => {
-      const status = query.state.data?.status;
-      return status === 'running' ? 2000 : false;
+      const isRunning = query.state.data?.sources.some((source) => source.status === 'running');
+      return isRunning ? 2000 : false;
     },
   });
 }
@@ -35,47 +34,45 @@ export function useKnowledgeIngestStatus(): UseQueryResult<KnowledgeIngestStatus
 export function useKnowledgeIngestStart(): UseMutationResult<
   { message: string },
   Error,
-  KnowledgeIngestBody | undefined
+  KnowledgeIngestBody
 > {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body?: KnowledgeIngestBody) => startKnowledgeIngest(body ?? {}),
+    mutationFn: (body: KnowledgeIngestBody) => startKnowledgeIngest(body),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: knowledgeIngestStatusKey });
+      queryClient.invalidateQueries({ queryKey: knowledgeSourcesStatusKey });
     },
   });
 }
 
-/** Hook that combines status (with polling) and start mutation, and toasts on completion (FR-007). */
 export function useKnowledgeIngest(): {
-  statusQuery: UseQueryResult<KnowledgeIngestStatus>;
-  startMutation: UseMutationResult<
-    { message: string },
-    Error,
-    KnowledgeIngestBody | undefined
-  >;
+  statusQuery: UseQueryResult<KnowledgeSourcesStatus>;
+  startMutation: UseMutationResult<{ message: string }, Error, KnowledgeIngestBody>;
 } {
-  const statusQuery = useKnowledgeIngestStatus();
+  const statusQuery = useKnowledgeSourcesStatus();
   const startMutation = useKnowledgeIngestStart();
-  const prevStatusRef = useRef<'running' | 'idle' | undefined>(undefined);
+  const prevStatusesRef = useRef<Record<string, string>>({});
 
   useEffect(() => {
-    const status = statusQuery.data?.status;
-    if (status === 'idle' && prevStatusRef.current === 'running') {
-      const err = statusQuery.data?.error;
-      if (err) {
-        toast.error('Ingest failed', { description: err });
-      } else {
-        const last = statusQuery.data?.last_result;
-        if (last) {
-          toast.success('Ingest complete', {
-            description: `${last.chunks_ingested ?? 0} chunks, ${last.files_processed ?? 0} files`,
+    const sources = statusQuery.data?.sources ?? [];
+    const prevStatuses = prevStatusesRef.current;
+
+    for (const source of sources) {
+      if (source.status !== 'running' && prevStatuses[source.source_key] === 'running') {
+        if (source.status === 'failed' && source.last_error) {
+          toast.error(`${source.display_name} ingest failed`, {
+            description: source.last_error,
+          });
+        } else if (source.status === 'ready') {
+          toast.success(`${source.display_name} ingest complete`, {
+            description: `${source.last_chunks_ingested} chunks, ${source.last_files_processed} files`,
           });
         }
       }
+
+      prevStatuses[source.source_key] = source.status;
     }
-    prevStatusRef.current = status;
-  }, [statusQuery.data?.status, statusQuery.data?.error, statusQuery.data?.last_result]);
+  }, [statusQuery.data]);
 
   return { statusQuery, startMutation };
 }

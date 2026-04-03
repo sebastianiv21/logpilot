@@ -126,6 +126,7 @@ def search_docs(
             query.strip(),
             limit=limit,
             document_type_filter=DOCS_DOCUMENT_TYPES,
+            source_filter="docs",
         )
     except Exception as e:
         logger.warning("search_docs failed: %s", e)
@@ -163,6 +164,7 @@ def search_repo(
             query.strip(),
             limit=limit,
             document_type_filter=REPO_DOCUMENT_TYPE,
+            source_filter="code",
         )
     except Exception as e:
         logger.warning("search_repo failed: %s", e)

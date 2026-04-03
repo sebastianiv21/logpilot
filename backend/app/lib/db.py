@@ -137,10 +137,68 @@ def initialize_schema() -> None:
             );
         """)
         conn.execute("""
+            ALTER TABLE knowledge_chunks
+            ADD COLUMN IF NOT EXISTS source_key TEXT;
+        """)
+        conn.execute("""
+            ALTER TABLE knowledge_chunks
+            ADD COLUMN IF NOT EXISTS file_hash TEXT;
+        """)
+        conn.execute("""
+            ALTER TABLE knowledge_chunks
+            ADD COLUMN IF NOT EXISTS chunk_index INTEGER;
+        """)
+        conn.execute("""
             CREATE INDEX IF NOT EXISTS knowledge_chunks_hnsw_idx
                 ON knowledge_chunks
                 USING hnsw (embedding vector_cosine_ops)
                 WITH (m = 16, ef_construction = 64);
+        """)
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS knowledge_chunks_source_key_idx
+                ON knowledge_chunks(source_key);
+        """)
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS knowledge_chunks_source_path_idx
+                ON knowledge_chunks(source_key, source_path);
+        """)
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS knowledge_sources (
+                source_key                    TEXT PRIMARY KEY,
+                display_name                  TEXT NOT NULL,
+                configured_paths              JSONB NOT NULL DEFAULT '[]'::jsonb,
+                status                        TEXT NOT NULL DEFAULT 'idle',
+                last_started_at               TIMESTAMPTZ,
+                last_completed_at             TIMESTAMPTZ,
+                last_error                    TEXT,
+                last_chunks_ingested          INTEGER NOT NULL DEFAULT 0,
+                last_files_processed          INTEGER NOT NULL DEFAULT 0,
+                last_files_skipped_unchanged  INTEGER NOT NULL DEFAULT 0,
+                last_files_deleted            INTEGER NOT NULL DEFAULT 0,
+                last_embedding_model          TEXT,
+                last_embedding_dimension      INTEGER,
+                last_ingest_mode              TEXT
+            );
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS knowledge_source_files (
+                source_key          TEXT NOT NULL REFERENCES knowledge_sources(source_key) ON DELETE CASCADE,
+                source_path         TEXT NOT NULL,
+                content_hash        TEXT NOT NULL,
+                chunk_count         INTEGER NOT NULL DEFAULT 0,
+                last_ingested_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                PRIMARY KEY (source_key, source_path)
+            );
+        """)
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS knowledge_source_files_source_key_idx
+                ON knowledge_source_files(source_key);
+        """)
+        conn.execute("""
+            INSERT INTO knowledge_sources (source_key, display_name)
+            VALUES ('code', 'Code'), ('docs', 'Documentation')
+            ON CONFLICT (source_key) DO NOTHING;
         """)
 
         conn.commit()
