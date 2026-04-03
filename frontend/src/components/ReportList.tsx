@@ -23,7 +23,7 @@ export function ReportList() {
   const { data, isLoading, error } = useReportsList(currentSessionId);
   const [selectedReport, setSelectedReport] = useState<ReportListItem | null>(null);
   const reportModalRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(!!selectedReport, reportModalRef);
+  useFocusTrap(!!selectedReport, reportModalRef, () => setSelectedReport(null));
 
   useEffect(() => {
     if (

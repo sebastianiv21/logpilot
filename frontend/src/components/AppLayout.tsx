@@ -21,7 +21,7 @@ export function AppLayout() {
     SEARCH_DEBOUNCE_MS
   )
   const editModalRef = useRef<HTMLDivElement>(null)
-  useFocusTrap(!!editingSession, editModalRef)
+  useFocusTrap(!!editingSession, editModalRef, () => setEditingSession(null))
   const isKnowledgePage = location.pathname === '/knowledge'
 
   return (

@@ -1,12 +1,14 @@
 import { useEffect } from 'react';
 
 /**
- * Trap focus inside a modal: focus first focusable on open, cycle Tab/Shift+Tab within container.
+ * Trap focus inside a modal: focus first focusable on open, cycle Tab/Shift+Tab within container,
+ * and optionally close on Escape.
  * Use with ref on the modal content container (e.g. modal-box).
  */
 export function useFocusTrap(
   active: boolean,
-  containerRef: React.RefObject<HTMLDivElement | null>
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  onEscape?: () => void
 ): void {
   useEffect(() => {
     if (!active || !containerRef.current) return;
@@ -18,6 +20,11 @@ export function useFocusTrap(
     const last = focusables[focusables.length - 1];
     if (first) first.focus();
     function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onEscape?.();
+        return;
+      }
       if (e.key !== 'Tab') return;
       if (e.shiftKey) {
         if (document.activeElement === first) {
@@ -33,5 +40,5 @@ export function useFocusTrap(
     }
     el.addEventListener('keydown', onKeyDown);
     return () => el.removeEventListener('keydown', onKeyDown);
-  }, [active, containerRef]);
+  }, [active, containerRef, onEscape]);
 }
