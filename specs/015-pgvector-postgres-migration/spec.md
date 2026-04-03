@@ -22,7 +22,7 @@ As a system operator, I want all persistent data (session metadata, reports, log
 
 **Why this priority**: Consolidating from two separate storage engines (SQLite + Qdrant) into one PostgreSQL instance dramatically reduces operational complexity, removes the need to run a dedicated Qdrant service, and enables standard database tooling for backup, monitoring, and recovery.
 
-**Independent Test**: Can be fully tested by starting the application with only a PostgreSQL connection configured (no Qdrant, no SQLite file), performing a full session lifecycle (create session → upload logs → run a similarity search → generate a report), and verifying all data is persisted and retrievable from PostgreSQL alone.
+**Independent Test**: Can be fully tested by starting the application with only a PostgreSQL connection configured (no Qdrant, no SQLite file), performing a session lifecycle (create session → upload logs → generate a report), and verifying that session records, log extents, upload summaries, and embedding rows are all persisted and retrievable from PostgreSQL alone. Semantic search quality is validated independently in User Story 2.
 
 **Acceptance Scenarios**:
 
