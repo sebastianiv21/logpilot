@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import { Upload } from 'lucide-react';
@@ -50,6 +50,12 @@ export function UploadLogs() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
+  const clearFileInput = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }, []);
+
   const {
     data: uploadSummaryFromApi,
     isLoading: isUploadSummaryLoading,
@@ -79,9 +85,11 @@ export function UploadLogs() {
           ? 'Upload complete. Some files or lines were skipped.'
           : 'Logs uploaded.'
       );
+      clearFileInput();
     },
     onError: (err) => {
       toast.error(uploadErrorMessage(err));
+      clearFileInput();
     },
   });
 
@@ -108,6 +116,10 @@ export function UploadLogs() {
       markSessionHasLogs(currentSessionId);
     }
   }, [uploadSummaryFromApi, currentSessionId, markSessionHasLogs]);
+
+  useEffect(() => {
+    clearFileInput();
+  }, [clearFileInput, currentSessionId]);
 
   if (!currentSessionId) {
     return (
