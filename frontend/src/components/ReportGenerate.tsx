@@ -70,7 +70,7 @@ export function ReportGenerate() {
         Generate report
       </h2>
       <p className="text-base-content/80 text-sm">
-        Ask a question to generate a report. One report at a time per session.
+        Ask a question to generate a report.
       </p>
 
       {currentSessionId && !hasUpload && (

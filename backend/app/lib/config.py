@@ -15,6 +15,16 @@ class Config:
 
     # Loki
     LOKI_URL: str = os.environ.get("LOKI_URL", "http://localhost:3100").strip().rstrip("/")
+    LOKI_PUSH_BATCH_BYTES: int = int(
+        os.environ.get("LOKI_PUSH_BATCH_BYTES", str(1 * 1024 * 1024)).strip() or 1048576
+    )
+    LOKI_PUSH_RATE_LIMIT_BYTES_PER_SEC: int = int(
+        os.environ.get("LOKI_PUSH_RATE_LIMIT_BYTES_PER_SEC", "0").strip() or 0
+    )
+    LOKI_PUSH_MAX_RETRIES: int = int(os.environ.get("LOKI_PUSH_MAX_RETRIES", "2").strip() or 2)
+    LOKI_MAX_ENTRY_BYTES: int = int(
+        os.environ.get("LOKI_MAX_ENTRY_BYTES", str(256 * 1024)).strip() or 262144
+    )
 
     # Prometheus
     PROMETHEUS_URL: str = (

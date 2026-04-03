@@ -2,12 +2,111 @@
 
 from __future__ import annotations
 
+import time
+
 import httpx
 
 from app.lib.config import config
 
 LOKI_PUSH_PATH = "/loki/api/v1/push"
 LOKI_QUERY_RANGE_PATH = "/loki/api/v1/query_range"
+ENTRY_OVERHEAD_BYTES = 128
+ENTRY_SPLIT_SUFFIX = "\n[logpilot split]"
+
+
+def _estimate_entry_bytes(entry: tuple[str, str]) -> int:
+    """Estimate serialized size with safety margin for JSON framing."""
+    timestamp_ns, line = entry
+    return len(timestamp_ns) + len(line.encode("utf-8")) + ENTRY_OVERHEAD_BYTES
+
+
+def _split_oversized_entries(
+    entries: list[tuple[str, str]],
+    *,
+    max_entry_bytes: int,
+) -> list[tuple[str, str]]:
+    """Split oversized Loki entries into smaller UTF-8 safe chunks."""
+    if max_entry_bytes <= ENTRY_OVERHEAD_BYTES:
+        return entries
+
+    split_entries: list[tuple[str, str]] = []
+    max_line_bytes = max_entry_bytes - ENTRY_OVERHEAD_BYTES
+    suffix_bytes = len(ENTRY_SPLIT_SUFFIX.encode("utf-8"))
+
+    for timestamp_ns, line in entries:
+        line_bytes = line.encode("utf-8")
+        if len(line_bytes) <= max_line_bytes:
+            split_entries.append((timestamp_ns, line))
+            continue
+
+        chunk_budget = max(1, max_line_bytes - suffix_bytes)
+        start = 0
+        while start < len(line_bytes):
+            end = min(start + chunk_budget, len(line_bytes))
+            while end < len(line_bytes) and (line_bytes[end] & 0b1100_0000) == 0b1000_0000:
+                end -= 1
+            if end <= start:
+                end = min(start + chunk_budget, len(line_bytes))
+            chunk = line_bytes[start:end].decode("utf-8", errors="ignore")
+            if end < len(line_bytes):
+                chunk += ENTRY_SPLIT_SUFFIX
+            split_entries.append((timestamp_ns, chunk))
+            start = end
+
+    return split_entries
+
+
+def _chunk_entries(
+    entries: list[tuple[str, str]],
+    *,
+    max_batch_bytes: int,
+) -> list[list[tuple[str, str]]]:
+    """Split entries into size-bounded batches while preserving order."""
+    if not entries:
+        return []
+    if max_batch_bytes <= 0:
+        return [entries]
+
+    batches: list[list[tuple[str, str]]] = []
+    current_batch: list[tuple[str, str]] = []
+    current_bytes = 0
+
+    for entry in entries:
+        entry_bytes = _estimate_entry_bytes(entry)
+        if current_batch and current_bytes + entry_bytes > max_batch_bytes:
+            batches.append(current_batch)
+            current_batch = []
+            current_bytes = 0
+        current_batch.append(entry)
+        current_bytes += entry_bytes
+
+    if current_batch:
+        batches.append(current_batch)
+    return batches
+
+
+def _push_batch(
+    client: httpx.Client,
+    url: str,
+    labels: dict[str, str],
+    entries: list[tuple[str, str]],
+    *,
+    max_retries: int,
+) -> None:
+    """Push one batch to Loki and retry briefly on 429 responses."""
+    payload = {"streams": [{"stream": labels, "values": entries}]}
+    for attempt in range(max_retries + 1):
+        resp = client.post(url, json=payload)
+        if resp.status_code < 400:
+            return
+        if resp.status_code == 429 and attempt < max_retries:
+            time.sleep(min(2**attempt, 4))
+            continue
+        raise httpx.HTTPStatusError(
+            f"Loki push failed ({resp.status_code}): {resp.text}",
+            request=resp.request,
+            response=resp,
+        )
 
 
 def push_logs(
@@ -21,16 +120,25 @@ def push_logs(
     Push log entries to Loki. Each entry is (timestamp_ns_string, log_line).
     Labels are applied to the stream.
     """
+    if not entries:
+        return
+
     url = (base_url or config.LOKI_URL).rstrip("/") + LOKI_PUSH_PATH
-    payload = {"streams": [{"stream": labels, "values": entries}]}
+    entries = _split_oversized_entries(
+        entries,
+        max_entry_bytes=max(1, config.LOKI_MAX_ENTRY_BYTES),
+    )
+    max_batch_bytes = max(1, config.LOKI_PUSH_BATCH_BYTES)
+    max_rate_bytes_per_sec = max(0, config.LOKI_PUSH_RATE_LIMIT_BYTES_PER_SEC)
+    max_retries = max(0, config.LOKI_PUSH_MAX_RETRIES)
+    batches = _chunk_entries(entries, max_batch_bytes=max_batch_bytes)
+
     with httpx.Client(timeout=timeout) as client:
-        resp = client.post(url, json=payload)
-        if resp.status_code >= 400:
-            raise httpx.HTTPStatusError(
-                f"Loki push failed ({resp.status_code}): {resp.text}",
-                request=resp.request,
-                response=resp,
-            )
+        for index, batch in enumerate(batches):
+            _push_batch(client, url, labels, batch, max_retries=max_retries)
+            if max_rate_bytes_per_sec > 0 and index < len(batches) - 1:
+                batch_bytes = sum(_estimate_entry_bytes(entry) for entry in batch)
+                time.sleep(batch_bytes / max_rate_bytes_per_sec)
 
 
 def query_logs(
@@ -96,8 +204,6 @@ def get_log_time_range_ns(
     oldest, backward limit=1 for newest. Falls back to single query if direction
     is not supported by the Loki server.
     """
-    import time
-
     end_ns = int(time.time() * 1_000_000_000)
     start_ns = 0  # epoch; covers all logs
 
