@@ -62,8 +62,8 @@ Complexity Tracking table with rationale and rejected alternatives.
 ## Additional Constraints
 
 - **Technology**: Python (typed), Loki for log storage, Prometheus for metrics, Grafana for
-  dashboards, Qdrant for vector search. LLM provider MUST be configurable (OpenAI-compatible
-  API, environment or configuration; no hardcoded vendor).
+  dashboards, PostgreSQL with pgvector for vector search and session data storage. LLM provider
+  MUST be configurable (OpenAI-compatible API, environment or configuration; no hardcoded vendor).
 - **Security**: AI tools are read-only in MVP; sanitize uploads and extracted paths; restrict
   filesystem access during extraction; no arbitrary shell or network execution via the agent.
 - **Performance**: Target medium-sized log archives and interactive upload-to-query latency;
@@ -86,4 +86,4 @@ reviews MUST verify compliance. Complexity that conflicts with principles MUST b
 the plan's Complexity Tracking table. For runtime development guidance, use `docs/PRD.md`, the
 feature's `spec.md`, and `quickstart.md` when available.
 
-**Version**: 1.0.0 | **Ratified**: 2025-03-13 | **Last Amended**: 2025-03-13
+**Version**: 1.0.1 | **Ratified**: 2025-03-13 | **Last Amended**: 2026-04-03

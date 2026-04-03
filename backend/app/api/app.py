@@ -1,7 +1,7 @@
-"""FastAPI app with router mounting and global exception handler."""
-
 import logging
 import time
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -16,9 +16,19 @@ from app.api.logs import router as logs_router
 from app.api.reports import router as reports_router
 from app.api.sessions import router as sessions_router
 from app.api.upload import router as upload_router
+from app.lib.db import close_pool, init_pool, initialize_schema
 from app.lib.prometheus_client import get_metrics
 
 logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator:
+    """Initialize PostgreSQL pool and schema on startup; close pool on shutdown."""
+    initialize_schema()
+    init_pool()
+    yield
+    close_pool()
 
 
 class RequestLoggingMiddleware:
@@ -45,7 +55,7 @@ class RequestLoggingMiddleware:
             logger.info("Response: %s %s (%.0fms)", method, path, ms)
 
 
-app = FastAPI(title="LogPilot API", version="0.1.0")
+app = FastAPI(title="LogPilot API", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(

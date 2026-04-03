@@ -1,94 +1,148 @@
-"""SQLite schema and initialization for sessions and reports (MVP metadata store)."""
+from __future__ import annotations
 
-import sqlite3
-from pathlib import Path
+import logging
 
-SCHEMA_SESSIONS = """
-CREATE TABLE IF NOT EXISTS sessions (
-    id TEXT PRIMARY KEY,
-    name TEXT,
-    external_link TEXT,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
-);
-"""
+import psycopg
+from pgvector.psycopg import register_vector
+from psycopg_pool import ConnectionPool
 
-SCHEMA_REPORTS = """
-CREATE TABLE IF NOT EXISTS reports (
-    id TEXT PRIMARY KEY,
-    session_id TEXT NOT NULL,
-    content TEXT NOT NULL,
-    question TEXT,
-    created_at TEXT NOT NULL,
-    FOREIGN KEY (session_id) REFERENCES sessions(id)
-);
-"""
+from app.lib.config import config
 
-SCHEMA_SESSION_LOG_EXTENT = """
-CREATE TABLE IF NOT EXISTS session_log_extent (
-    session_id TEXT PRIMARY KEY,
-    start_ns INTEGER NOT NULL,
-    end_ns INTEGER NOT NULL,
-    FOREIGN KEY (session_id) REFERENCES sessions(id)
-);
-"""
+logger = logging.getLogger(__name__)
 
-SCHEMA_SESSION_UPLOAD_SUMMARY = """
-CREATE TABLE IF NOT EXISTS session_upload_summary (
-    session_id TEXT PRIMARY KEY,
-    status TEXT NOT NULL,
-    files_processed INTEGER NOT NULL,
-    files_skipped INTEGER NOT NULL,
-    lines_parsed INTEGER NOT NULL,
-    lines_rejected INTEGER NOT NULL,
-    error TEXT,
-    updated_at TEXT NOT NULL,
-    uploaded_file_name TEXT,
-    FOREIGN KEY (session_id) REFERENCES sessions(id)
-);
-"""
+_pool: ConnectionPool | None = None
 
 
-def get_connection(db_path: str | Path) -> sqlite3.Connection:
-    """Return a connection to the SQLite database; creates file and parent dir if needed."""
-    path = Path(db_path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(path))
-    conn.row_factory = sqlite3.Row
-    return conn
+def _get_database_url(database_url: str | None = None) -> str:
+    url = database_url or config.DATABASE_URL
+    if not url:
+        raise RuntimeError(
+            "DATABASE_URL is not set. Configure it in your environment or .env file."
+        )
+    return url
 
 
-def _ensure_upload_summary_has_file_name(conn: sqlite3.Connection) -> None:
-    """Add uploaded_file_name column to session_upload_summary if missing (for existing DBs)."""
-    cur = conn.execute("PRAGMA table_info(session_upload_summary)")
-    columns = [row[1] for row in cur.fetchall()]
-    if "uploaded_file_name" not in columns:
-        conn.execute("ALTER TABLE session_upload_summary ADD COLUMN uploaded_file_name TEXT")
+def _configure_connection(conn: psycopg.Connection) -> None:
+    """Called for every new connection in the pool: registers the pgvector type codec."""
+    register_vector(conn)
 
 
-def _ensure_reports_have_question(conn: sqlite3.Connection) -> None:
-    """Add question column to reports if missing (for existing DBs)."""
-    cur = conn.execute("PRAGMA table_info(reports)")
-    columns = [row[1] for row in cur.fetchall()]
-    if "question" not in columns:
-        conn.execute("ALTER TABLE reports ADD COLUMN question TEXT")
-
-
-def init_schema(conn: sqlite3.Connection) -> None:
-    """Create sessions, reports, session_log_extent, and session_upload_summary tables if they do not exist."""
-    conn.executescript(
-        SCHEMA_SESSIONS
-        + SCHEMA_REPORTS
-        + SCHEMA_SESSION_LOG_EXTENT
-        + SCHEMA_SESSION_UPLOAD_SUMMARY
+def init_pool(database_url: str | None = None) -> None:
+    """Open the connection pool. Call once at application startup."""
+    global _pool
+    url = _get_database_url(database_url)
+    _pool = ConnectionPool(
+        conninfo=url,
+        min_size=2,
+        max_size=5,
+        open=False,
+        configure=_configure_connection,
     )
-    _ensure_reports_have_question(conn)
-    _ensure_upload_summary_has_file_name(conn)
-    conn.commit()
+    _pool.open(wait=True)
+    logger.info("Connected to PostgreSQL")
 
 
-def init_db(db_path: str | Path) -> sqlite3.Connection:
-    """Create database file (and parent directory if needed), apply schema, return connection."""
-    conn = get_connection(db_path)
-    init_schema(conn)
-    return conn
+def close_pool() -> None:
+    """Close the connection pool. Call once at application shutdown."""
+    global _pool
+    if _pool is not None:
+        _pool.close()
+        _pool = None
+
+
+def get_pool() -> ConnectionPool:
+    """Return the active connection pool. Raises RuntimeError if not initialized."""
+    if _pool is None:
+        raise RuntimeError("Database pool not initialized. Call init_pool() first.")
+    return _pool
+
+
+def initialize_schema() -> None:
+    """
+    Create all tables, indexes, and the pgvector extension on first startup.
+    All statements are idempotent (IF NOT EXISTS). Raises RuntimeError if pgvector
+    is not installed on the PostgreSQL instance.
+    """
+    dim = config.EMBEDDING_DIMENSION
+    with psycopg.connect(_get_database_url()) as conn:
+        # Enable pgvector extension — fail fast with a clear message if not available.
+        try:
+            conn.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+        except Exception as exc:
+            raise RuntimeError(
+                "pgvector extension is not installed on the PostgreSQL instance. "
+                "Use the 'pgvector/pgvector:pg16' Docker image or install pgvector manually."
+            ) from exc
+
+        logger.info("pgvector extension verified")
+
+        # Sessions
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS sessions (
+                id          TEXT PRIMARY KEY,
+                name        TEXT,
+                external_link TEXT,
+                created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+        """)
+
+        # Reports
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS reports (
+                id          TEXT PRIMARY KEY,
+                session_id  TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+                content     TEXT NOT NULL,
+                question    TEXT,
+                created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+        """)
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS reports_session_id_idx ON reports(session_id);
+        """)
+
+        # Session log extent (one row per session, nanosecond timestamps)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS session_log_extent (
+                session_id  TEXT PRIMARY KEY REFERENCES sessions(id) ON DELETE CASCADE,
+                start_ns    BIGINT NOT NULL,
+                end_ns      BIGINT NOT NULL
+            );
+        """)
+
+        # Session upload summary (one row per session — last upload wins)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS session_upload_summary (
+                session_id          TEXT PRIMARY KEY REFERENCES sessions(id) ON DELETE CASCADE,
+                uploaded_file_name  TEXT,
+                status              TEXT NOT NULL DEFAULT 'pending',
+                files_processed     INTEGER NOT NULL DEFAULT 0,
+                files_skipped       INTEGER NOT NULL DEFAULT 0,
+                lines_parsed        INTEGER NOT NULL DEFAULT 0,
+                lines_rejected      INTEGER NOT NULL DEFAULT 0,
+                error               TEXT,
+                updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+        """)
+
+        # Knowledge chunks
+        conn.execute(f"""
+            CREATE TABLE IF NOT EXISTS knowledge_chunks (
+                id              BIGSERIAL PRIMARY KEY,
+                content         TEXT NOT NULL,
+                source_path     TEXT,
+                document_type   TEXT,
+                metadata        JSONB,
+                embedding       vector({dim})
+            );
+        """)
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS knowledge_chunks_hnsw_idx
+                ON knowledge_chunks
+                USING hnsw (embedding vector_cosine_ops)
+                WITH (m = 16, ef_construction = 64);
+        """)
+
+        conn.commit()
+
+    logger.info("Schema initialized")

@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from app.lib.archive import PathTraversalError, extract_zip_safe
-from app.lib.config import config
 from app.lib.loki_client import push_logs
 from app.lib.prometheus_client import record_metrics
 from app.lib.repositories import SessionRepository
@@ -79,12 +78,8 @@ class UploadResult:
 
 
 def _resolve_temp_dir() -> Path:
-    """Return DATA_DIR if writable, else system temp dir."""
-    try:
-        config.DATA_DIR.mkdir(parents=True, exist_ok=True)
-        return config.DATA_DIR
-    except OSError:
-        return Path(tempfile.gettempdir())
+    """Return the system temp dir for zip extraction."""
+    return Path(tempfile.gettempdir())
 
 
 def run_upload_pipeline(

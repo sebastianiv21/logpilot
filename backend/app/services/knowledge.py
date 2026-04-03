@@ -1,4 +1,4 @@
-"""Chunking and embedding for docs/repo content; coordinates with Qdrant client."""
+"""Chunking and embedding for docs/repo content; coordinates with pgvector store."""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ from typing import Any
 from openai import OpenAI
 
 from app.lib.config import config
-from app.lib.qdrant_client import delete_all, upsert_chunks
-from app.lib.qdrant_client import search as qdrant_search
+from app.lib.pg_vector_store import delete_all, upsert_chunks
+from app.lib.pg_vector_store import search as pg_search
 
 logger = logging.getLogger(__name__)
 
@@ -253,7 +253,7 @@ def search_knowledge(
     vectors = _get_embeddings(texts)
     if not vectors:
         return []
-    return qdrant_search(
+    return pg_search(
         vectors[0],
         limit=limit,
         document_type_filter=document_type_filter,

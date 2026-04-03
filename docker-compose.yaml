@@ -1,4 +1,4 @@
-# LogPilot MVP: Loki, Prometheus, Grafana, Qdrant (quickstart ports)
+# LogPilot MVP: Loki, Prometheus, Grafana, PostgreSQL+pgvector (quickstart ports)
 # Start: docker compose up -d
 
 services:
@@ -56,19 +56,22 @@ services:
       timeout: 5s
       retries: 3
 
-  qdrant:
-    image: qdrant/qdrant:v1.17
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: logpilot
+      POSTGRES_USER: logpilot
+      POSTGRES_PASSWORD: logpilot
     ports:
-      - "6333:6333"
+      - "5432:5432"
     volumes:
-      - qdrant-data:/qdrant/storage
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      # Image has no wget/curl; use TCP check
-      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
+      test: ["CMD-SHELL", "pg_isready -U logpilot"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 15s
+      start_period: 10s
 
   backend:
     build:
@@ -79,12 +82,10 @@ services:
     environment:
       LOKI_URL: http://loki:3100
       PROMETHEUS_URL: http://prometheus:9090
-      QDRANT_URL: http://qdrant:6333
-      DATA_DIR: /data
+      DATABASE_URL: postgresql://logpilot:logpilot@postgres:5432/logpilot
     env_file:
       - .env
     volumes:
-      - backend-data:/data
       # Mount: KNOWLEDGE_SOURCES_MOUNT (parent) or single KNOWLEDGE_SOURCES; entrypoint rewrites paths to /knowledge
       - ${KNOWLEDGE_SOURCES_MOUNT:-${KNOWLEDGE_SOURCES:-./knowledge}}:/knowledge:ro
     deploy:
@@ -95,11 +96,13 @@ services:
         reservations:
           memory: 256M
     depends_on:
+      grafana:
+        condition: service_healthy
       loki:
         condition: service_healthy
       prometheus:
         condition: service_healthy
-      qdrant:
+      postgres:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/\")' || exit 1"]
@@ -111,5 +114,4 @@ volumes:
   loki-data:
   prometheus-data:
   grafana-data:
-  qdrant-data:
-  backend-data:
+  postgres-data:

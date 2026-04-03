@@ -1,11 +1,12 @@
-"""Session and Report repositories (CRUD and list/get)."""
+"""Session and Report repositories (CRUD and list/get) — psycopg3 / PostgreSQL."""
 
-import sqlite3
+from __future__ import annotations
+
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
-from app.lib.config import config
-from app.lib.db import get_connection, init_schema
+from app.lib.db import get_pool
 from app.models.report import Report
 from app.models.session import Session
 
@@ -14,24 +15,11 @@ def _iso_now() -> str:
     return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
-def _row_to_session(row: sqlite3.Row) -> Session:
-    return Session(
-        id=row["id"],
-        name=row["name"],
-        external_link=row["external_link"],
-        created_at=row["created_at"],
-        updated_at=row["updated_at"],
-    )
-
-
-def _row_to_report(row: sqlite3.Row) -> Report:
-    return Report(
-        id=row["id"],
-        session_id=row["session_id"],
-        content=row["content"],
-        question=row["question"] if "question" in row.keys() else None,
-        created_at=row["created_at"],
-    )
+def _dt_to_iso(value: Any) -> str:
+    """Convert a datetime (from PostgreSQL TIMESTAMPTZ) or str to ISO string."""
+    if isinstance(value, datetime):
+        return value.isoformat().replace("+00:00", "Z")
+    return str(value)
 
 
 def _normalize_question(question: str | None) -> str | None:
@@ -51,62 +39,59 @@ def _question_preview(question: str | None, max_length: int = 96) -> str | None:
 
 
 class SessionRepository:
-    """CRUD for sessions."""
-
-    def __init__(self, conn: sqlite3.Connection | None = None) -> None:
-        self._conn = conn
-        self._own_conn = conn is None
-
-    def _connection(self) -> sqlite3.Connection:
-        if self._conn is not None:
-            return self._conn
-        conn = get_connection(config.db_path)
-        init_schema(conn)
-        return conn
+    """CRUD for sessions — backed by PostgreSQL via psycopg3 connection pool."""
 
     def create(self, name: str | None = None, external_link: str | None = None) -> Session:
-        now = _iso_now()
         sid = str(uuid.uuid4())
-        conn = self._connection()
-        try:
-            conn.execute(
-                "INSERT INTO sessions (id, name, external_link, created_at, updated_at) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (sid, name, external_link, now, now),
-            )
+        with get_pool().connection() as conn:
+            row = conn.execute(
+                "INSERT INTO sessions (id, name, external_link) VALUES (%s, %s, %s) "
+                "RETURNING id, name, external_link, created_at, updated_at",
+                (sid, name, external_link),
+            ).fetchone()
             conn.commit()
-        finally:
-            if self._own_conn and self._conn is None:
-                conn.close()
+        assert row is not None
         return Session(
-            id=sid, name=name, external_link=external_link, created_at=now, updated_at=now
+            id=row[0],
+            name=row[1],
+            external_link=row[2],
+            created_at=_dt_to_iso(row[3]),
+            updated_at=_dt_to_iso(row[4]),
         )
 
     def get(self, session_id: str) -> Session | None:
-        conn = self._connection()
-        try:
+        with get_pool().connection() as conn:
             row = conn.execute(
-                "SELECT id, name, external_link, created_at, updated_at FROM sessions WHERE id = ?",
+                "SELECT id, name, external_link, created_at, updated_at "
+                "FROM sessions WHERE id = %s",
                 (session_id,),
             ).fetchone()
-            if row is None:
-                return None
-            return _row_to_session(row)
-        finally:
-            if self._own_conn and self._conn is None:
-                conn.close()
+        if row is None:
+            return None
+        return Session(
+            id=row[0],
+            name=row[1],
+            external_link=row[2],
+            created_at=_dt_to_iso(row[3]),
+            updated_at=_dt_to_iso(row[4]),
+        )
 
     def list_all(self) -> list[Session]:
-        conn = self._connection()
-        try:
+        with get_pool().connection() as conn:
             rows = conn.execute(
-                "SELECT id, name, external_link, created_at, updated_at FROM sessions "
-                "ORDER BY created_at DESC"
+                "SELECT id, name, external_link, created_at, updated_at "
+                "FROM sessions ORDER BY created_at DESC"
             ).fetchall()
-            return [_row_to_session(r) for r in rows]
-        finally:
-            if self._own_conn and self._conn is None:
-                conn.close()
+        return [
+            Session(
+                id=r[0],
+                name=r[1],
+                external_link=r[2],
+                created_at=_dt_to_iso(r[3]),
+                updated_at=_dt_to_iso(r[4]),
+            )
+            for r in rows
+        ]
 
     def update(
         self,
@@ -120,102 +105,90 @@ class SessionRepository:
         updates: list[str] = []
         params: list[object] = []
         if name is not None:
-            updates.append("name = ?")
+            updates.append("name = %s")
             params.append(name)
         if external_link is not None:
-            updates.append("external_link = ?")
+            updates.append("external_link = %s")
             params.append(external_link)
         if not updates:
             return existing
-        now = _iso_now()
-        updates.append("updated_at = ?")
-        params.append(now)
+        updates.append("updated_at = NOW()")
         params.append(session_id)
-        conn = self._connection()
-        try:
-            conn.execute(f"UPDATE sessions SET {', '.join(updates)} WHERE id = ?", params)
+        with get_pool().connection() as conn:
+            row = conn.execute(
+                f"UPDATE sessions SET {', '.join(updates)} WHERE id = %s "
+                "RETURNING id, name, external_link, created_at, updated_at",
+                params,
+            ).fetchone()
             conn.commit()
-        finally:
-            if self._own_conn and self._conn is None:
-                conn.close()
+        if row is None:
+            return None
         return Session(
-            id=existing.id,
-            name=name if name is not None else existing.name,
-            external_link=external_link if external_link is not None else existing.external_link,
-            created_at=existing.created_at,
-            updated_at=now,
+            id=row[0],
+            name=row[1],
+            external_link=row[2],
+            created_at=_dt_to_iso(row[3]),
+            updated_at=_dt_to_iso(row[4]),
         )
 
     def get_log_extent(self, session_id: str) -> tuple[int, int] | None:
-        """Return (start_ns, end_ns) for the session's logged time range, or None if never updated."""
-        conn = self._connection()
-        try:
+        """Return (start_ns, end_ns) for the session's logged time range, or None."""
+        with get_pool().connection() as conn:
             row = conn.execute(
-                "SELECT start_ns, end_ns FROM session_log_extent WHERE session_id = ?",
+                "SELECT start_ns, end_ns FROM session_log_extent WHERE session_id = %s",
                 (session_id,),
             ).fetchone()
-            if row is None:
-                return None
-            return (int(row["start_ns"]), int(row["end_ns"]))
-        finally:
-            if self._own_conn and self._conn is None:
-                conn.close()
+        if row is None:
+            return None
+        return (int(row[0]), int(row[1]))
 
     def update_log_extent(
         self, session_id: str, batch_start_ns: int, batch_end_ns: int
     ) -> None:
         """Extend the session's log time range with this batch (min/max with existing if any)."""
-        conn = self._connection()
-        try:
+        with get_pool().connection() as conn:
             existing = conn.execute(
-                "SELECT start_ns, end_ns FROM session_log_extent WHERE session_id = ?",
+                "SELECT start_ns, end_ns FROM session_log_extent WHERE session_id = %s",
                 (session_id,),
             ).fetchone()
             if existing is None:
                 conn.execute(
-                    "INSERT INTO session_log_extent (session_id, start_ns, end_ns) VALUES (?, ?, ?)",
+                    "INSERT INTO session_log_extent (session_id, start_ns, end_ns) "
+                    "VALUES (%s, %s, %s)",
                     (session_id, batch_start_ns, batch_end_ns),
                 )
             else:
-                start_ns = min(int(existing["start_ns"]), batch_start_ns)
-                end_ns = max(int(existing["end_ns"]), batch_end_ns)
+                start_ns = min(int(existing[0]), batch_start_ns)
+                end_ns = max(int(existing[1]), batch_end_ns)
                 conn.execute(
-                    "UPDATE session_log_extent SET start_ns = ?, end_ns = ? WHERE session_id = ?",
+                    "UPDATE session_log_extent SET start_ns = %s, end_ns = %s "
+                    "WHERE session_id = %s",
                     (start_ns, end_ns, session_id),
                 )
             conn.commit()
-        finally:
-            if self._own_conn and self._conn is None:
-                conn.close()
 
-    def get_upload_summary(
-        self, session_id: str
-    ) -> dict[str, str | int | None] | None:
+    def get_upload_summary(self, session_id: str) -> dict[str, Any] | None:
         """Return the last upload summary for the session, or None if never uploaded."""
-        conn = self._connection()
-        try:
+        with get_pool().connection() as conn:
             row = conn.execute(
                 "SELECT session_id, status, files_processed, files_skipped, "
                 "lines_parsed, lines_rejected, error, updated_at, uploaded_file_name "
-                "FROM session_upload_summary WHERE session_id = ?",
+                "FROM session_upload_summary WHERE session_id = %s",
                 (session_id,),
             ).fetchone()
-            if row is None:
-                return None
-            return {
-                "session_id": row["session_id"],
-                "status": row["status"],
-                "files_processed": int(row["files_processed"]),
-                "files_skipped": int(row["files_skipped"]),
-                "lines_parsed": int(row["lines_parsed"]),
-                "lines_rejected": int(row["lines_rejected"]),
-                "error": row["error"],
-                "updated_at": row["updated_at"],
-                "uploaded_file_name": row["uploaded_file_name"],
-            }
-        finally:
-            if self._own_conn and self._conn is None:
-                conn.close()
+        if row is None:
+            return None
+        return {
+            "session_id": row[0],
+            "status": row[1],
+            "files_processed": int(row[2]),
+            "files_skipped": int(row[3]),
+            "lines_parsed": int(row[4]),
+            "lines_rejected": int(row[5]),
+            "error": row[6],
+            "updated_at": _dt_to_iso(row[7]),
+            "uploaded_file_name": row[8],
+        }
 
     def upsert_upload_summary(
         self,
@@ -228,111 +201,104 @@ class SessionRepository:
         error: str | None = None,
         uploaded_file_name: str | None = None,
     ) -> None:
-        """Insert or replace the last upload summary for the session."""
-        now = _iso_now()
-        conn = self._connection()
-        try:
+        """Insert or update the upload summary for the session (one row per session)."""
+        with get_pool().connection() as conn:
             conn.execute(
                 "INSERT INTO session_upload_summary "
-                "(session_id, status, files_processed, files_skipped, lines_parsed, lines_rejected, error, updated_at, uploaded_file_name) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) "
-                "ON CONFLICT(session_id) DO UPDATE SET "
-                "status=excluded.status, files_processed=excluded.files_processed, "
-                "files_skipped=excluded.files_skipped, lines_parsed=excluded.lines_parsed, "
-                "lines_rejected=excluded.lines_rejected, error=excluded.error, updated_at=excluded.updated_at, "
-                "uploaded_file_name=excluded.uploaded_file_name",
-                (session_id, status, files_processed, files_skipped, lines_parsed, lines_rejected, error, now, uploaded_file_name),
+                "(session_id, status, files_processed, files_skipped, lines_parsed, "
+                "lines_rejected, error, uploaded_file_name, updated_at) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW()) "
+                "ON CONFLICT (session_id) DO UPDATE SET "
+                "status = EXCLUDED.status, "
+                "files_processed = EXCLUDED.files_processed, "
+                "files_skipped = EXCLUDED.files_skipped, "
+                "lines_parsed = EXCLUDED.lines_parsed, "
+                "lines_rejected = EXCLUDED.lines_rejected, "
+                "error = EXCLUDED.error, "
+                "uploaded_file_name = EXCLUDED.uploaded_file_name, "
+                "updated_at = EXCLUDED.updated_at",
+                (
+                    session_id, status, files_processed, files_skipped,
+                    lines_parsed, lines_rejected, error, uploaded_file_name,
+                ),
             )
             conn.commit()
-        finally:
-            if self._own_conn and self._conn is None:
-                conn.close()
 
 
 class ReportRepository:
-    """Create, list by session, get by id for reports."""
-
-    def __init__(self, conn: sqlite3.Connection | None = None) -> None:
-        self._conn = conn
-        self._own_conn = conn is None
-
-    def _connection(self) -> sqlite3.Connection:
-        if self._conn is not None:
-            return self._conn
-        conn = get_connection(config.db_path)
-        init_schema(conn)
-        return conn
+    """Create, list by session, get by id for reports — backed by PostgreSQL."""
 
     def create(self, session_id: str, content: str, question: str | None = None) -> Report:
         rid = str(uuid.uuid4())
-        now = _iso_now()
         normalized_question = _normalize_question(question)
-        conn = self._connection()
-        try:
-            conn.execute(
-                "INSERT INTO reports (id, session_id, content, question, created_at) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (rid, session_id, content, normalized_question, now),
-            )
+        with get_pool().connection() as conn:
+            row = conn.execute(
+                "INSERT INTO reports (id, session_id, content, question) "
+                "VALUES (%s, %s, %s, %s) "
+                "RETURNING id, session_id, content, question, created_at",
+                (rid, session_id, content, normalized_question),
+            ).fetchone()
             conn.commit()
-        finally:
-            if self._own_conn and self._conn is None:
-                conn.close()
+        assert row is not None
         return Report(
-            id=rid,
-            session_id=session_id,
-            content=content,
-            question=normalized_question,
-            created_at=now,
+            id=row[0],
+            session_id=row[1],
+            content=row[2],
+            question=row[3],
+            created_at=_dt_to_iso(row[4]),
         )
 
     def list_by_session(self, session_id: str) -> list[Report]:
-        conn = self._connection()
-        try:
+        with get_pool().connection() as conn:
             rows = conn.execute(
                 "SELECT id, session_id, content, question, created_at FROM reports "
-                "WHERE session_id = ? ORDER BY created_at DESC",
+                "WHERE session_id = %s ORDER BY created_at DESC",
                 (session_id,),
             ).fetchall()
-            return [_row_to_report(r) for r in rows]
-        finally:
-            if self._own_conn and self._conn is None:
-                conn.close()
+        return [
+            Report(
+                id=r[0],
+                session_id=r[1],
+                content=r[2],
+                question=r[3],
+                created_at=_dt_to_iso(r[4]),
+            )
+            for r in rows
+        ]
 
     def get_by_id(self, report_id: str, session_id: str | None = None) -> Report | None:
-        conn = self._connection()
-        try:
+        with get_pool().connection() as conn:
             if session_id is not None:
                 row = conn.execute(
                     "SELECT id, session_id, content, question, created_at FROM reports "
-                    "WHERE id = ? AND session_id = ?",
+                    "WHERE id = %s AND session_id = %s",
                     (report_id, session_id),
                 ).fetchone()
             else:
                 row = conn.execute(
-                    "SELECT id, session_id, content, question, created_at FROM reports WHERE id = ?",
+                    "SELECT id, session_id, content, question, created_at FROM reports "
+                    "WHERE id = %s",
                     (report_id,),
                 ).fetchone()
-            if row is None:
-                return None
-            return _row_to_report(row)
-        finally:
-            if self._own_conn and self._conn is None:
-                conn.close()
+        if row is None:
+            return None
+        return Report(
+            id=row[0],
+            session_id=row[1],
+            content=row[2],
+            question=row[3],
+            created_at=_dt_to_iso(row[4]),
+        )
 
     def update_content(self, report_id: str, session_id: str, content: str) -> bool:
         """Update report content by id and session_id. Returns True if a row was updated."""
-        conn = self._connection()
-        try:
+        with get_pool().connection() as conn:
             cur = conn.execute(
-                "UPDATE reports SET content = ? WHERE id = ? AND session_id = ?",
+                "UPDATE reports SET content = %s WHERE id = %s AND session_id = %s",
                 (content, report_id, session_id),
             )
             conn.commit()
             return cur.rowcount > 0
-        finally:
-            if self._own_conn and self._conn is None:
-                conn.close()
 
     @staticmethod
     def question_preview(question: str | None, max_length: int = 96) -> str | None:
