@@ -28,6 +28,8 @@ function uploadErrorMessage(err: unknown): string {
     switch (err.status) {
       case 404:
         return 'Session not found.';
+      case 409:
+        return 'This session already has logs. Create a new session to upload another archive.';
       case 413:
         return 'Archive is too large (e.g. max 100 MB).';
       case 400:
@@ -108,11 +110,22 @@ export function UploadLogs() {
       toast.error('File must be a .zip archive.');
       return;
     }
+    if (
+      uploadSummaryFromApi &&
+      (uploadSummaryFromApi.status === 'success' || uploadSummaryFromApi.status === 'partial')
+    ) {
+      toast.error('This session already has logs. Create a new session to upload another archive.');
+      return;
+    }
     mutation.mutate({ sessionId: currentSessionId, file });
   };
 
   useEffect(() => {
-    if (uploadSummaryFromApi && currentSessionId) {
+    if (
+      uploadSummaryFromApi &&
+      currentSessionId &&
+      (uploadSummaryFromApi.status === 'success' || uploadSummaryFromApi.status === 'partial')
+    ) {
       markSessionHasLogs(currentSessionId);
     }
   }, [uploadSummaryFromApi, currentSessionId, markSessionHasLogs]);
@@ -133,6 +146,8 @@ export function UploadLogs() {
     uploadSummaryFromApi ??
     lastUploadResultBySessionId[currentSessionId ?? ''] ??
     (mutation.data?.session_id === currentSessionId ? mutation.data : null);
+  const isSessionLockedForUpload =
+    resultForCurrentSession?.status === 'success' || resultForCurrentSession?.status === 'partial';
 
   const handleRetryUploadSummary = () => {
     refetchUploadSummary().then((result) => {
@@ -158,13 +173,13 @@ export function UploadLogs() {
             accept=".zip"
             className="file-input file-input-bordered w-full max-w-xs"
             aria-label="Choose .zip log archive"
-            disabled={mutation.isPending}
+            disabled={mutation.isPending || isSessionLockedForUpload}
           />
         </label>
         <button
           type="submit"
           className="btn btn-primary flex items-center gap-2"
-          disabled={mutation.isPending}
+          disabled={mutation.isPending || isSessionLockedForUpload}
           aria-busy={mutation.isPending}
           aria-label="Upload log archive"
         >
@@ -176,6 +191,12 @@ export function UploadLogs() {
           {mutation.isPending ? 'Uploading…' : 'Upload'}
         </button>
       </form>
+
+      {isSessionLockedForUpload && (
+        <div className="rounded-lg bg-base-200 p-4 text-base-content/80" role="status">
+          This session already has logs. Create a new session to upload another archive.
+        </div>
+      )}
 
       {isLoadingSummary && !resultForCurrentSession && (
         <div className="flex items-center gap-2 text-base-content/80" role="status" aria-live="polite">

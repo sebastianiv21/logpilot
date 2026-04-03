@@ -60,6 +60,14 @@ def get_upload_summary(session_id: str) -> UploadResultResponse:
     )
 
 
+def _session_has_logs(session_id: str) -> bool:
+    """True when the session already has ingested logs."""
+    if _repo.get_log_extent(session_id) is not None:
+        return True
+    summary = _repo.get_upload_summary(session_id)
+    return summary is not None and summary["status"] in {"success", "partial"}
+
+
 @router.post("/{session_id}/logs/upload", response_model=UploadResultResponse)
 async def upload_logs(
     session_id: str,
@@ -67,11 +75,18 @@ async def upload_logs(
 ) -> UploadResultResponse:
     """
     Upload a compressed log archive for the session. Returns upload result (status, counts, error).
-    404 if session not found; 413 if too large; 400 on validation/malformed archive.
+    404 if session not found; 409 if session already has logs; 413 if too large;
+    400 on validation/malformed archive.
     """
     session = _repo.get(session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
+
+    if _session_has_logs(session_id):
+        raise HTTPException(
+            status_code=409,
+            detail="This session already has logs. Create a new session to upload another archive.",
+        )
 
     if not file.filename or not file.filename.lower().endswith(".zip"):
         raise HTTPException(

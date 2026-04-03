@@ -131,4 +131,28 @@ describe('UploadLogs', () => {
       ).toBe('')
     })
   })
+
+  it('blocks uploads when the session already has logs', async () => {
+    mocks.getUploadSummaryMock.mockResolvedValue({
+      session_id: 'session-1',
+      status: 'success',
+      uploaded_file_name: 'existing.zip',
+      files_processed: 1,
+      files_skipped: 0,
+      lines_parsed: 10,
+      lines_rejected: 0,
+      error: null,
+      updated_at: '2026-04-03T10:00:00Z',
+    })
+
+    renderUploadLogs()
+
+    await waitFor(() => {
+      expect(screen.getByText(/this session already has logs/i)).toBeInTheDocument()
+    })
+
+    expect(screen.getByLabelText(/choose \.zip log archive/i)).toBeDisabled()
+    expect(screen.getByRole('button', { name: /upload log archive/i })).toBeDisabled()
+    expect(mocks.uploadLogsMock).not.toHaveBeenCalled()
+  })
 })
