@@ -103,6 +103,12 @@ export function UploadLogs() {
     mutation.mutate({ sessionId: currentSessionId, file });
   };
 
+  useEffect(() => {
+    if (uploadSummaryFromApi && currentSessionId) {
+      markSessionHasLogs(currentSessionId);
+    }
+  }, [uploadSummaryFromApi, currentSessionId, markSessionHasLogs]);
+
   if (!currentSessionId) {
     return (
       <div className="rounded-lg bg-base-200 p-4 text-base-content/80">
@@ -110,12 +116,6 @@ export function UploadLogs() {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (uploadSummaryFromApi && currentSessionId) {
-      markSessionHasLogs(currentSessionId);
-    }
-  }, [uploadSummaryFromApi, currentSessionId, markSessionHasLogs]);
 
   const resultForCurrentSession =
     uploadSummaryFromApi ??
