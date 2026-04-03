@@ -74,7 +74,7 @@ async function parseErrorResponse(res: Response): Promise<ApiError> {
 
 /** User-facing message when fetch fails (network error, CORS, etc.). */
 export const NETWORK_ERROR_MESSAGE =
-  'Unable to reach server. Check your connection and try again.';
+  "Can't connect to the server.";
 
 /** True if error indicates backend unavailable or network failure (for retry/connection UI). */
 export function isConnectionError(err: unknown): boolean {

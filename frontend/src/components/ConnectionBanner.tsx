@@ -27,6 +27,7 @@ export function ConnectionBanner() {
     >
       <WifiOff size={18} aria-hidden />
       <span>{message}</span>
+      <span className="opacity-90">Please check your connection and try again.</span>
       <button
         type="button"
         className="btn btn-sm btn-ghost btn-active flex items-center gap-2"
@@ -42,7 +43,6 @@ export function ConnectionBanner() {
         )}
         {isFetching ? 'Checking…' : 'Retry'}
       </button>
-      <span className="text-sm opacity-90">Check your network and try again.</span>
     </div>
   );
 }
