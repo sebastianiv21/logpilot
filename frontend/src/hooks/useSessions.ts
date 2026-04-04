@@ -46,7 +46,13 @@ export function useCreateSession(): UseMutationResult<
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body?: CreateSessionBody) => createSession(body ?? {}),
-    onSuccess: () => {
+    onSuccess: (session) => {
+      queryClient.setQueryData<{ sessions: Session[] }>(sessionsKey, (current) => {
+        const sessions = current?.sessions ?? [];
+        const withoutCreated = sessions.filter((existing) => existing.id !== session.id);
+        return { sessions: [session, ...withoutCreated] };
+      });
+      queryClient.setQueryData(sessionKey(session.id), session);
       queryClient.invalidateQueries({ queryKey: sessionsKey });
     },
   });
