@@ -48,8 +48,8 @@ class SessionRepository:
         sid = str(uuid.uuid4())
         with get_pool().connection() as conn:
             row = conn.execute(
-                "INSERT INTO sessions (id, name, external_link) VALUES (%s, %s, %s) "
-                "RETURNING id, name, external_link, created_at, updated_at",
+                "INSERT INTO sessions (id, name, external_link, is_pinned) VALUES (%s, %s, %s, FALSE) "
+                "RETURNING id, name, external_link, is_pinned, created_at, updated_at",
                 (sid, name, external_link),
             ).fetchone()
             conn.commit()
@@ -58,14 +58,15 @@ class SessionRepository:
             id=row[0],
             name=row[1],
             external_link=row[2],
-            created_at=_dt_to_iso(row[3]),
-            updated_at=_dt_to_iso(row[4]),
+            is_pinned=bool(row[3]),
+            created_at=_dt_to_iso(row[4]),
+            updated_at=_dt_to_iso(row[5]),
         )
 
     def get(self, session_id: str) -> Session | None:
         with get_pool().connection() as conn:
             row = conn.execute(
-                "SELECT id, name, external_link, created_at, updated_at "
+                "SELECT id, name, external_link, is_pinned, created_at, updated_at "
                 "FROM sessions WHERE id = %s",
                 (session_id,),
             ).fetchone()
@@ -75,14 +76,15 @@ class SessionRepository:
             id=row[0],
             name=row[1],
             external_link=row[2],
-            created_at=_dt_to_iso(row[3]),
-            updated_at=_dt_to_iso(row[4]),
+            is_pinned=bool(row[3]),
+            created_at=_dt_to_iso(row[4]),
+            updated_at=_dt_to_iso(row[5]),
         )
 
     def list_all(self) -> list[Session]:
         with get_pool().connection() as conn:
             rows = conn.execute(
-                "SELECT id, name, external_link, created_at, updated_at "
+                "SELECT id, name, external_link, is_pinned, created_at, updated_at "
                 "FROM sessions ORDER BY created_at DESC"
             ).fetchall()
         return [
@@ -90,8 +92,9 @@ class SessionRepository:
                 id=r[0],
                 name=r[1],
                 external_link=r[2],
-                created_at=_dt_to_iso(r[3]),
-                updated_at=_dt_to_iso(r[4]),
+                is_pinned=bool(r[3]),
+                created_at=_dt_to_iso(r[4]),
+                updated_at=_dt_to_iso(r[5]),
             )
             for r in rows
         ]
@@ -101,6 +104,7 @@ class SessionRepository:
         session_id: str,
         name: str | None = None,
         external_link: str | None = None,
+        is_pinned: bool | None = None,
     ) -> Session | None:
         existing = self.get(session_id)
         if existing is None:
@@ -113,6 +117,9 @@ class SessionRepository:
         if external_link is not None:
             updates.append("external_link = %s")
             params.append(external_link)
+        if is_pinned is not None:
+            updates.append("is_pinned = %s")
+            params.append(is_pinned)
         if not updates:
             return existing
         updates.append("updated_at = NOW()")
@@ -120,7 +127,7 @@ class SessionRepository:
         with get_pool().connection() as conn:
             row = conn.execute(
                 f"UPDATE sessions SET {', '.join(updates)} WHERE id = %s "
-                "RETURNING id, name, external_link, created_at, updated_at",
+                "RETURNING id, name, external_link, is_pinned, created_at, updated_at",
                 params,
             ).fetchone()
             conn.commit()
@@ -130,9 +137,34 @@ class SessionRepository:
             id=row[0],
             name=row[1],
             external_link=row[2],
-            created_at=_dt_to_iso(row[3]),
-            updated_at=_dt_to_iso(row[4]),
+            is_pinned=bool(row[3]),
+            created_at=_dt_to_iso(row[4]),
+            updated_at=_dt_to_iso(row[5]),
         )
+
+    def list_unpinned(self) -> list[Session]:
+        with get_pool().connection() as conn:
+            rows = conn.execute(
+                "SELECT id, name, external_link, is_pinned, created_at, updated_at "
+                "FROM sessions WHERE is_pinned = FALSE ORDER BY created_at DESC"
+            ).fetchall()
+        return [
+            Session(
+                id=row[0],
+                name=row[1],
+                external_link=row[2],
+                is_pinned=bool(row[3]),
+                created_at=_dt_to_iso(row[4]),
+                updated_at=_dt_to_iso(row[5]),
+            )
+            for row in rows
+        ]
+
+    def delete(self, session_id: str) -> bool:
+        with get_pool().connection() as conn:
+            cur = conn.execute("DELETE FROM sessions WHERE id = %s", (session_id,))
+            conn.commit()
+            return cur.rowcount > 0
 
     def get_log_extent(self, session_id: str) -> tuple[int, int] | None:
         """Return (start_ns, end_ns) for the session's logged time range, or None."""

@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from app.lib.repositories import SessionRepository
 from app.services.upload import MAX_COMPRESSED_BYTES, run_upload_pipeline
+from app.services.retention import run_session_retention_cleanup
 
 CHUNK_SIZE = 1024 * 1024  # 1 MiB
 
@@ -129,6 +130,8 @@ async def upload_logs(
         error=result.error,
         uploaded_file_name=file.filename,
     )
+    if result.status in {"success", "partial"}:
+        await asyncio.to_thread(run_session_retention_cleanup)
     updated = _repo.get_upload_summary(session_id)
 
     return UploadResultResponse(

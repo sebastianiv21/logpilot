@@ -11,6 +11,7 @@ class Session:
     id: str
     name: str | None
     external_link: str | None
+    is_pinned: bool
     created_at: str
     updated_at: str
 
@@ -20,6 +21,7 @@ class Session:
             "id": self.id,
             "name": self.name,
             "external_link": self.external_link,
+            "is_pinned": self.is_pinned,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }

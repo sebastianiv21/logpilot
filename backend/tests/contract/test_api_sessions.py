@@ -16,6 +16,7 @@ def _session_shape(data: dict) -> dict[str, type | tuple]:
         "id": str,
         "name": (str, type(None)),
         "external_link": (str, type(None)),
+        "is_pinned": bool,
         "created_at": str,
         "updated_at": str,
     }
@@ -26,6 +27,8 @@ def _assert_session_object(obj: dict) -> None:
         assert key in obj, f"missing key {key}"
         if typ is str:
             assert isinstance(obj[key], str), f"{key} should be str"
+        elif typ is bool:
+            assert isinstance(obj[key], bool), f"{key} should be bool"
         else:
             assert isinstance(obj[key], (str, type(None))), f"{key} should be str or null"
     # id must be UUID format
@@ -60,6 +63,7 @@ def test_create_session_201(client: TestClient) -> None:
     _assert_session_object(data)
     assert data["name"] is None
     assert data["external_link"] is None
+    assert data["is_pinned"] is False
 
 
 def test_create_session_with_body(client: TestClient) -> None:
@@ -120,6 +124,17 @@ def test_update_session_200(client: TestClient) -> None:
     _assert_session_object(data)
     assert data["name"] == "new"
     assert data["external_link"] == "https://old.com"
+
+
+def test_update_session_pin_flag(client: TestClient) -> None:
+    create = client.post("/sessions", json={"name": "old"})
+    assert create.status_code == 201
+    sid = create.json()["id"]
+
+    response = client.patch(f"/sessions/{sid}", json={"is_pinned": True})
+
+    assert response.status_code == 200
+    assert response.json()["is_pinned"] is True
 
 
 def test_update_session_404(client: TestClient) -> None:

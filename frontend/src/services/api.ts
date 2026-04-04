@@ -129,7 +129,11 @@ export async function getSession(id: string): Promise<Session> {
 }
 
 export type CreateSessionBody = { name?: string | null; external_link?: string | null };
-export type PatchSessionBody = { name?: string | null; external_link?: string | null };
+export type PatchSessionBody = {
+  name?: string | null;
+  external_link?: string | null;
+  is_pinned?: boolean;
+};
 
 export async function createSession(body: CreateSessionBody = {}): Promise<Session> {
   return apiFetch<Session>('/sessions', {

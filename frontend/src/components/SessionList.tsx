@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { format, parseISO } from 'date-fns';
-import { Check, Pencil } from 'lucide-react';
+import { Check, Pencil, Pin, PinOff } from 'lucide-react';
 import type { Session } from '../lib/schemas';
-import { useSessionsList } from '../hooks/useSessions';
+import { usePatchSession, useSessionsList } from '../hooks/useSessions';
 import { useCurrentSession } from '../contexts/SessionContext';
 
 const SESSIONS_BATCH_SIZE = 10;
@@ -18,6 +18,7 @@ function SessionListItem({
   onSelect: () => void;
   onEdit: () => void;
 }) {
+  const patchSession = usePatchSession();
   const createdAt = (() => {
     try {
       return format(parseISO(session.created_at), 'MMM d, yyyy HH:mm');
@@ -36,7 +37,10 @@ function SessionListItem({
       data-current={isCurrent}
     >
       <div className="font-medium truncate" title={session.name ?? session.id}>
-        {session.name || `Session ${session.id.slice(0, 8)}`}
+        <span className="inline-flex items-center gap-1">
+          {session.name || `Session ${session.id.slice(0, 8)}`}
+          {session.is_pinned ? <Pin size={14} aria-label="Pinned session" /> : null}
+        </span>
       </div>
       <div className="text-base-content/60 mt-0.5">{createdAt}</div>
       {session.external_link ? (
@@ -70,6 +74,21 @@ function SessionListItem({
           <Pencil size={18} aria-hidden />
           Edit
         </button>
+        <button
+          type="button"
+          className="btn btn-xs btn-ghost flex items-center gap-1"
+          onClick={() =>
+            patchSession.mutate({
+              id: session.id,
+              body: { is_pinned: !session.is_pinned },
+            })
+          }
+          aria-label={session.is_pinned ? 'Unpin session' : 'Pin session'}
+          disabled={patchSession.isPending}
+        >
+          {session.is_pinned ? <PinOff size={18} aria-hidden /> : <Pin size={18} aria-hidden />}
+          {session.is_pinned ? 'Unpin' : 'Pin'}
+        </button>
       </div>
     </div>
   );
@@ -98,6 +117,15 @@ export function SessionList({
   const [visibleCount, setVisibleCount] = useState<number>(SESSIONS_BATCH_SIZE);
 
   const sessions = data?.sessions ?? [];
+  useEffect(() => {
+    if (
+      data &&
+      currentSessionId &&
+      !sessions.some((session) => session.id === currentSessionId)
+    ) {
+      setCurrentSessionId(null);
+    }
+  }, [currentSessionId, data, sessions, setCurrentSessionId]);
   const filteredSessions = useMemo(
     () => filterSessionsByQuery(sessions, searchQuery),
     [sessions, searchQuery]

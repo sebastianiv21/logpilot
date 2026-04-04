@@ -17,7 +17,7 @@ Local-first log investigation platform: upload compressed log archives, parse an
    # Edit .env and set LLM_API_KEY (and optionally LLM_BASE_URL, LLM_MODEL)
    ```
 
-2. **Start the stack** (Loki, Prometheus, Grafana, Qdrant, backend):
+2. **Start the stack** (Loki, Prometheus, Grafana, PostgreSQL, backend):
 
    ```bash
    docker compose up -d
@@ -45,8 +45,10 @@ For detailed steps (knowledge ingest, report generation, export), see **[Quickst
 | `EMBEDDING_MODEL` | No | Embedding model (default: `text-embedding-3-small`) |
 | `LOKI_URL` | No* | Loki URL (default: `http://localhost:3100`) |
 | `PROMETHEUS_URL` | No* | Prometheus URL (default: `http://localhost:9090`) |
-| `QDRANT_URL` | No* | Qdrant URL (default: `http://localhost:6333`) |
-| `DATA_DIR` | No | Directory for SQLite and temp files (default: `./data`) |
+| `SESSION_RETENTION_ENABLED` | No | Enable automatic retention cleanup (default: `true`) |
+| `SESSION_RETENTION_MAX_COUNT` | No | Keep at most this many newest unpinned sessions; `0` or less disables count cleanup (default: `20`) |
+| `SESSION_RETENTION_MAX_AGE_DAYS` | No | Delete unpinned sessions older than this many days; `0` or less disables age cleanup (default: `30`) |
+| `PROMETHEUS_RETENTION_TIME` | No | Global Prometheus retention window used by Docker Compose (default: `30d`) |
 | `KNOWLEDGE_CODE_SOURCES` | No | Comma-separated paths for code ingest |
 | `KNOWLEDGE_DOC_SOURCES` | No | Comma-separated paths for documentation ingest |
 | `KNOWLEDGE_MOUNT_ROOT` | No | Docker: common parent path mounted at `/knowledge` for code/docs sources |
@@ -60,11 +62,13 @@ Copy `.env.example` to `.env` and set the values you need.
 Useful when developing; infrastructure can still run in Docker:
 
 ```bash
-docker compose up -d loki prometheus grafana qdrant
+docker compose up -d loki prometheus grafana postgres
 cd backend && uv run fastapi dev app/main.py
 ```
 
 Set `LOKI_URL` and `PROMETHEUS_URL` in `.env` to `http://localhost:3100`, etc.
+
+Pinned sessions are excluded from automatic cleanup. Unpinned sessions are cleaned up on backend startup and after successful or partial uploads using the count and age limits above.
 
 ## Running tests
 

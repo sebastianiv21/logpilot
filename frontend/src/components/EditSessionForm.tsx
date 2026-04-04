@@ -23,6 +23,7 @@ export function EditSessionForm({ session, onSuccess, onCancel }: Props) {
     defaultValues: {
       name: session.name ?? '',
       external_link: session.external_link ?? '',
+      is_pinned: session.is_pinned,
     },
   });
 
@@ -33,6 +34,7 @@ export function EditSessionForm({ session, onSuccess, onCancel }: Props) {
         body: {
           name: data.name?.trim() || null,
           external_link: data.external_link?.trim() || null,
+          is_pinned: !!data.is_pinned,
         },
       },
       { onSuccess: () => onSuccess?.() }
@@ -77,6 +79,14 @@ export function EditSessionForm({ session, onSuccess, onCancel }: Props) {
           </p>
         )}
       </div>
+      <label className="label cursor-pointer justify-start gap-3 rounded-lg border border-base-300 px-3 py-2">
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm"
+          {...register('is_pinned')}
+        />
+        <span className="text-sm">Pin this session to protect it from automatic cleanup</span>
+      </label>
       <div className="flex gap-2 pt-1">
         <button
           type="submit"

@@ -82,9 +82,14 @@ def initialize_schema() -> None:
                 id          TEXT PRIMARY KEY,
                 name        TEXT,
                 external_link TEXT,
+                is_pinned   BOOLEAN NOT NULL DEFAULT FALSE,
                 created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
             );
+        """)
+        conn.execute("""
+            ALTER TABLE sessions
+            ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN NOT NULL DEFAULT FALSE;
         """)
 
         # Reports

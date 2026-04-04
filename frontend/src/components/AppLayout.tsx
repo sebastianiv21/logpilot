@@ -1,7 +1,9 @@
-import { useState, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { FolderOpen, Pencil, ScrollText, Search } from 'lucide-react'
 import type { Session } from '../lib/schemas'
+import { useCurrentSession } from '../contexts/SessionContext'
+import { useSessionsList } from '../hooks/useSessions'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import { SessionList } from './SessionList'
@@ -14,6 +16,8 @@ const SEARCH_DEBOUNCE_MS = 200
 
 export function AppLayout() {
   const location = useLocation()
+  const { data: sessionsData } = useSessionsList()
+  const { currentSessionId, setCurrentSessionId } = useCurrentSession()
   const [editingSession, setEditingSession] = useState<Session | null>(null)
   const [sessionSearchRaw, setSessionSearchRaw] = useState('')
   const sessionSearchDebounced = useDebouncedValue(
@@ -23,6 +27,17 @@ export function AppLayout() {
   const editModalRef = useRef<HTMLDivElement>(null)
   useFocusTrap(!!editingSession, editModalRef, () => setEditingSession(null))
   const isKnowledgePage = location.pathname === '/knowledge'
+
+  useEffect(() => {
+    const sessions = sessionsData?.sessions
+    if (
+      sessions &&
+      currentSessionId &&
+      !sessions.some((session) => session.id === currentSessionId)
+    ) {
+      setCurrentSessionId(null)
+    }
+  }, [currentSessionId, sessionsData, setCurrentSessionId])
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">

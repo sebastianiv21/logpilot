@@ -9,6 +9,7 @@ export const SessionSchema = z.object({
   id: z.string(),
   name: z.string().nullable(),
   external_link: z.string().nullable(),
+  is_pinned: z.boolean(),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -30,6 +31,7 @@ export type CreateSessionFormValues = z.infer<typeof CreateSessionFormSchema>;
 export const EditSessionFormSchema = z.object({
   name: z.string().max(500).optional().or(z.literal('')),
   external_link: z.string().max(2000).optional().or(z.literal('')),
+  is_pinned: z.boolean().optional(),
 });
 export type EditSessionFormValues = z.infer<typeof EditSessionFormSchema>;
 

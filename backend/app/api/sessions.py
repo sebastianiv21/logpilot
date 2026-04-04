@@ -15,6 +15,7 @@ class SessionResponse(BaseModel):
     id: str
     name: str | None
     external_link: str | None
+    is_pinned: bool
     created_at: str
     updated_at: str
 
@@ -33,6 +34,7 @@ class SessionCreateBody(BaseModel):
 class SessionUpdateBody(BaseModel):
     name: str | None = None
     external_link: str | None = None
+    is_pinned: bool | None = None
 
 
 @router.get("", response_model=SessionListResponse)
@@ -65,7 +67,12 @@ def get_session(session_id: str) -> SessionResponse:
 def update_session(session_id: str, body: SessionUpdateBody | None = None) -> SessionResponse:
     """PATCH /sessions/{session_id} — partial update (name, external_link). 404 if not found."""
     body = body or SessionUpdateBody()
-    session = _repo.update(session_id, name=body.name, external_link=body.external_link)
+    session = _repo.update(
+        session_id,
+        name=body.name,
+        external_link=body.external_link,
+        is_pinned=body.is_pinned,
+    )
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
     return SessionResponse.model_validate(session.to_api())

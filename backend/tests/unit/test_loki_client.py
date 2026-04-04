@@ -29,6 +29,10 @@ class _FakeClient:
         self._posted_payloads.append({"url": url, "json": json})
         return self._responses.pop(0)
 
+    def post_with_params(self, url: str, params: dict) -> _FakeResponse:
+        self._posted_payloads.append({"url": url, "params": params})
+        return self._responses.pop(0)
+
 
 def test_push_logs_splits_large_payloads_into_multiple_batches(monkeypatch) -> None:
     entries = [("1", "a" * 600), ("2", "b" * 600), ("3", "c" * 600)]
@@ -135,3 +139,33 @@ def test_push_logs_splits_oversized_single_entry(monkeypatch) -> None:
     assert values[0][1].endswith(loki_client.ENTRY_SPLIT_SUFFIX)
     assert len(values[0][1].encode("utf-8")) + loki_client.ENTRY_OVERHEAD_BYTES <= 700
     assert len(values[1][1].encode("utf-8")) + loki_client.ENTRY_OVERHEAD_BYTES <= 700
+
+
+def test_delete_logs_posts_delete_request_for_session_selector(monkeypatch) -> None:
+    posted_payloads: list[dict] = []
+    responses = [_FakeResponse(204)]
+
+    class DeleteClient(_FakeClient):
+        def post(self, url: str, params: dict) -> _FakeResponse:  # type: ignore[override]
+            self._posted_payloads.append({"url": url, "params": params})
+            return self._responses.pop(0)
+
+    monkeypatch.setattr(loki_client.config, "LOKI_URL", "http://example.test")
+    monkeypatch.setattr(
+        loki_client.httpx,
+        "Client",
+        lambda timeout: DeleteClient(responses, posted_payloads),
+    )
+
+    loki_client.delete_logs(session_id="abc", start_ns=10, end_ns=20)
+
+    assert posted_payloads == [
+        {
+            "url": "http://example.test/loki/api/v1/delete",
+            "params": {
+                "query": '{session_id="abc"}',
+                "start": "10",
+                "end": "20",
+            },
+        }
+    ]

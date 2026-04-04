@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from datetime import UTC, datetime
 
 import httpx
 
@@ -10,6 +11,7 @@ from app.lib.config import config
 
 LOKI_PUSH_PATH = "/loki/api/v1/push"
 LOKI_QUERY_RANGE_PATH = "/loki/api/v1/query_range"
+LOKI_DELETE_PATH = "/loki/api/v1/delete"
 ENTRY_OVERHEAD_BYTES = 128
 ENTRY_SPLIT_SUFFIX = "\n[logpilot split]"
 
@@ -249,3 +251,23 @@ def get_log_time_range_ns(
         return None
     timestamps = [r["timestamp_ns"] for r in records]
     return (min(timestamps), max(timestamps))
+
+
+def delete_logs(
+    *,
+    session_id: str,
+    start_ns: int = 0,
+    end_ns: int | None = None,
+    base_url: str | None = None,
+    timeout: float = 10.0,
+) -> None:
+    """Submit a delete request for all logs tied to a session id."""
+    url = (base_url or config.LOKI_URL).rstrip("/") + LOKI_DELETE_PATH
+    params = {
+        "query": f'{{session_id="{session_id}"}}',
+        "start": str(max(0, start_ns)),
+        "end": str(end_ns if end_ns is not None else int(datetime.now(UTC).timestamp() * 1_000_000_000)),
+    }
+    with httpx.Client(timeout=timeout) as client:
+        resp = client.post(url, params=params)
+        resp.raise_for_status()
