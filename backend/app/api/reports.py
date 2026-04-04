@@ -5,13 +5,20 @@ from __future__ import annotations
 import logging
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
-from fastapi.responses import PlainTextResponse, Response
+from fastapi.responses import PlainTextResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
+from starlette.background import BackgroundTask
 
 from app.lib.config import config
 from app.lib.repositories import ReportRepository, SessionRepository
 from app.services.agent import generate_incident_report
-from app.services.export import export_markdown, export_pdf
+from app.services.export import (
+    PDFExportRenderError,
+    PDFExportTooLargeError,
+    export_markdown,
+    export_pdf_to_file,
+    iter_pdf_chunks,
+)
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/sessions", tags=["sessions", "reports"])
@@ -111,6 +118,15 @@ def _run_report_generation(session_id: str, report_id: str, question: str) -> No
         repo.update_content(report_id, session_id, error_msg)
 
 
+def _log_pdf_export(report_id: str, outcome: str, **fields: object) -> None:
+    logger.info(
+        "pdf_export report_id=%s outcome=%s %s",
+        report_id,
+        outcome,
+        " ".join(f"{key}={value}" for key, value in fields.items()),
+    )
+
+
 @router.post(
     "/{session_id}/reports/generate",
     response_model=GenerateReportResponse,
@@ -123,7 +139,8 @@ def generate_report(
 ) -> GenerateReportResponse:
     """
     Start incident report generation (async). Returns immediately with report id.
-    Poll GET /sessions/{session_id}/reports/{report_id} for content; empty content means still generating.
+    Poll GET /sessions/{session_id}/reports/{report_id} for content;
+    empty content means still generating.
     """
     if _session_repo.get(session_id) is None:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -163,23 +180,66 @@ def export_report(
     if not (report.content or "").strip():
         raise HTTPException(
             status_code=409,
-            detail="Report not yet generated; poll GET .../reports/{report_id} until content is present",
+            detail=(
+                "Report not yet generated; poll GET .../reports/{report_id} "
+                "until content is present"
+            ),
         )
     if format == "markdown":
         content = export_markdown(report.content)
         return PlainTextResponse(content=content, media_type="text/markdown")
     if format == "pdf":
         try:
-            pdf_bytes = export_pdf(report.content)
-        except Exception as e:
+            result = export_pdf_to_file(report.content)
+        except PDFExportTooLargeError as e:
+            _log_pdf_export(
+                report_id,
+                "rejected",
+                report_chars=e.stats.report_chars,
+                code_fence_count=e.stats.code_fence_count,
+                code_block_line_count=e.stats.code_block_line_count,
+                block_count=e.stats.block_count,
+                flowable_count=e.stats.flowable_count,
+                duration_ms=f"{e.stats.duration_ms:.2f}",
+                rss_kb_before=e.stats.rss_kb_before,
+                rss_kb_after=e.stats.rss_kb_after,
+            )
+            raise HTTPException(status_code=413, detail=e.detail) from e
+        except PDFExportRenderError as e:
+            _log_pdf_export(
+                report_id,
+                "failed",
+                report_chars=e.stats.report_chars,
+                code_fence_count=e.stats.code_fence_count,
+                code_block_line_count=e.stats.code_block_line_count,
+                block_count=e.stats.block_count,
+                flowable_count=e.stats.flowable_count,
+                duration_ms=f"{e.stats.duration_ms:.2f}",
+                rss_kb_before=e.stats.rss_kb_before,
+                rss_kb_after=e.stats.rss_kb_after,
+            )
             logger.exception("PDF export failed for report_id=%s", report_id)
             raise HTTPException(
                 status_code=503,
                 detail=PDF_EXPORT_FAILURE_DETAIL,
             ) from e
-        return Response(
-            content=pdf_bytes,
+        _log_pdf_export(
+            report_id,
+            "success",
+            report_chars=result.stats.report_chars,
+            code_fence_count=result.stats.code_fence_count,
+            code_block_line_count=result.stats.code_block_line_count,
+            block_count=result.stats.block_count,
+            flowable_count=result.stats.flowable_count,
+            duration_ms=f"{result.stats.duration_ms:.2f}",
+            rss_kb_before=result.stats.rss_kb_before,
+            rss_kb_after=result.stats.rss_kb_after,
+            output_bytes=result.stats.output_bytes,
+        )
+        return StreamingResponse(
+            iter_pdf_chunks(result.file),
             media_type="application/pdf",
             headers={"Content-Disposition": f'attachment; filename="report-{report_id}.pdf"'},
+            background=BackgroundTask(result.file.close),
         )
     raise HTTPException(status_code=400, detail="format must be markdown or pdf")
