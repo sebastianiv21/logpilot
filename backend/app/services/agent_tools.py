@@ -1,4 +1,9 @@
-"""Agent tools: query_logs, query_metrics, search_docs, search_repo. Read-only, session-scoped."""
+"""Agent tools: query_logs, query_metrics, search_docs, grep_repo, read_file.
+
+All tools are read-only and (where session-relevant) session-scoped. `grep_repo`
+and `read_file` operate on source code on demand via ripgrep — code is no longer
+pre-embedded.
+"""
 
 from __future__ import annotations
 
@@ -8,7 +13,7 @@ from typing import Any
 
 from app.lib import loki_client, prometheus_query
 from app.lib.repositories import SessionRepository
-from app.services import knowledge
+from app.services import code_search, knowledge
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +22,9 @@ LOG_QUERY_LIMIT_MAX = 1000
 SEARCH_LIMIT_MAX = 10
 QUERY_STRING_MAX_LEN = 2000
 
-# Document type filters: docs = markdown/text/config; repo = source
+# Docs (markdown / text / config) are the only document types that remain in the
+# vector store. Source code is searched on demand via grep_repo.
 DOCS_DOCUMENT_TYPES = ["markdown", "rst", "text", "config"]
-REPO_DOCUMENT_TYPE = "source"
 
 
 def _parse_iso_to_ns(iso_str: str) -> int:
@@ -147,38 +152,75 @@ def search_docs(
     }
 
 
-def search_repo(
-    query: str,
-    limit: int = 10,
+def grep_repo(
+    pattern: str,
+    glob: str | None = None,
+    max_results: int = 50,
+    context_lines: int = 2,
 ) -> dict[str, Any]:
     """
-    Semantic search over repository content. Same shape as search_docs.
+    Search source code (ripgrep regex) over configured KNOWLEDGE_CODE_SOURCES.
+    Returns: list of hits with {path, line, snippet, before, after}.
     """
-    if not query or not query.strip():
-        return {"chunks": [], "knowledge_not_available": False}
-    if len(query) > QUERY_STRING_MAX_LEN:
-        return {"chunks": [], "error": "query too long"}
-    limit = min(max(1, limit), SEARCH_LIMIT_MAX)
+    if not pattern or not pattern.strip():
+        return {"hits": [], "code_search_unavailable": False}
+    if len(pattern) > QUERY_STRING_MAX_LEN:
+        return {"hits": [], "error": "pattern too long"}
     try:
-        chunks = knowledge.search_knowledge(
-            query.strip(),
-            limit=limit,
-            document_type_filter=REPO_DOCUMENT_TYPE,
-            source_filter="code",
+        hits = code_search.grep_repo(
+            pattern.strip(),
+            glob=glob,
+            max_results=max_results,
+            context_lines=context_lines,
         )
+    except code_search.RipgrepUnavailableError as e:
+        logger.warning("grep_repo unavailable: %s", e)
+        return {"hits": [], "code_search_unavailable": True, "error": str(e)}
     except Exception as e:
-        logger.warning("search_repo failed: %s", e)
-        return {"chunks": [], "knowledge_not_available": True, "error": "Search failed"}
-    if not chunks:
-        return {"chunks": [], "knowledge_not_available": True}
+        logger.warning("grep_repo failed: %s", e)
+        return {"hits": [], "code_search_unavailable": True, "error": "Grep failed"}
     return {
-        "chunks": [
+        "hits": [
             {
-                "content": c["content"],
-                "source_path": c["source_path"],
-                "metadata": c.get("metadata", {}),
+                "path": h.path,
+                "line": h.line,
+                "snippet": h.snippet,
+                "before": h.before,
+                "after": h.after,
             }
-            for c in chunks
+            for h in hits
         ],
-        "knowledge_not_available": False,
+        "code_search_unavailable": False,
+    }
+
+
+def read_file(
+    path: str,
+    line_start: int = 1,
+    line_end: int | None = None,
+) -> dict[str, Any]:
+    """
+    Read a bounded slice of a source file under the KNOWLEDGE_CODE_SOURCES
+    allowlist. Returns: {path, line_start, line_end, total_lines, content, truncated}.
+    """
+    if not path or not path.strip():
+        return {"error": "path required"}
+    try:
+        slice_ = code_search.read_file(
+            path.strip(), line_start=line_start, line_end=line_end
+        )
+    except code_search.OutsideAllowlistError as e:
+        return {"error": f"Path not in allowlist: {e}"}
+    except FileNotFoundError as e:
+        return {"error": str(e)}
+    except Exception as e:
+        logger.warning("read_file failed: %s", e)
+        return {"error": "Read failed"}
+    return {
+        "path": slice_.path,
+        "line_start": slice_.line_start,
+        "line_end": slice_.line_end,
+        "total_lines": slice_.total_lines,
+        "content": slice_.content,
+        "truncated": slice_.truncated,
     }

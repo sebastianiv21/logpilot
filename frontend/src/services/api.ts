@@ -213,7 +213,7 @@ export async function getLogsRange(sessionId: string): Promise<LogsRangeResponse
 // --- Knowledge (contracts/api.md) ---
 
 export type KnowledgeIngestBody = {
-  source: 'code' | 'docs';
+  source: 'docs';
   mode?: 'incremental' | 'force';
 };
 
@@ -239,7 +239,7 @@ export async function getKnowledgeSourcesStatus(): Promise<KnowledgeSourcesStatu
 export type KnowledgeSearchBody = {
   query: string;
   limit?: number;
-  source_filter?: 'all' | 'code' | 'docs';
+  source_filter?: 'all' | 'docs';
 };
 
 /** POST /knowledge/search — semantic search; returns chunks with content, source_path, metadata. */

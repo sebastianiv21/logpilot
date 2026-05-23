@@ -69,6 +69,11 @@ class Config:
 
     @property
     def knowledge_code_sources(self) -> list[Path]:
+        """Allowlist for on-demand code search (grep_repo, read_file).
+
+        These paths are NOT pre-indexed or embedded; they bound what the agent's
+        ripgrep-based tools are allowed to reach at query time.
+        """
         raw = os.environ.get("KNOWLEDGE_CODE_SOURCES", "").strip()
         return self._split_paths(raw) if raw else []
 
@@ -79,8 +84,8 @@ class Config:
 
     @property
     def knowledge_sources_by_key(self) -> dict[str, list[Path]]:
+        """Ingestable knowledge sources (docs only; code is queried on demand)."""
         return {
-            "code": self.knowledge_code_sources,
             "docs": self.knowledge_doc_sources,
         }
 

@@ -22,9 +22,7 @@ function ChunkCard({ chunk }: { chunk: KnowledgeSearchChunk }) {
   return (
     <div className="card bg-base-200 border border-base-300 overflow-hidden">
       <div className="card-body p-3">
-        <div className="badge badge-outline badge-sm w-fit">
-          {chunk.source_key === 'code' ? 'Code' : 'Docs'}
-        </div>
+        <div className="badge badge-outline badge-sm w-fit">Docs</div>
         <p className="text-sm whitespace-pre-wrap break-words">{chunk.content}</p>
         <p className="text-xs text-base-content/60 mt-1 font-mono">
           {chunk.source_path}
@@ -43,7 +41,6 @@ export function KnowledgeSearch() {
   const { data: sourcesStatus } = useKnowledgeSourcesStatus()
   const searchMutation = useKnowledgeSearch()
   const [visibleCount, setVisibleCount] = useState(KB_SEARCH_BATCH_SIZE)
-  const [sourceFilter, setSourceFilter] = useState<'all' | 'code' | 'docs'>('all')
 
   const form = useForm<KnowledgeSearchFormValues>({
     resolver: zodResolver(KnowledgeSearchFormSchema),
@@ -75,7 +72,7 @@ export function KnowledgeSearch() {
     searchMutation.mutate({
       query: values.query.trim(),
       limit: 50,
-      source_filter: sourceFilter,
+      source_filter: 'docs',
     })
   })
 
@@ -127,19 +124,6 @@ export function KnowledgeSearch() {
           {searchMutation.isPending ? 'Searching…' : 'Search'}
         </button>
       </form>
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Knowledge source filters">
-        {(['all', 'code', 'docs'] as const).map((option) => (
-          <button
-            key={option}
-            type="button"
-            className={`btn btn-sm ${sourceFilter === option ? 'btn-primary' : 'btn-ghost'}`}
-            onClick={() => setSourceFilter(option)}
-          >
-            {option === 'all' ? 'All' : option === 'code' ? 'Code' : 'Docs'}
-          </button>
-        ))}
-      </div>
-
       {searchMutation.isError && (
         <div className="alert alert-error" role="alert">
           <span>{searchMutation.error?.message ?? 'Couldn\'t search'}</span>

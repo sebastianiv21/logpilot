@@ -124,7 +124,7 @@ export type ReportGenerateFormValues = z.infer<typeof ReportGenerateFormSchema>;
 
 // --- Knowledge ---
 export const KnowledgeSourceStatusSchema = z.object({
-  source_key: z.enum(['code', 'docs']),
+  source_key: z.enum(['docs']),
   display_name: z.string(),
   configured_paths: z.array(z.string()),
   status: z.enum(['idle', 'running', 'ready', 'failed']),
@@ -149,7 +149,7 @@ export type KnowledgeSourcesStatus = z.infer<typeof KnowledgeSourcesStatusSchema
 export const KnowledgeSearchChunkSchema = z.object({
   content: z.string(),
   source_path: z.string(),
-  source_key: z.enum(['code', 'docs']).optional().default('docs'),
+  source_key: z.enum(['docs']).optional().default('docs'),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type KnowledgeSearchChunk = z.infer<typeof KnowledgeSearchChunkSchema>;
