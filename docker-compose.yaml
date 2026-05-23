@@ -84,11 +84,17 @@ services:
       LOKI_URL: http://loki:3100
       PROMETHEUS_URL: http://prometheus:9090
       DATABASE_URL: postgresql://logpilot:logpilot@postgres:5432/logpilot
+      # Container-side knowledge paths are fixed. Configure the host-side
+      # source dirs via KNOWLEDGE_CODE_HOST_PATH / KNOWLEDGE_DOC_HOST_PATH in .env.
+      KNOWLEDGE_CODE_SOURCES: /knowledge/code
+      KNOWLEDGE_DOC_SOURCES: /knowledge/docs
     env_file:
       - .env
     volumes:
-      # Mount the common parent for configured knowledge paths; entrypoint rewrites code/doc paths to /knowledge
-      - ${KNOWLEDGE_MOUNT_ROOT:-./knowledge}:/knowledge:ro
+      # Two independent bind mounts. Defaults to in-repo empty dirs so compose
+      # still boots without any knowledge configured.
+      - ${KNOWLEDGE_CODE_HOST_PATH:-./knowledge/code}:/knowledge/code:ro
+      - ${KNOWLEDGE_DOC_HOST_PATH:-./knowledge/docs}:/knowledge/docs:ro
     deploy:
       resources:
         limits:

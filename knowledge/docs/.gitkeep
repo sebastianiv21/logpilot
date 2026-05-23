@@ -1,0 +1,3 @@
+# Default empty mount for KNOWLEDGE_DOC_HOST_PATH. Set the env var to point
+# at a real host directory; otherwise this empty dir is mounted at
+# /knowledge/docs inside the backend container.
