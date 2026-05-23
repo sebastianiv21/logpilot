@@ -69,3 +69,43 @@ async def test_list_sessions_uses_repository():
         result = await mcp.call_tool("list_sessions", {})
         assert result is not None
         mocked_repo.return_value.list_all.assert_called_once()
+
+
+class TestEntrypointDatabaseSetup:
+    """The stdio entrypoint must mirror the FastAPI lifespan: init the DB at
+    startup, close the pool at shutdown — but never abort startup if the DB is
+    unavailable, so grep_repo / read_file remain usable for lightweight tests.
+    """
+
+    def test_setup_database_returns_true_on_success(self):
+        from app.mcp_server import __main__ as entrypoint
+
+        with patch.object(entrypoint, "initialize_schema") as init_schema, \
+             patch.object(entrypoint, "init_pool") as init_pool:
+            assert entrypoint._setup_database() is True
+            init_schema.assert_called_once()
+            init_pool.assert_called_once()
+
+    def test_setup_database_returns_false_when_db_unavailable(self, caplog):
+        from app.mcp_server import __main__ as entrypoint
+
+        with patch.object(
+            entrypoint, "initialize_schema",
+            side_effect=RuntimeError("DATABASE_URL is not set"),
+        ):
+            assert entrypoint._setup_database() is False
+        # Warning must mention which tools degrade.
+        assert any(
+            "grep_repo" in record.message and "read_file" in record.message
+            for record in caplog.records
+        )
+
+    def test_main_closes_pool_even_when_run_raises(self):
+        from app.mcp_server import __main__ as entrypoint
+
+        with patch.object(entrypoint, "_setup_database", return_value=True), \
+             patch.object(entrypoint.mcp, "run", side_effect=KeyboardInterrupt), \
+             patch.object(entrypoint, "close_pool") as close:
+            with pytest.raises(KeyboardInterrupt):
+                entrypoint.main()
+            close.assert_called_once()
