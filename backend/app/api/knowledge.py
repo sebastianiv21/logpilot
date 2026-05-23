@@ -18,9 +18,13 @@ knowledge_repo = KnowledgeRepository()
 
 
 class IngestRequest(BaseModel):
-    """Request body for starting ingest of one configured source."""
+    """Request body for starting ingest of one configured source.
 
-    source: Literal["code", "docs"] = Field(..., description="Knowledge source to ingest")
+    Source code is no longer ingested; use grep_repo / read_file agent tools
+    instead. Only documentation flows through the embeddings pipeline now.
+    """
+
+    source: Literal["docs"] = Field(..., description="Knowledge source to ingest")
     mode: Literal["incremental", "force"] = Field(
         default="incremental",
         description="Incremental skips unchanged files; force refreshes the selected source",
@@ -41,7 +45,7 @@ class SearchRequest(BaseModel):
 
     query: str = Field(..., min_length=1, description="Search query")
     limit: int = Field(default=10, ge=1, le=100, description="Max chunks to return")
-    source_filter: Literal["all", "code", "docs"] = Field(
+    source_filter: Literal["all", "docs"] = Field(
         default="all",
         description="Filter results to one knowledge source or search all",
     )
@@ -65,7 +69,7 @@ class SearchResponse(BaseModel):
 class KnowledgeSourceStatus(BaseModel):
     """Persisted status for one knowledge source."""
 
-    source_key: Literal["code", "docs"]
+    source_key: Literal["docs"]
     display_name: str
     configured_paths: list[str]
     status: Literal["idle", "running", "ready", "failed"]

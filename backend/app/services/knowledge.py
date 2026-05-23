@@ -1,4 +1,9 @@
-"""Chunking and embedding for persisted code/docs knowledge sources."""
+"""Chunking and embedding for persisted documentation knowledge sources.
+
+Source code is no longer embedded — it's queried on demand via grep_repo /
+read_file (see app/services/code_search.py). Only docs (markdown / text / yaml
+/ json / etc.) flow through this module.
+"""
 
 from __future__ import annotations
 
@@ -16,38 +21,7 @@ from app.lib.repositories import KnowledgeRepository
 
 logger = logging.getLogger(__name__)
 
-# Repo file extensions (code and config)
-REPO_EXTENSIONS = {
-    ".ts",
-    ".tsx",
-    ".js",
-    ".jsx",
-    ".cjs",
-    ".mjs",
-    ".java",
-    ".py",
-    ".css",
-    ".html",
-    ".sql",
-    ".sh",
-    ".hbs",
-    ".tpl",
-    ".json",
-    ".jsonl",
-    ".yml",
-    ".yaml",
-    ".xml",
-    ".properties",
-    ".md",
-    ".mdx",
-    ".mdc",
-    ".conf",
-    ".cfg",
-    ".aql",
-    ".hurl",
-}
-
-# Docs file extensions (documentation and config)
+# Docs file extensions (documentation, prose, lightweight config)
 DOCS_EXTENSIONS = {
     ".md",
     ".mdx",
@@ -65,16 +39,14 @@ DOCS_EXTENSIONS = {
 }
 
 SOURCE_EXTENSIONS = {
-    "code": REPO_EXTENSIONS,
     "docs": DOCS_EXTENSIONS,
 }
 SOURCE_DISPLAY_NAMES = {
-    "code": "Code",
     "docs": "Documentation",
 }
 
-# Union: ingest all supported file types when needed in tests
-KNOWN_EXTENSIONS = REPO_EXTENSIONS | DOCS_EXTENSIONS
+# Kept for tests / callers that want the universe of ingestable extensions.
+KNOWN_EXTENSIONS = DOCS_EXTENSIONS
 
 DEFAULT_CHUNK_SIZE = 800
 DEFAULT_CHUNK_OVERLAP = 100
@@ -124,30 +96,12 @@ def _chunk_text(text: str, chunk_size: int, overlap: int) -> list[str]:
 
 
 def _document_type(path: Path) -> str:
-    """Derive document_type from path (e.g. markdown, source, docs)."""
+    """Derive document_type from path. Docs-only universe — no 'source' bucket."""
     ext = path.suffix.lower()
-    if ext in (".md", ".markdown", ".mdx", ".mdc", ".rst"):
-        return "markdown" if ext in (".md", ".markdown", ".mdx", ".mdc") else "rst"
-    if ext in (
-        ".py",
-        ".ts",
-        ".tsx",
-        ".js",
-        ".jsx",
-        ".cjs",
-        ".mjs",
-        ".java",
-        ".css",
-        ".html",
-        ".sql",
-        ".sh",
-        ".json",
-        ".jsonl",
-        ".xml",
-        ".aql",
-        ".hurl",
-    ):
-        return "source"
+    if ext in (".md", ".markdown", ".mdx", ".mdc"):
+        return "markdown"
+    if ext == ".rst":
+        return "rst"
     if ext in (".yml", ".yaml", ".toml", ".cfg", ".conf", ".ini", ".properties"):
         return "config"
     return "text"

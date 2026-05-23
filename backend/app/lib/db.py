@@ -202,9 +202,13 @@ def initialize_schema() -> None:
         """)
         conn.execute("""
             INSERT INTO knowledge_sources (source_key, display_name)
-            VALUES ('code', 'Code'), ('docs', 'Documentation')
+            VALUES ('docs', 'Documentation')
             ON CONFLICT (source_key) DO NOTHING;
         """)
+        # Code is no longer ingested — purge any prior 'code' source rows so the
+        # API surface and DB stay in sync. Cascade clears tracked files and chunks.
+        conn.execute("DELETE FROM knowledge_sources WHERE source_key = 'code';")
+        conn.execute("DELETE FROM knowledge_chunks WHERE source_key = 'code';")
 
         conn.commit()
 

@@ -6,7 +6,6 @@ import pytest
 from app.services.knowledge import (
     DOCS_EXTENSIONS,
     KNOWN_EXTENSIONS,
-    REPO_EXTENSIONS,
     _chunk_text,
     _collect_files,
     _document_type,
@@ -38,7 +37,7 @@ class TestChunkText:
 
 
 class TestDocumentType:
-    """Test document_type derivation from file extension."""
+    """Test document_type derivation from file extension. Docs-only universe."""
 
     @pytest.mark.parametrize("ext", [".md", ".mdx", ".mdc", ".markdown"])
     def test_markdown_extensions(self, ext):
@@ -46,10 +45,6 @@ class TestDocumentType:
 
     def test_rst_is_rst(self):
         assert _document_type(Path("readme.rst")) == "rst"
-
-    @pytest.mark.parametrize("ext", [".py", ".ts", ".tsx", ".js", ".jsx", ".java", ".sql", ".json"])
-    def test_source_extensions(self, ext):
-        assert _document_type(Path(f"src{ext}")) == "source"
 
     @pytest.mark.parametrize("ext", [".yml", ".yaml", ".cfg", ".conf", ".ini", ".properties"])
     def test_config_extensions(self, ext):
@@ -61,25 +56,19 @@ class TestDocumentType:
 
 
 class TestFileExtensions:
-    """Test repo vs docs extension sets."""
+    """Test docs extension set (code is no longer ingested)."""
 
-    def test_repo_and_docs_defined(self):
-        assert len(REPO_EXTENSIONS) >= 20
+    def test_docs_defined(self):
         assert len(DOCS_EXTENSIONS) >= 10
 
-    def test_known_is_union(self):
-        assert KNOWN_EXTENSIONS == REPO_EXTENSIONS | DOCS_EXTENSIONS
-
-    def test_common_repo_extensions_included(self):
-        assert ".ts" in REPO_EXTENSIONS
-        assert ".tsx" in REPO_EXTENSIONS
-        assert ".py" in REPO_EXTENSIONS
-        assert ".md" in REPO_EXTENSIONS
+    def test_known_equals_docs(self):
+        assert KNOWN_EXTENSIONS == DOCS_EXTENSIONS
 
     def test_docs_specific_included(self):
         assert ".txt" in DOCS_EXTENSIONS
         assert ".ini" in DOCS_EXTENSIONS
         assert ".svg" in DOCS_EXTENSIONS
+        assert ".md" in DOCS_EXTENSIONS
 
 
 class TestCollectFiles:
@@ -87,25 +76,23 @@ class TestCollectFiles:
 
     def test_collects_matching_extensions(self, tmp_path):
         (tmp_path / "readme.md").write_text("# Doc")
-        (tmp_path / "script.py").write_text("print(1)")
         (tmp_path / "notes.txt").write_text("notes")
+        (tmp_path / "script.py").write_text("print(1)")  # .py is no longer ingested
         (tmp_path / "binary.foo").write_bytes(b"\x00\x01")
         found = _collect_files([tmp_path])
         exts = {p.suffix.lower() for p in found}
         assert ".md" in exts
-        assert ".py" in exts
         assert ".txt" in exts
+        assert ".py" not in exts
         assert ".foo" not in exts
-        assert len(found) == 3
+        assert len(found) == 2
 
     def test_collects_only_allowed_extensions_for_source(self, tmp_path):
         (tmp_path / "readme.md").write_text("# Doc")
         (tmp_path / "script.py").write_text("print(1)")
         docs_only = _collect_files([tmp_path], DOCS_EXTENSIONS)
-        repo_only = _collect_files([tmp_path], REPO_EXTENSIONS)
 
         assert {path.name for path in docs_only} == {"readme.md"}
-        assert {path.name for path in repo_only} == {"readme.md", "script.py"}
 
     def test_single_file_source(self, tmp_path):
         md_file = tmp_path / "one.md"

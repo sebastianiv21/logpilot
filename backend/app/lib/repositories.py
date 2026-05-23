@@ -345,7 +345,6 @@ class KnowledgeRepository:
     """Persistence for knowledge source status and file-level ingest bookkeeping."""
 
     SOURCE_DEFINITIONS = {
-        "code": "Code",
         "docs": "Documentation",
     }
 
