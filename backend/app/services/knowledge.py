@@ -15,9 +15,8 @@ from typing import Any
 from openai import OpenAI
 
 from app.lib.config import config
-from app.lib.pg_vector_store import delete_all, delete_file, upsert_chunks
-from app.lib.pg_vector_store import search as pg_search
 from app.lib.repositories import KnowledgeRepository
+from app.lib.vector_store import VectorSearchFilters, get_vector_store
 
 logger = logging.getLogger(__name__)
 
@@ -185,9 +184,10 @@ def ingest(source_key: str, *, mode: str = "incremental") -> dict[str, Any]:
     files = _collect_files(sources, SOURCE_EXTENSIONS[source_key])
     repo = KnowledgeRepository()
     tracked_files = repo.list_tracked_files(source_key)
+    store = get_vector_store()
 
     if mode == "force":
-        delete_all(source_key)
+        store.delete(source_key=source_key)
         repo.delete_tracked_files_for_source(source_key)
         tracked_files = {}
 
@@ -200,7 +200,7 @@ def ingest(source_key: str, *, mode: str = "incremental") -> dict[str, Any]:
 
     files_deleted = 0
     for stale_path in set(tracked_files) - set(discovered):
-        delete_file(source_key, stale_path)
+        store.delete(source_key=source_key, source_path=stale_path)
         repo.delete_tracked_file(source_key, stale_path)
         files_deleted += 1
 
@@ -214,10 +214,10 @@ def ingest(source_key: str, *, mode: str = "incremental") -> dict[str, Any]:
             files_skipped_unchanged += 1
             continue
 
-        delete_file(source_key, source_path)
+        store.delete(source_key=source_key, source_path=source_path)
         embedded_chunks = _embed_chunks(chunks)
         if embedded_chunks:
-            upsert_chunks(embedded_chunks)
+            store.upsert(embedded_chunks)
         repo.upsert_tracked_file(source_key, source_path, file_hash, len(embedded_chunks))
         files_processed += 1
         chunks_ingested += len(embedded_chunks)
@@ -243,8 +243,11 @@ def search_knowledge(
     source_filter: str | list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """
-    Embed the query and run semantic search; return chunks with content, source_path, metadata.
-    document_type_filter: e.g. "source" for repo only, or ["markdown", "text"] for docs only.
+    Embed the query and run semantic search; return chunks with content,
+    source_path, metadata.
+
+    ``document_type_filter`` narrows by document_type (e.g. ``"markdown"`` or
+    ``["markdown", "text"]``). ``source_filter`` narrows by source_key.
     """
     if not query.strip():
         return []
@@ -255,9 +258,17 @@ def search_knowledge(
     vectors = _get_embeddings(texts)
     if not vectors:
         return []
-    return pg_search(
-        vectors[0],
-        limit=limit,
-        document_type_filter=document_type_filter,
-        source_filter=source_filter,
+
+    filters: VectorSearchFilters = {}
+    if document_type_filter is not None:
+        filters["document_type"] = document_type_filter
+    if source_filter is not None:
+        filters["source_key"] = source_filter
+
+    return list(
+        get_vector_store().search(
+            vectors[0],
+            limit=limit,
+            filters=filters or None,
+        )
     )
