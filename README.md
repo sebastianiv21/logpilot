@@ -49,9 +49,10 @@ For detailed steps (knowledge ingest, report generation, export), see **[Quickst
 | `SESSION_RETENTION_MAX_COUNT` | No | Keep at most this many newest unpinned sessions; `0` or less disables count cleanup (default: `20`) |
 | `SESSION_RETENTION_MAX_AGE_DAYS` | No | Delete unpinned sessions older than this many days; `0` or less disables age cleanup (default: `30`) |
 | `PROMETHEUS_RETENTION_TIME` | No | Global Prometheus retention window used by Docker Compose (default: `30d`) |
-| `KNOWLEDGE_CODE_SOURCES` | No | Comma-separated paths for code ingest |
-| `KNOWLEDGE_DOC_SOURCES` | No | Comma-separated paths for documentation ingest |
-| `KNOWLEDGE_MOUNT_ROOT` | No | Docker: common parent path mounted at `/knowledge` for code/docs sources |
+| `KNOWLEDGE_CODE_HOST_PATH` | No | Docker: host path bind-mounted at `/knowledge/code` (read by `grep_repo` / `read_file`) |
+| `KNOWLEDGE_DOC_HOST_PATH` | No | Docker: host path bind-mounted at `/knowledge/docs` (ingested by the docs pipeline) |
+| `KNOWLEDGE_CODE_SOURCES` | No | Local backend only: comma-separated host paths for code search (Docker sets this to `/knowledge/code` automatically) |
+| `KNOWLEDGE_DOC_SOURCES` | No | Local backend only: comma-separated host paths for docs ingest (Docker sets this to `/knowledge/docs` automatically) |
 
 \* Defaults are correct when running the backend on the host against `docker compose` services; in Docker, the compose file sets URLs to service names.
 
