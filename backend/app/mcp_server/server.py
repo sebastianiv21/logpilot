@@ -27,7 +27,7 @@ from mcp.server.fastmcp import FastMCP
 
 from app.lib.repositories import SessionRepository
 from app.services import agent as agent_service
-from app.services import agent_tools
+from app.services import agent_tools, incident_memory
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +82,37 @@ def search_docs(query: str, limit: int = 10) -> dict[str, Any]:
     """Semantic search over ingested documentation chunks. Returns chunks with
     content, source_path, and metadata. Limit capped at 10."""
     return agent_tools.search_docs(query=query, limit=limit)
+
+
+@mcp.tool()
+def search_past_incidents(
+    query: str,
+    current_session_id: str,
+    limit: int = 5,
+    min_similarity: float = 0.75,
+) -> list[dict[str, Any]]:
+    """Find prior incident reports semantically similar to ``query``,
+    excluding ``current_session_id``. Returns up to ``limit`` matches with
+    session_id, report_id, question, summary, root_cause, created_at,
+    similarity. Empty list when nothing crosses ``min_similarity``."""
+    results = incident_memory.search_past_incidents(
+        query,
+        current_session_id=current_session_id,
+        limit=limit,
+        min_similarity=min_similarity,
+    )
+    return [
+        {
+            "session_id": r.session_id,
+            "report_id": r.report_id,
+            "question": r.question,
+            "summary": r.summary,
+            "root_cause": r.root_cause,
+            "created_at": r.created_at,
+            "similarity": r.similarity,
+        }
+        for r in results
+    ]
 
 
 @mcp.tool()

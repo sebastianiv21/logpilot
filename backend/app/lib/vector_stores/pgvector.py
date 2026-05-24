@@ -96,6 +96,16 @@ class PgVectorStore:
                     where_parts.append("document_type = ANY(%s)")
                     params.append(list(document_type_filter))
 
+            exclude_session_id = filters.get("exclude_session_id")
+            if exclude_session_id is not None:
+                # metadata is a JSONB column; ->> extracts the value as text.
+                # IS DISTINCT FROM handles NULLs cleanly (chunks without a
+                # session_id still match — i.e. they're not excluded).
+                where_parts.append(
+                    "(metadata->>'session_id') IS DISTINCT FROM %s"
+                )
+                params.append(exclude_session_id)
+
             where_clause = (
                 f"WHERE {' AND '.join(where_parts)} " if where_parts else ""
             )

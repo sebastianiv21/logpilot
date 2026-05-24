@@ -148,3 +148,29 @@ class TestMarkdownRenderer:
         out = render_markdown(_minimal_report())
         assert out.endswith("\n")
         assert not out.endswith("\n\n")
+
+    def test_related_past_incidents_section_omitted_when_empty(self) -> None:
+        out = render_markdown(_minimal_report())
+        assert "## Related past incidents" not in out
+
+    def test_related_past_incidents_section_rendered_when_present(self) -> None:
+        from app.services.report_model import RelatedIncident
+
+        report = _minimal_report(
+            related_past_incidents=[
+                RelatedIncident(
+                    session_id="abc-123",
+                    report_id="rep-456",
+                    question="Why did payments fail?",
+                    similarity=0.84,
+                    why_relevant="Same KafkaTimeoutException, same service.",
+                ),
+            ],
+        )
+        out = render_markdown(report)
+        assert "## Related past incidents" in out
+        assert "`abc-123`" in out
+        assert "`rep-456`" in out
+        assert "0.84" in out
+        assert '"Why did payments fail?"' in out
+        assert "Same KafkaTimeoutException" in out

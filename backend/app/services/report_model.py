@@ -20,6 +20,7 @@ REPORT_SECTIONS: tuple[str, ...] = (
     "Next troubleshooting steps",
     "Coding agent fix prompt",
 )
+RELATED_INCIDENTS_SECTION = "Related past incidents"
 
 _NOT_DETERMINED = "*Not determined.*"
 
@@ -50,6 +51,33 @@ class EvidenceItem(BaseModel):
     source: str = Field(
         ...,
         description="Which tool produced it: one of 'logs', 'metrics', 'docs', 'code'.",
+    )
+
+
+class RelatedIncident(BaseModel):
+    """A prior session's investigation flagged as relevant to this one.
+
+    ``session_id`` / ``report_id`` come from search_past_incidents; the agent
+    decides which results to surface, writes ``why_relevant``, and orders them.
+    """
+
+    session_id: str = Field(..., description="Prior session id.")
+    report_id: str = Field(..., description="Prior report id in that session.")
+    question: str = Field(
+        ..., description="Original investigation question from the prior session."
+    )
+    similarity: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Cosine similarity of the prior report's fingerprint to this query.",
+    )
+    why_relevant: str = Field(
+        ...,
+        description=(
+            "Why this prior incident matters to the current one — same symptoms, "
+            "same service, same root cause family. One or two sentences."
+        ),
     )
 
 
@@ -118,6 +146,15 @@ class IncidentReport(BaseModel):
             "Concise implementation prompt for a coding agent. Base it on the "
             "summary + root cause + uncertainty + supporting evidence. Preserve "
             "uncertainty explicitly; do not invent fixes unsupported by evidence."
+        ),
+    )
+    related_past_incidents: list[RelatedIncident] = Field(
+        default_factory=list,
+        description=(
+            "Prior incidents the agent decided are relevant to this one. "
+            "Populate by calling search_past_incidents and filtering the "
+            "results down to genuine matches. Leave empty when no prior "
+            "incident is similar enough to surface."
         ),
     )
 
@@ -195,5 +232,20 @@ def render_markdown(report: IncidentReport) -> str:
         f"## {REPORT_SECTIONS[6]}\n"
         + (report.coding_agent_fix_prompt.strip() or _NOT_DETERMINED)
     )
+
+    if report.related_past_incidents:
+        related_lines: list[str] = []
+        for item in report.related_past_incidents:
+            related_lines.append(
+                f"- Session `{item.session_id}` "
+                f"(report `{item.report_id}`, similarity {item.similarity:.2f}): "
+                f"\"{item.question.strip()}\""
+            )
+            why = item.why_relevant.strip()
+            if why:
+                related_lines.append(f"  - Why relevant: {why}")
+        parts.append(
+            f"## {RELATED_INCIDENTS_SECTION}\n" + "\n".join(related_lines)
+        )
 
     return "\n\n".join(parts).strip() + "\n"

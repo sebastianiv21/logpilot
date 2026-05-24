@@ -17,6 +17,7 @@ EXPECTED_TOOLS = {
     "query_logs",
     "query_metrics",
     "search_docs",
+    "search_past_incidents",
     "grep_repo",
     "read_file",
     "generate_incident_report",
