@@ -30,6 +30,7 @@ class UploadResultResponse(BaseModel):
     session_id: str
     error: str | None = None
     uploaded_file_name: str | None = None
+    uploaded_file_size_bytes: int | None = None
     updated_at: str | None = None
 
 
@@ -57,6 +58,7 @@ def get_upload_summary(session_id: str) -> UploadResultResponse:
         session_id=summary["session_id"],
         error=summary["error"],
         uploaded_file_name=summary.get("uploaded_file_name"),
+        uploaded_file_size_bytes=summary.get("uploaded_file_size_bytes"),
         updated_at=summary.get("updated_at"),
     )
 
@@ -129,6 +131,7 @@ async def upload_logs(
         lines_rejected=result.lines_rejected,
         error=result.error,
         uploaded_file_name=file.filename,
+        uploaded_file_size_bytes=total,
     )
     if result.status in {"success", "partial"}:
         await asyncio.to_thread(run_session_retention_cleanup)
@@ -143,5 +146,6 @@ async def upload_logs(
         session_id=result.session_id,
         error=result.error,
         uploaded_file_name=file.filename,
+        uploaded_file_size_bytes=total,
         updated_at=updated["updated_at"] if updated else None,
     )

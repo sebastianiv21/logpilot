@@ -10,6 +10,19 @@ import { UploadSummaryCharts } from './UploadSummaryCharts';
 
 const MAX_ERROR_LENGTH = 120;
 
+/** Format a byte count as a human-readable string (e.g. "12.3 MB"). */
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ['KB', 'MB', 'GB'];
+  let value = bytes / 1024;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+  return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
 /** Shorten long or noisy upload error messages for toast and inline display. */
 function shortenUploadError(error: string | null): string {
   if (!error || !error.trim()) return 'Upload failed.';
@@ -246,7 +259,11 @@ export function UploadLogs() {
           {(resultForCurrentSession.uploaded_file_name ?? resultForCurrentSession.updated_at) && (
             <p className="text-sm text-base-content/80 mt-1">
               {resultForCurrentSession.uploaded_file_name && (
-                <span>File: {resultForCurrentSession.uploaded_file_name}</span>
+                <span>
+                  File: {resultForCurrentSession.uploaded_file_name}
+                  {typeof resultForCurrentSession.uploaded_file_size_bytes === 'number' &&
+                    ` (${formatBytes(resultForCurrentSession.uploaded_file_size_bytes)})`}
+                </span>
               )}
               {resultForCurrentSession.uploaded_file_name && resultForCurrentSession.updated_at && ' · '}
               {resultForCurrentSession.updated_at && (

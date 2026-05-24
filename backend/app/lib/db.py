@@ -129,6 +129,10 @@ def initialize_schema() -> None:
                 updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
             );
         """)
+        conn.execute("""
+            ALTER TABLE session_upload_summary
+            ADD COLUMN IF NOT EXISTS uploaded_file_size_bytes BIGINT;
+        """)
 
         # Knowledge chunks
         conn.execute(f"""

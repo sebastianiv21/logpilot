@@ -207,7 +207,8 @@ class SessionRepository:
         with get_pool().connection() as conn:
             row = conn.execute(
                 "SELECT session_id, status, files_processed, files_skipped, "
-                "lines_parsed, lines_rejected, error, updated_at, uploaded_file_name "
+                "lines_parsed, lines_rejected, error, updated_at, uploaded_file_name, "
+                "uploaded_file_size_bytes "
                 "FROM session_upload_summary WHERE session_id = %s",
                 (session_id,),
             ).fetchone()
@@ -223,6 +224,7 @@ class SessionRepository:
             "error": row[6],
             "updated_at": _dt_to_iso(row[7]),
             "uploaded_file_name": row[8],
+            "uploaded_file_size_bytes": int(row[9]) if row[9] is not None else None,
         }
 
     def upsert_upload_summary(
@@ -235,14 +237,15 @@ class SessionRepository:
         lines_rejected: int,
         error: str | None = None,
         uploaded_file_name: str | None = None,
+        uploaded_file_size_bytes: int | None = None,
     ) -> None:
         """Insert or update the upload summary for the session (one row per session)."""
         with get_pool().connection() as conn:
             conn.execute(
                 "INSERT INTO session_upload_summary "
                 "(session_id, status, files_processed, files_skipped, lines_parsed, "
-                "lines_rejected, error, uploaded_file_name, updated_at) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW()) "
+                "lines_rejected, error, uploaded_file_name, uploaded_file_size_bytes, updated_at) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW()) "
                 "ON CONFLICT (session_id) DO UPDATE SET "
                 "status = EXCLUDED.status, "
                 "files_processed = EXCLUDED.files_processed, "
@@ -251,10 +254,12 @@ class SessionRepository:
                 "lines_rejected = EXCLUDED.lines_rejected, "
                 "error = EXCLUDED.error, "
                 "uploaded_file_name = EXCLUDED.uploaded_file_name, "
+                "uploaded_file_size_bytes = EXCLUDED.uploaded_file_size_bytes, "
                 "updated_at = EXCLUDED.updated_at",
                 (
                     session_id, status, files_processed, files_skipped,
                     lines_parsed, lines_rejected, error, uploaded_file_name,
+                    uploaded_file_size_bytes,
                 ),
             )
             conn.commit()
