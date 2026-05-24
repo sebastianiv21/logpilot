@@ -172,15 +172,12 @@ if log_level != null {
   .log_level = downcase(log_level) ?? log_level
 }
 
-# ---------- 6. Tag the parser side ----------------------------------------
-.parser = "vector"
 '''
 
 # ---------------------------------------------------------------------------
-# Sink: Loki, with the parser label set so the Python pipeline's pushes stay
-# distinguishable. session_id and service round-trip through labels so the
-# existing UI/agent queries still match. stream is a 2-value label (stdout
-# /stderr) — low-cardinality, high-utility for ops queries.
+# Sink: Loki. session_id and service round-trip through labels so the UI and
+# agent queries can scope to a session. stream is a 2-value label
+# (stdout/stderr) — low-cardinality, high-utility for ops queries.
 # ---------------------------------------------------------------------------
 [sinks.loki]
 type = "loki"
@@ -189,7 +186,6 @@ endpoint = "http://loki:3100"
 encoding.codec = "text"
 labels.session_id = "{{ session_id }}"
 labels.service = "{{ service }}"
-labels.parser = "vector"
 labels.stream = "{{ stream }}"
 labels.source = "vector_file"
 out_of_order_action = "accept"

@@ -37,10 +37,6 @@ vi.mock('../src/contexts/SessionContext', () => ({
   }),
 }))
 
-vi.mock('../src/components/UploadSummaryCharts', () => ({
-  UploadSummaryCharts: () => <div data-testid="upload-summary-charts" />,
-}))
-
 function renderUploadLogs() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -73,8 +69,6 @@ describe('UploadLogs', () => {
       uploaded_file_name: 'logs.zip',
       files_processed: 1,
       files_skipped: 0,
-      lines_parsed: 10,
-      lines_rejected: 0,
       error: null,
       updated_at: '2026-04-03T10:00:00Z',
     })
@@ -139,8 +133,6 @@ describe('UploadLogs', () => {
       uploaded_file_name: 'existing.zip',
       files_processed: 1,
       files_skipped: 0,
-      lines_parsed: 10,
-      lines_rejected: 0,
       error: null,
       updated_at: '2026-04-03T10:00:00Z',
     })

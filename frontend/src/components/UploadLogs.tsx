@@ -6,7 +6,6 @@ import { Upload } from 'lucide-react';
 import { ApiError, getUploadSummary, uploadLogs } from '../services/api';
 import { useCurrentSession } from '../contexts/SessionContext';
 import type { UploadResult } from '../lib/schemas';
-import { UploadSummaryCharts } from './UploadSummaryCharts';
 
 const MAX_ERROR_LENGTH = 120;
 
@@ -253,7 +252,7 @@ export function UploadLogs() {
             {resultForCurrentSession.status === 'failed'
               ? 'Failed'
               : resultForCurrentSession.status === 'partial'
-                ? 'Complete (some files or lines skipped/rejected)'
+                ? 'Complete (some files skipped)'
                 : 'Success'}
           </p>
           {(resultForCurrentSession.uploaded_file_name ?? resultForCurrentSession.updated_at) && (
@@ -274,12 +273,12 @@ export function UploadLogs() {
             </p>
           )}
           {resultForCurrentSession.status !== 'failed' ? (
-            <>
-              <UploadSummaryCharts result={resultForCurrentSession} />
-              <p className="mt-2 text-sm text-base-content/70 sr-only">
-                Files processed: {resultForCurrentSession.files_processed}, skipped: {resultForCurrentSession.files_skipped}. Lines parsed: {resultForCurrentSession.lines_parsed}, rejected: {resultForCurrentSession.lines_rejected}. Parsed coverage: {resultForCurrentSession.lines_parsed + resultForCurrentSession.lines_rejected > 0 ? `${Math.round((resultForCurrentSession.lines_parsed / (resultForCurrentSession.lines_parsed + resultForCurrentSession.lines_rejected)) * 100)}%` : '—'}.
-              </p>
-            </>
+            <p className="mt-2 text-sm text-base-content/70">
+              {resultForCurrentSession.files_processed} log file{resultForCurrentSession.files_processed === 1 ? '' : 's'} ingested
+              {resultForCurrentSession.files_skipped > 0 &&
+                `, ${resultForCurrentSession.files_skipped} skipped`}
+              .
+            </p>
           ) : (
             <p className="mt-2 text-sm">{shortenUploadError(resultForCurrentSession.error)}</p>
           )}

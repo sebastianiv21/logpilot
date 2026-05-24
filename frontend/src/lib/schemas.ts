@@ -41,8 +41,6 @@ export const UploadResultSchema = z.object({
   status: z.enum(['success', 'failed', 'partial']),
   files_processed: z.number(),
   files_skipped: z.number(),
-  lines_parsed: z.number(),
-  lines_rejected: z.number(),
   session_id: z.string(),
   error: z.string().nullable(),
   uploaded_file_name: z.string().nullable().optional(),

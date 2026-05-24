@@ -16,26 +16,6 @@ class Config:
     def __init__(self) -> None:
         # Loki
         self.LOKI_URL: str = os.environ.get("LOKI_URL", "http://localhost:3100").strip().rstrip("/")
-        self.LOKI_PUSH_BATCH_BYTES: int = int(
-            os.environ.get("LOKI_PUSH_BATCH_BYTES", str(1 * 1024 * 1024)).strip() or 1048576
-        )
-        self.LOKI_PUSH_RATE_LIMIT_BYTES_PER_SEC: int = int(
-            os.environ.get("LOKI_PUSH_RATE_LIMIT_BYTES_PER_SEC", "0").strip() or 0
-        )
-        self.LOKI_PUSH_MAX_RETRIES: int = int(
-            os.environ.get("LOKI_PUSH_MAX_RETRIES", "2").strip() or 2
-        )
-        self.LOKI_MAX_ENTRY_BYTES: int = int(
-            os.environ.get("LOKI_MAX_ENTRY_BYTES", str(256 * 1024)).strip() or 262144
-        )
-        # Prometheus
-        self.PROMETHEUS_URL: str = (
-            os.environ.get("PROMETHEUS_URL", "http://localhost:9090").strip().rstrip("/")
-        )
-        self.PROMETHEUS_RETENTION_TIME: str = (
-            os.environ.get("PROMETHEUS_RETENTION_TIME", "30d").strip() or "30d"
-        )
-
         # PostgreSQL
         self.DATABASE_URL: str = os.environ.get("DATABASE_URL", "").strip()
 
@@ -50,22 +30,12 @@ class Config:
             os.environ.get("EMBEDDING_DIMENSION", "1536").strip() or "1536"
         )
 
-        # Vector parser sidecar (dual-write).
-        # Backend drops extracted log files at:
-        #   <VECTOR_LOG_DROP_DIR>/<session_id>/<service>/<filename>
-        # so the Vector container can pick them up. Empty disables the drop.
+        # Vector sidecar drop directory. Backend extracts the uploaded archive
+        # and copies each log file to <VECTOR_LOG_DROP_DIR>/<session_id>/<service>/<filename>;
+        # Vector picks them up via inotify and pushes to Loki. Empty disables
+        # the drop (uploads will succeed but no logs reach Loki).
         self.VECTOR_LOG_DROP_DIR: str = (
             os.environ.get("VECTOR_LOG_DROP_DIR") or ""
-        ).strip()
-        # Python pipeline pushes are tagged with this Loki label so queries can
-        # distinguish them from the Vector sidecar's pushes.
-        self.LOKI_PARSER_LABEL: str = (
-            os.environ.get("LOKI_PARSER_LABEL") or "python"
-        ).strip()
-        # Default `parser` label that query_logs filters on. Flip to "vector"
-        # during cutover; queries explicitly passing parser= override this.
-        self.LOKI_QUERY_PARSER: str = (
-            os.environ.get("LOKI_QUERY_PARSER") or "python"
         ).strip()
 
         # Session retention

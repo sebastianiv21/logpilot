@@ -27,9 +27,9 @@ def _setup_database() -> bool:
     except Exception as exc:
         logger.warning(
             "MCP server starting WITHOUT database connectivity (%s). "
-            "DB-backed tools (query_logs, query_metrics, search_docs, "
-            "list_sessions, get_session, generate_incident_report) will fail; "
-            "grep_repo and read_file remain available.",
+            "DB-backed tools (query_logs, search_docs, list_sessions, "
+            "get_session, generate_incident_report) will fail; grep_repo and "
+            "read_file remain available.",
             exc,
         )
         return False

@@ -123,8 +123,6 @@ def initialize_schema() -> None:
                 status              TEXT NOT NULL DEFAULT 'pending',
                 files_processed     INTEGER NOT NULL DEFAULT 0,
                 files_skipped       INTEGER NOT NULL DEFAULT 0,
-                lines_parsed        INTEGER NOT NULL DEFAULT 0,
-                lines_rejected      INTEGER NOT NULL DEFAULT 0,
                 error               TEXT,
                 updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
             );
@@ -132,6 +130,12 @@ def initialize_schema() -> None:
         conn.execute("""
             ALTER TABLE session_upload_summary
             ADD COLUMN IF NOT EXISTS uploaded_file_size_bytes BIGINT;
+        """)
+        conn.execute("""
+            ALTER TABLE session_upload_summary DROP COLUMN IF EXISTS lines_parsed;
+        """)
+        conn.execute("""
+            ALTER TABLE session_upload_summary DROP COLUMN IF EXISTS lines_rejected;
         """)
 
         # Knowledge chunks
@@ -209,10 +213,6 @@ def initialize_schema() -> None:
             VALUES ('docs', 'Documentation')
             ON CONFLICT (source_key) DO NOTHING;
         """)
-        # Code is no longer ingested — purge any prior 'code' source rows so the
-        # API surface and DB stay in sync. Cascade clears tracked files and chunks.
-        conn.execute("DELETE FROM knowledge_sources WHERE source_key = 'code';")
-        conn.execute("DELETE FROM knowledge_chunks WHERE source_key = 'code';")
 
         conn.commit()
 

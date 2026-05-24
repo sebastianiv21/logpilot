@@ -102,7 +102,7 @@ Enable DevOps and platform engineers to move from raw incident data to an eviden
 4. Logs are ingested into Loki with queryable labels.
 5. Metrics are derived and exposed to Prometheus.
 6. Grafana dashboards show log and metric trends.
-7. Documentation and repository content are indexed into Qdrant.
+7. Documentation and repository content are embedded into pgvector.
 8. User asks an incident question.
 9. AI agent queries logs, metrics, docs, and repository context.
 10. AI agent returns a structured incident report.
@@ -217,7 +217,7 @@ The system must ingest documentation, runbooks, and repository content into a se
 - Support ingestion of markdown, text, and source code files.
 - Chunk content into retrievable segments.
 - Generate embeddings for each chunk.
-- Store embeddings and metadata in Qdrant.
+- Store embeddings and metadata in PostgreSQL with the pgvector extension.
 - Preserve source metadata such as file path, repository, and document type.
 
 #### Acceptance Criteria
@@ -321,7 +321,7 @@ The system must protect the agent workflow from unsafe or invalid behavior.
 - Loki ingestion
 - Prometheus metric generation
 - Grafana dashboard provisioning
-- Document and repository indexing into Qdrant
+- Document and repository indexing into pgvector
 - AI incident investigation agent with approved tools
 - Structured incident report generation
 
@@ -354,7 +354,7 @@ The system must protect the agent workflow from unsafe or invalid behavior.
 - Grafana
 - Loki
 - Prometheus
-- Qdrant
+- PostgreSQL with pgvector
 - Configurable LLM provider (OpenAI, OpenRouter, or OpenAI-compatible API)
 - LangGraph (or equivalent agent framework)
 - Docker
@@ -406,7 +406,7 @@ Mitigation: Design the AI layer around a configurable, OpenAI-compatible client 
 ### Phase 3: Knowledge Layer
 - Ingest docs and runbooks
 - Ingest repository code
-- Generate embeddings and store in Qdrant
+- Generate embeddings and store in pgvector
 
 ### Phase 4: AI Investigation
 - Implement configurable LLM client (OpenAI-compatible; support OpenAI and OpenRouter via config)

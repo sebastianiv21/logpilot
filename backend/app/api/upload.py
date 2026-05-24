@@ -25,8 +25,6 @@ class UploadResultResponse(BaseModel):
     status: str
     files_processed: int
     files_skipped: int
-    lines_parsed: int
-    lines_rejected: int
     session_id: str
     error: str | None = None
     uploaded_file_name: str | None = None
@@ -53,8 +51,6 @@ def get_upload_summary(session_id: str) -> UploadResultResponse:
         status=summary["status"],
         files_processed=summary["files_processed"],
         files_skipped=summary["files_skipped"],
-        lines_parsed=summary["lines_parsed"],
-        lines_rejected=summary["lines_rejected"],
         session_id=summary["session_id"],
         error=summary["error"],
         uploaded_file_name=summary.get("uploaded_file_name"),
@@ -127,8 +123,6 @@ async def upload_logs(
         status=result.status,
         files_processed=result.files_processed,
         files_skipped=result.files_skipped,
-        lines_parsed=result.lines_parsed,
-        lines_rejected=result.lines_rejected,
         error=result.error,
         uploaded_file_name=file.filename,
         uploaded_file_size_bytes=total,
@@ -141,8 +135,6 @@ async def upload_logs(
         status=result.status,
         files_processed=result.files_processed,
         files_skipped=result.files_skipped,
-        lines_parsed=result.lines_parsed,
-        lines_rejected=result.lines_rejected,
         session_id=result.session_id,
         error=result.error,
         uploaded_file_name=file.filename,

@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import ASGIApp, Receive, Scope, Send
@@ -18,7 +18,6 @@ from app.api.sessions import router as sessions_router
 from app.api.suggestions import router as suggestions_router
 from app.api.upload import router as upload_router
 from app.lib.db import close_pool, init_pool, initialize_schema
-from app.lib.prometheus_client import get_metrics
 from app.services.retention import run_session_retention_cleanup
 
 logger = logging.getLogger(__name__)
@@ -83,11 +82,6 @@ app.include_router(logs_router)
 app.include_router(reports_router)
 app.include_router(suggestions_router)
 app.include_router(knowledge_router)
-
-
-@app.get("/metrics", include_in_schema=False)
-def metrics() -> Response:
-    return Response(content=get_metrics(), media_type="text/plain; version=0.0.4; charset=utf-8")
 
 
 @app.exception_handler(StarletteHTTPException)

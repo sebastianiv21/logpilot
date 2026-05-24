@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 
 AGENT_INSTRUCTIONS = """You are an incident investigation assistant. Read-only tools:
 - query_logs: log store (query, start, end, limit)
-- query_metrics: derived metrics (metric_name, start, end, step)
 - search_docs: semantic search over docs/knowledge
 - search_past_incidents: find prior incident reports semantically similar to a
   query. Call this early when the symptoms are concrete (specific error
@@ -117,24 +116,6 @@ def _make_agent() -> Agent[AgentDeps, IncidentReport]:
             start=start,
             end=end,
             limit=limit,
-        )
-
-    @agent.tool
-    def query_metrics(
-        ctx: RunContext[AgentDeps],
-        metric_name: str,
-        start: str,
-        end: str,
-        step: str = "15s",
-    ) -> dict[str, Any]:
-        """Query derived Prometheus metrics for the session
-        (errors_total, error_rate, response_time, ...)."""
-        return agent_tools.query_metrics(
-            session_id=ctx.deps.session_id,
-            metric_name=metric_name,
-            start=start,
-            end=end,
-            step=step,
         )
 
     @agent.tool_plain
