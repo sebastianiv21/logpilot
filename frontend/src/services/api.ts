@@ -10,6 +10,7 @@ import {
   LogsQueryResponseSchema,
   ReportListSchema,
   ReportSchema,
+  SuggestedQuestionsResponseSchema,
   UploadResultSchema,
 } from '../lib/schemas';
 import type {
@@ -22,6 +23,7 @@ import type {
   ReportList,
   Session,
   SessionList,
+  SuggestedQuestionsResponse,
   UploadResult,
 } from '../lib/schemas';
 
@@ -324,4 +326,17 @@ export function downloadBlob(blob: Blob, filename: string): void {
   a.download = filename;
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+// --- Suggested questions ---
+
+/** GET /sessions/{session_id}/suggested-questions — three pill suggestions for the question input.
+ *  Backend returns empty list (not 5xx) when LLM is unconfigured or the agent run fails. */
+export async function getSuggestedQuestions(
+  sessionId: string
+): Promise<SuggestedQuestionsResponse> {
+  const raw = await apiFetch<unknown>(
+    `/sessions/${encodeURIComponent(sessionId)}/suggested-questions`
+  );
+  return SuggestedQuestionsResponseSchema.parse(raw);
 }
