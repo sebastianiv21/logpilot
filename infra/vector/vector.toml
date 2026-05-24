@@ -1,0 +1,98 @@
+# LogPilot Vector configuration — dual-write parser sidecar.
+#
+# Vector reads log files dropped by the backend into /var/log/logpilot/<session>/<service>/...
+# and pushes them to Loki with parser="vector". Coexists with the Python parser
+# (parser="python"); queries default to the Python labelset until cutover.
+#
+# Operators wanting a custom parser can bind-mount their own vector.toml over
+# /etc/vector/vector.toml — that's the "external parsing config" knob (TODO 7).
+
+data_dir = "/var/lib/vector"
+
+# ---------------------------------------------------------------------------
+# Source: every supported log file under the shared drop volume.
+# Backend writes files at /var/log/logpilot/<session_id>/<service>/<filename>.
+# ---------------------------------------------------------------------------
+[sources.session_logs]
+type = "file"
+include = [
+  "/var/log/logpilot/*/*/stdout",
+  "/var/log/logpilot/*/*/stderr",
+  "/var/log/logpilot/*/*/*.log",
+]
+read_from = "beginning"
+ignore_older_secs = 0  # never expire — sessions can sit on disk for days
+
+# ---------------------------------------------------------------------------
+# Transform: derive session_id + service from the path, then apply a robust
+# timestamp fallback chain. VRL handles parsing, the previous-line carry-over,
+# and the file-mtime / now() backstops in one place.
+#
+# TODO 5: service name = parent folder of stdout / stderr / *.log
+# TODO 4: timestamp fallback = parsed → previous-line carry-over → now()
+# ---------------------------------------------------------------------------
+[transforms.parse_and_label]
+type = "remap"
+inputs = ["session_logs"]
+source = '''
+# Pull session and service out of the conventional path layout.
+captures, err = parse_regex(.file, r'/var/log/logpilot/(?P<session>[^/]+)/(?P<service>[^/]+)/[^/]+$')
+if err == null {
+  .session_id = captures.session
+  .service = captures.service
+}
+
+# Best-effort timestamp extraction from the raw line.
+# Recognises ISO 8601 first; falls through to other common formats if needed.
+parsed_ts = null
+for_each([
+  "%Y-%m-%dT%H:%M:%S%.fZ",
+  "%Y-%m-%dT%H:%M:%S%.f%:z",
+  "%Y-%m-%d %H:%M:%S%.f",
+  "%Y-%m-%dT%H:%M:%SZ",
+]) -> |_index, fmt| {
+  if parsed_ts == null {
+    candidate, parse_err = parse_timestamp(.message, format: fmt)
+    if parse_err == null {
+      parsed_ts = candidate
+    }
+  }
+}
+
+if parsed_ts != null {
+  .timestamp = parsed_ts
+} else if exists(.previous_ts) {
+  # Continuation lines (stack frames, indented blocks) inherit the carried ts.
+  .timestamp = .previous_ts
+} else {
+  # No timestamp anywhere; use ingest time. Vector's file source doesn't
+  # surface file mtime as a VRL field, so now() is the best we can do here.
+  .timestamp = now()
+}
+
+# Carry the parsed timestamp forward for the next event from the same source.
+if parsed_ts != null {
+  .previous_ts = parsed_ts
+}
+
+# Tag the parser so dual-write queries can pick a side.
+.parser = "vector"
+'''
+
+# ---------------------------------------------------------------------------
+# Sink: Loki, with the parser label set so the Python pipeline's pushes stay
+# distinguishable. session_id and service round-trip through labels so the
+# existing UI/agent queries still match.
+# ---------------------------------------------------------------------------
+[sinks.loki]
+type = "loki"
+inputs = ["parse_and_label"]
+endpoint = "http://loki:3100"
+encoding.codec = "text"
+labels.session_id = "{{ session_id }}"
+labels.service = "{{ service }}"
+labels.parser = "vector"
+labels.source = "vector_file"
+out_of_order_action = "accept"
+remove_label_fields = true
+remove_timestamp = false
