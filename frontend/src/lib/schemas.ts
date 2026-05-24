@@ -122,6 +122,12 @@ export const ReportGenerateFormSchema = z.object({
 });
 export type ReportGenerateFormValues = z.infer<typeof ReportGenerateFormSchema>;
 
+/** Suggested questions for a session — pills shown above the question input. */
+export const SuggestedQuestionsResponseSchema = z.object({
+  questions: z.array(z.string()),
+});
+export type SuggestedQuestionsResponse = z.infer<typeof SuggestedQuestionsResponseSchema>;
+
 // --- Knowledge ---
 export const KnowledgeSourceStatusSchema = z.object({
   source_key: z.enum(['docs']),

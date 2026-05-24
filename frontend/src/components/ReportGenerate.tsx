@@ -15,6 +15,7 @@ import { getUploadSummary } from '../services/api';
 import { useCurrentSession } from '../contexts/SessionContext';
 import { useReportGeneration } from '../contexts/ReportGenerationContext';
 import { useGenerateReport } from '../hooks/useReports';
+import { QuestionSuggestions } from './QuestionSuggestions';
 
 export function ReportGenerate() {
   const { currentSessionId } = useCurrentSession();
@@ -37,6 +38,8 @@ export function ReportGenerate() {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
+    setFocus,
   } = useForm<ReportGenerateFormValues>({
     resolver: zodResolver(ReportGenerateFormSchema),
     defaultValues: { question: '' },
@@ -82,6 +85,16 @@ export function ReportGenerate() {
           <Upload size={18} aria-hidden />
           <span>Upload logs first to generate reports.</span>
         </div>
+      )}
+
+      {currentSessionId && hasUpload && (
+        <QuestionSuggestions
+          sessionId={currentSessionId}
+          onSelect={(q) => {
+            setValue('question', q, { shouldValidate: true, shouldDirty: true });
+            setFocus('question');
+          }}
+        />
       )}
 
       <form onSubmit={onSubmit} className="space-y-2">
