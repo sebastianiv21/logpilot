@@ -1,4 +1,4 @@
-"""Agent tools: query_logs, query_metrics, search_docs, grep_repo, read_file.
+"""Agent tools: query_logs, search_docs, grep_repo, read_file.
 
 All tools are read-only and (where session-relevant) session-scoped. `grep_repo`
 and `read_file` operate on source code on demand via ripgrep — code is no longer
@@ -11,7 +11,7 @@ import logging
 from datetime import datetime
 from typing import Any
 
-from app.lib import loki_client, prometheus_query
+from app.lib import loki_client
 from app.lib.repositories import SessionRepository
 from app.services import code_search, knowledge
 
@@ -83,34 +83,6 @@ def query_logs(
             "raw_message": r.get("raw_message", ""),
         })
     return {"logs": logs}
-
-
-def query_metrics(
-    session_id: str,
-    metric_name: str,
-    start: str,
-    end: str,
-    step: str = "15s",
-) -> dict[str, Any]:
-    """
-    Query derived metrics for the session. Returns time series or scalar values.
-    Input: metric_name, start/end ISO, optional step.
-    """
-    _validate_session(session_id)
-    if not start or not end:
-        return {"error": "start and end are required", "values": [], "metric_not_available": True}
-    try:
-        result = prometheus_query.query_range(
-            metric_name=metric_name,
-            session_id=session_id,
-            start=start,
-            end=end,
-            step=step,
-        )
-    except Exception as e:
-        logger.warning("query_metrics failed: %s", e)
-        return {"error": str(e), "values": [], "metric_not_available": True}
-    return result
 
 
 def search_docs(

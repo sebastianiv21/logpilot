@@ -207,8 +207,7 @@ class SessionRepository:
         with get_pool().connection() as conn:
             row = conn.execute(
                 "SELECT session_id, status, files_processed, files_skipped, "
-                "lines_parsed, lines_rejected, error, updated_at, uploaded_file_name, "
-                "uploaded_file_size_bytes "
+                "error, updated_at, uploaded_file_name, uploaded_file_size_bytes "
                 "FROM session_upload_summary WHERE session_id = %s",
                 (session_id,),
             ).fetchone()
@@ -219,12 +218,10 @@ class SessionRepository:
             "status": row[1],
             "files_processed": int(row[2]),
             "files_skipped": int(row[3]),
-            "lines_parsed": int(row[4]),
-            "lines_rejected": int(row[5]),
-            "error": row[6],
-            "updated_at": _dt_to_iso(row[7]),
-            "uploaded_file_name": row[8],
-            "uploaded_file_size_bytes": int(row[9]) if row[9] is not None else None,
+            "error": row[4],
+            "updated_at": _dt_to_iso(row[5]),
+            "uploaded_file_name": row[6],
+            "uploaded_file_size_bytes": int(row[7]) if row[7] is not None else None,
         }
 
     def upsert_upload_summary(
@@ -233,8 +230,6 @@ class SessionRepository:
         status: str,
         files_processed: int,
         files_skipped: int,
-        lines_parsed: int,
-        lines_rejected: int,
         error: str | None = None,
         uploaded_file_name: str | None = None,
         uploaded_file_size_bytes: int | None = None,
@@ -243,23 +238,20 @@ class SessionRepository:
         with get_pool().connection() as conn:
             conn.execute(
                 "INSERT INTO session_upload_summary "
-                "(session_id, status, files_processed, files_skipped, lines_parsed, "
-                "lines_rejected, error, uploaded_file_name, uploaded_file_size_bytes, updated_at) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW()) "
+                "(session_id, status, files_processed, files_skipped, "
+                "error, uploaded_file_name, uploaded_file_size_bytes, updated_at) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, NOW()) "
                 "ON CONFLICT (session_id) DO UPDATE SET "
                 "status = EXCLUDED.status, "
                 "files_processed = EXCLUDED.files_processed, "
                 "files_skipped = EXCLUDED.files_skipped, "
-                "lines_parsed = EXCLUDED.lines_parsed, "
-                "lines_rejected = EXCLUDED.lines_rejected, "
                 "error = EXCLUDED.error, "
                 "uploaded_file_name = EXCLUDED.uploaded_file_name, "
                 "uploaded_file_size_bytes = EXCLUDED.uploaded_file_size_bytes, "
                 "updated_at = EXCLUDED.updated_at",
                 (
                     session_id, status, files_processed, files_skipped,
-                    lines_parsed, lines_rejected, error, uploaded_file_name,
-                    uploaded_file_size_bytes,
+                    error, uploaded_file_name, uploaded_file_size_bytes,
                 ),
             )
             conn.commit()

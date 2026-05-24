@@ -15,7 +15,6 @@ from app.mcp_server.server import mcp
 
 EXPECTED_TOOLS = {
     "query_logs",
-    "query_metrics",
     "search_docs",
     "search_past_incidents",
     "grep_repo",

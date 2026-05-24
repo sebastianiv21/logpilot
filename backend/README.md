@@ -34,7 +34,7 @@ Wire it into Claude Code via `~/.claude.json` (or equivalent):
 }
 ```
 
-Tools exposed: `query_logs`, `query_metrics`, `search_docs`, `grep_repo`, `read_file`, `generate_incident_report`, `list_sessions`, `get_session`. The server needs the same env vars the backend does (`DATABASE_URL`, `LOKI_URL`, `LLM_API_KEY`, `KNOWLEDGE_CODE_SOURCES`, etc.) — easiest is to launch from a shell that already has them set.
+Tools exposed: `query_logs`, `search_docs`, `search_past_incidents`, `grep_repo`, `read_file`, `generate_incident_report`, `list_sessions`, `get_session`. The server needs the same env vars the backend does (`DATABASE_URL`, `LOKI_URL`, `LLM_API_KEY`, `KNOWLEDGE_CODE_SOURCES`, etc.) — easiest is to launch from a shell that already has them set.
 
 ## PDF export
 

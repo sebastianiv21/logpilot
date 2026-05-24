@@ -1,4 +1,4 @@
-# LogPilot MVP: Loki, Prometheus, Grafana, PostgreSQL+pgvector (quickstart ports)
+# LogPilot MVP: Loki, Grafana, PostgreSQL+pgvector, Vector (quickstart ports)
 # Start: docker compose up -d
 
 services:
@@ -12,24 +12,6 @@ services:
       - ./docker/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O- http://localhost:3100/ready || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  prometheus:
-    image: prom/prometheus:v3.0.0
-    ports:
-      - "9090:9090"
-    command:
-      - --config.file=/etc/prometheus/prometheus.yml
-      - --storage.tsdb.path=/prometheus
-      - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION_TIME:-30d}
-      - --web.enable-lifecycle
-    volumes:
-      - prometheus-data:/prometheus
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O-", "http://localhost:9090/-/healthy"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -48,8 +30,6 @@ services:
       - ./docker/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
     depends_on:
       loki:
-        condition: service_healthy
-      prometheus:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O- http://localhost:3000/api/health || exit 1"]
@@ -98,13 +78,13 @@ services:
       - "8000:8000"
     environment:
       LOKI_URL: http://loki:3100
-      PROMETHEUS_URL: http://prometheus:9090
       DATABASE_URL: postgresql://logpilot:logpilot@postgres:5432/logpilot
       # Container-side knowledge paths are fixed. Configure the host-side
       # source dirs via KNOWLEDGE_CODE_HOST_PATH / KNOWLEDGE_DOC_HOST_PATH in .env.
       KNOWLEDGE_CODE_SOURCES: /knowledge/code
       KNOWLEDGE_DOC_SOURCES: /knowledge/docs
-      # Vector parser sidecar: backend drops files here, Vector reads them.
+      # Vector sidecar: backend drops extracted log files here, Vector tails
+      # them and pushes to Loki.
       VECTOR_LOG_DROP_DIR: /var/log/logpilot
     env_file:
       - .env
@@ -127,8 +107,6 @@ services:
         condition: service_healthy
       loki:
         condition: service_healthy
-      prometheus:
-        condition: service_healthy
       postgres:
         condition: service_healthy
     healthcheck:
@@ -139,7 +117,6 @@ services:
 
 volumes:
   loki-data:
-  prometheus-data:
   grafana-data:
   postgres-data:
   vector-logs:

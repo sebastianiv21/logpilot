@@ -59,25 +59,6 @@ def query_logs(
 
 
 @mcp.tool()
-def query_metrics(
-    session_id: str,
-    metric_name: str,
-    start: str,
-    end: str,
-    step: str = "15s",
-) -> dict[str, Any]:
-    """Query derived Prometheus metrics for the session (e.g. errors_total,
-    error_rate, response_time). start/end ISO 8601; step is a Prometheus step."""
-    return agent_tools.query_metrics(
-        session_id=session_id,
-        metric_name=metric_name,
-        start=start,
-        end=end,
-        step=step,
-    )
-
-
-@mcp.tool()
 def search_docs(query: str, limit: int = 10) -> dict[str, Any]:
     """Semantic search over ingested documentation chunks. Returns chunks with
     content, source_path, and metadata. Limit capped at 10."""

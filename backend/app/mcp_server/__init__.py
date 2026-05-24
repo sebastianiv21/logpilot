@@ -2,8 +2,8 @@
 
 External agents (Claude Code, Cursor, Hermes, etc.) connect via stdio and can
 call the same tools the in-process PydanticAI agent uses: query_logs,
-query_metrics, search_docs, grep_repo, read_file, generate_incident_report,
-plus read-only session metadata.
+search_docs, grep_repo, read_file, generate_incident_report, plus read-only
+session metadata.
 
 Module is named ``mcp_server`` (not ``mcp``) to avoid colliding with the
 upstream ``mcp`` SDK package — ``pyproject.toml`` adds ``app/`` to

@@ -49,8 +49,7 @@ def _session_id(client: TestClient) -> str:
 
 
 @pytest.fixture
-def client(tmp_path, monkeypatch) -> TestClient:
-    monkeypatch.setattr(app_config.config, "DATA_DIR", tmp_path)
+def client(monkeypatch) -> TestClient:
     monkeypatch.setattr(app_config.config, "LLM_API_KEY", "test-key")
     return TestClient(app)
 

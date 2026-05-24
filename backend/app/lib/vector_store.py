@@ -100,6 +100,5 @@ def get_vector_store() -> VectorStore:
 
         return PgVectorStore()
     raise ValueError(
-        f"Unknown VECTOR_STORE={backend!r}. "
-        "Supported: 'pgvector'. (qdrant lands in a follow-up phase.)"
+        f"Unknown VECTOR_STORE={backend!r}. Supported: 'pgvector'."
     )

@@ -4,9 +4,7 @@ import uuid
 
 import pytest
 
-# Import after patching so config uses test DATA_DIR
 from app.api.app import app
-from app.lib import config as app_config
 from fastapi.testclient import TestClient
 
 
@@ -39,9 +37,8 @@ def _assert_session_object(obj: dict) -> None:
 
 
 @pytest.fixture
-def client(tmp_path, monkeypatch):
-    """Test client with isolated SQLite in tmp_path."""
-    monkeypatch.setattr(app_config.config, "DATA_DIR", tmp_path)
+def client():
+    """Test client backed by the PostgreSQL pool initialized in conftest."""
     return TestClient(app)
 
 
