@@ -26,7 +26,11 @@ data_dir = "/var/lib/vector"
 [sources.session_logs]
 type = "file"
 include = ["/var/log/logpilot/*/*/*"]
-exclude = ["/var/log/logpilot/*/*/.*"]
+exclude = [
+  "/var/log/logpilot/*/*/.*",            # hidden / dot-files
+  "/var/log/logpilot/*/appsmithctl/*",   # backup runner output — high-volume, low signal
+  "/var/log/logpilot/*/cron/*",          # cron heartbeats — high-volume, low signal
+]
 read_from = "beginning"
 # Note: do NOT set ignore_older_secs — it's a "maximum age" threshold (seconds),
 # and 0 means "ignore everything older than 0 seconds" (i.e. all files). Omit
