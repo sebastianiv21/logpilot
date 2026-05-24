@@ -6,8 +6,12 @@ Vector runs alongside the backend and re-parses every log file the backend drops
 
 [`vector.toml`](./vector.toml) addresses three TODOs from the architecture plan:
 
-- **TODO 4 — timestamp fallback.** VRL tries several ISO formats on each line. On miss, it carries the previous line's timestamp forward (so stack-trace continuations inherit the parent's time), then falls back to ingest time (`now()`). Vector's `file` source doesn't surface the file's mtime as a VRL field, so a true mtime fallback is deferred to a custom transform if you ever need it.
-- **TODO 5 — service from parent folder.** The path layout is `/var/log/logpilot/<session_id>/<service>/<filename>`, including `stdout` and `stderr`. A single regex extracts both labels — no host-side directory convention required.
+- **TODO 4 — timestamp fallback.** VRL handles three shapes:
+  - JSON-line records — MongoDB's `t.$date`, Caddy's `ts` (epoch float)
+  - Text-prefix records — ISO 8601 with `T` (most services), Postgres `YYYY-MM-DD HH:MM:SS.fff UTC`, supervisor/keycloak `YYYY-MM-DD HH:MM:SS,SSS`, Redis `<pid>:<role> DD Mon YYYY HH:MM:SS.SSS`
+  - Anything else (SLF4J banners, prose, stack frames) — ingest time (`now()`)
+  - True "carry the previous line's timestamp forward to stack-trace continuations" needs Vector's `multiline` config on the file source — different start pattern per service. Deferred to a follow-up.
+- **TODO 5 — service from parent folder.** The path layout is `/var/log/logpilot/<session_id>/<service>/<filename>`, where filename can be `<container_id>-stdout.log`, `<container_id>-stderr.log`, or any `*.log`. A single regex extracts session_id + service + filename; a second regex pulls `container_id` and `stream` (stdout/stderr) out of docker-style filenames.
 - **TODO 7 — configurable parsing.** The config is a single mounted file. Override by bind-mounting your own at `/etc/vector/vector.toml`:
 
   ```yaml
