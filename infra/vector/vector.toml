@@ -1,0 +1,197 @@
+# LogPilot Vector configuration — dual-write parser sidecar.
+#
+# Vector reads log files dropped by the backend into
+# /var/log/logpilot/<session_id>/<service>/<filename> and pushes them to Loki
+# with parser="vector". Coexists with the Python parser (parser="python");
+# queries default to the Python labelset until cutover.
+#
+# Operators wanting a custom parser can bind-mount their own vector.toml over
+# /etc/vector/vector.toml — that's the "external parsing config" knob (TODO 7).
+#
+# The VRL transform below is tuned against the Appsmith-style multi-service
+# log archive (backend, mongodb, postgres, redis, keycloak, rts, temporal,
+# supervisor, editor, appsmithctl). Add a new "if parsed_ts == null" block
+# per new format you encounter — the chain is intentionally explicit.
+
+data_dir = "/var/lib/vector"
+
+# ---------------------------------------------------------------------------
+# Source: every file under the shared drop volume.
+# Backend writes at /var/log/logpilot/<session_id>/<service>/<filename> where
+# filename can be:
+#   - <container_id>-stdout.log  (docker-style per-container streams)
+#   - <container_id>-stderr.log
+#   - any plain *.log            (db.log, backup.log, dated rotations, ...)
+# ---------------------------------------------------------------------------
+[sources.session_logs]
+type = "file"
+include = ["/var/log/logpilot/*/*/*"]
+exclude = [
+  "/var/log/logpilot/*/*/.*",            # hidden / dot-files
+  "/var/log/logpilot/*/appsmithctl/*",   # backup runner output — high-volume, low signal
+  "/var/log/logpilot/*/cron/*",          # cron heartbeats — high-volume, low signal
+]
+read_from = "beginning"
+# Note: do NOT set ignore_older_secs — it's a "maximum age" threshold (seconds),
+# and 0 means "ignore everything older than 0 seconds" (i.e. all files). Omit
+# the setting to disable age-based filtering, which is what we want for
+# historical uploads.
+
+# Real-world log archives have many empty or near-empty `*-stderr.log` files.
+# Vector's default fingerprint reads the first N bytes; empty/short files end
+# up identical and collapse together ("More than one file has the same
+# fingerprint" log spam). device_and_inode is unique per inode — exactly what
+# we want for files sitting on a single mounted volume.
+fingerprint.strategy = "device_and_inode"
+
+# ---------------------------------------------------------------------------
+# Transform: derive labels and apply a robust timestamp fallback chain.
+#
+# TODO 5: service name = parent folder of stdout / stderr / *.log.
+# TODO 4: timestamp fallback = parsed → ingest time (now()). Parsing tries
+#         JSON shapes first (mongodb $$date, caddy epoch), then common text
+#         prefixes (ISO/T, postgres UTC, supervisor comma-millis, redis
+#         pid-prefix). Continuation-line carry-over needs Vector's `multiline`
+#         config on the source (deferred — different start pattern per service).
+# ---------------------------------------------------------------------------
+[transforms.parse_and_label]
+type = "remap"
+inputs = ["session_logs"]
+# Keep events on the path even when a VRL expression aborts (`!`-suffixed
+# function panics on unexpected types). The transform's job is best-effort
+# enrichment; an event with no parsed timestamp is still better than no event.
+drop_on_error = false
+drop_on_abort = false
+source = '''
+# ---------- 1. Path-derived labels ----------------------------------------
+captures = parse_regex(.file, r'/var/log/logpilot/(?P<session>[^/]+)/(?P<service>[^/]+)/(?P<filename>[^/]+)$') ?? null
+if captures != null {
+  .session_id = captures.session
+  .service = captures.service
+  .filename = captures.filename
+
+  # Optional: container_id + stream from docker-style filenames.
+  stream_match = parse_regex(captures.filename, r'^(?P<container>[0-9a-f]{6,})-(?P<stream>stdout|stderr)\.log$') ?? null
+  if stream_match != null {
+    .container_id = stream_match.container
+    .stream = stream_match.stream
+  }
+}
+
+# ---------- 2. Try JSON shapes first --------------------------------------
+parsed_ts = null
+log_level = null
+
+parsed_json = parse_json(.message) ?? null
+if is_object(parsed_json) {
+  # MongoDB: {"t":{"$$date":"2026-04-16T20:56:21.362Z"}, "s":"I", ...}
+  # ($$ escapes Vector's env-var substitution; VRL sees a literal $)
+  mongo_date = parsed_json.t."$$date"
+  if is_string(mongo_date) {
+    parsed_ts = parse_timestamp(mongo_date, format: "%Y-%m-%dT%H:%M:%S%.fZ") ??
+                parse_timestamp(mongo_date, format: "%Y-%m-%dT%H:%M:%SZ") ??
+                null
+    sev = parsed_json.s
+    if is_string(sev) { log_level = sev }
+  }
+
+  # Caddy: {"level":"info","ts":1776372391.627854,...}
+  if parsed_ts == null {
+    caddy_ts = parsed_json.ts
+    if is_float(caddy_ts) || is_integer(caddy_ts) {
+      caddy_ts_float = to_float(caddy_ts) ?? 0.0
+      if caddy_ts_float != 0.0 {
+        ts_us = to_int(caddy_ts_float * 1000000.0)
+        parsed_ts = from_unix_timestamp(ts_us, unit: "microseconds") ?? null
+      }
+    }
+    lvl = parsed_json.level
+    if is_string(lvl) { log_level = lvl }
+  }
+}
+
+# ---------- 3. Text-prefix formats ----------------------------------------
+
+# ISO with T, optional fractional seconds, Z or numeric offset.
+# Examples: 2026-04-16T20:46:29.949Z  /  2026-04-17T00:00:00.765+0000
+if parsed_ts == null {
+  m = parse_regex(.message, r'^(?P<ts>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+\-]\d{2}:?\d{2}))') ?? null
+  if m != null {
+    parsed_ts = parse_timestamp(m.ts, format: "%Y-%m-%dT%H:%M:%S%.fZ") ??
+                parse_timestamp(m.ts, format: "%Y-%m-%dT%H:%M:%SZ") ??
+                parse_timestamp(m.ts, format: "%Y-%m-%dT%H:%M:%S%.f%:z") ??
+                parse_timestamp(m.ts, format: "%Y-%m-%dT%H:%M:%S%.f%z") ??
+                null
+  }
+}
+
+# Postgres: "YYYY-MM-DD HH:MM:SS.fff UTC ..."
+if parsed_ts == null {
+  m = parse_regex(.message, r'^(?P<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+) UTC') ?? null
+  if m != null {
+    parsed_ts = parse_timestamp(string!(m.ts) + "Z", format: "%Y-%m-%d %H:%M:%S%.fZ") ?? null
+  }
+}
+
+# Supervisor / Keycloak: "YYYY-MM-DD HH:MM:SS,SSS ..."
+if parsed_ts == null {
+  m = parse_regex(.message, r'^(?P<date>\d{4}-\d{2}-\d{2}) (?P<time>\d{2}:\d{2}:\d{2}),(?P<ms>\d{3})') ?? null
+  if m != null {
+    normalized = string!(m.date) + " " + string!(m.time) + "." + string!(m.ms)
+    parsed_ts = parse_timestamp(normalized, format: "%Y-%m-%d %H:%M:%S%.f") ?? null
+  }
+}
+
+# Redis: "<pid>:<role> DD Mon YYYY HH:MM:SS.SSS ..."
+if parsed_ts == null {
+  m = parse_regex(.message, r'^\d+:[A-Z] (?P<ts>\d{1,2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2}\.\d+)') ?? null
+  if m != null {
+    parsed_ts = parse_timestamp(m.ts, format: "%d %b %Y %H:%M:%S%.f") ?? null
+  }
+}
+
+# ---------- 4. Timestamp fallback -----------------------------------------
+# Note: VRL `remap` is stateless across events, so a true "carry the previous
+# line's timestamp forward" pass would require Vector's `multiline` config on
+# the source — different per service. For now: parsed line wins; everything
+# else (stack-trace continuations, prose banners) gets ingest time.
+if parsed_ts != null {
+  .timestamp = parsed_ts
+} else {
+  .timestamp = now()
+}
+
+# ---------- 5. Log-level extraction (best-effort) -------------------------
+if log_level == null {
+  m = parse_regex(.message, r'\b(?P<lvl>FATAL|CRITICAL|CRIT|ERROR|ERR|WARNING|WARN|INFO|DEBUG|TRACE|NOTICE)\b') ?? null
+  if m != null {
+    log_level = m.lvl
+  }
+}
+if log_level != null {
+  .log_level = downcase(log_level) ?? log_level
+}
+
+# ---------- 6. Tag the parser side ----------------------------------------
+.parser = "vector"
+'''
+
+# ---------------------------------------------------------------------------
+# Sink: Loki, with the parser label set so the Python pipeline's pushes stay
+# distinguishable. session_id and service round-trip through labels so the
+# existing UI/agent queries still match. stream is a 2-value label (stdout
+# /stderr) — low-cardinality, high-utility for ops queries.
+# ---------------------------------------------------------------------------
+[sinks.loki]
+type = "loki"
+inputs = ["parse_and_label"]
+endpoint = "http://loki:3100"
+encoding.codec = "text"
+labels.session_id = "{{ session_id }}"
+labels.service = "{{ service }}"
+labels.parser = "vector"
+labels.stream = "{{ stream }}"
+labels.source = "vector_file"
+out_of_order_action = "accept"
+remove_label_fields = true
+remove_timestamp = false

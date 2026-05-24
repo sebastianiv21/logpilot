@@ -161,10 +161,15 @@ def query_logs(
     """
     # Build LogQL: {session_id="..." [, label=value, ...] }
     parts = [f'session_id="{session_id}"']
-    if label_filters:
-        for k, v in label_filters.items():
-            if v:
-                parts.append(f'{k}="{v}"')
+    effective_filters = dict(label_filters or {})
+    # Default parser filter so dual-write (Python + Vector) doesn't surface
+    # both labelsets through the same query. Pass parser="" in label_filters
+    # to opt out (e.g. for ops queries that want both sides).
+    if "parser" not in effective_filters and config.LOKI_QUERY_PARSER:
+        effective_filters["parser"] = config.LOKI_QUERY_PARSER
+    for k, v in effective_filters.items():
+        if v:
+            parts.append(f'{k}="{v}"')
     logql = "{" + ", ".join(parts) + "}"
     params: dict[str, str | int] = {"query": logql, "limit": limit}
     if start_ns is not None:

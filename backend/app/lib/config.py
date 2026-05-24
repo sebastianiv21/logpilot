@@ -50,6 +50,24 @@ class Config:
             os.environ.get("EMBEDDING_DIMENSION", "1536").strip() or "1536"
         )
 
+        # Vector parser sidecar (dual-write).
+        # Backend drops extracted log files at:
+        #   <VECTOR_LOG_DROP_DIR>/<session_id>/<service>/<filename>
+        # so the Vector container can pick them up. Empty disables the drop.
+        self.VECTOR_LOG_DROP_DIR: str = (
+            os.environ.get("VECTOR_LOG_DROP_DIR") or ""
+        ).strip()
+        # Python pipeline pushes are tagged with this Loki label so queries can
+        # distinguish them from the Vector sidecar's pushes.
+        self.LOKI_PARSER_LABEL: str = (
+            os.environ.get("LOKI_PARSER_LABEL") or "python"
+        ).strip()
+        # Default `parser` label that query_logs filters on. Flip to "vector"
+        # during cutover; queries explicitly passing parser= override this.
+        self.LOKI_QUERY_PARSER: str = (
+            os.environ.get("LOKI_QUERY_PARSER") or "python"
+        ).strip()
+
         # Session retention
         self.SESSION_RETENTION_ENABLED: bool = (
             os.environ.get("SESSION_RETENTION_ENABLED", "true").strip().lower()
