@@ -37,13 +37,18 @@ class Chunk(TypedDict, total=False):
 class VectorSearchFilters(TypedDict, total=False):
     """Filters accepted by VectorStore.search.
 
-    Each filter may be a single value or a list (matches any). Implementations
-    may ignore unknown keys but should never silently accept misspelled ones —
-    add a key here when introducing a new filter dimension.
+    Each "match" filter (``document_type``, ``source_key``) may be a single
+    value or a list (matches any). ``exclude_session_id`` excludes chunks
+    whose metadata carries that session_id — used by cross-session incident
+    memory to keep the current session out of "have we seen this before?"
+    results. Implementations may ignore unknown keys but should never
+    silently accept misspelled ones — add a key here when introducing a new
+    filter dimension.
     """
 
     document_type: str | list[str]
     source_key: str | list[str]
+    exclude_session_id: str
 
 
 class VectorStore(Protocol):

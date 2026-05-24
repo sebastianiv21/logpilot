@@ -21,7 +21,8 @@ from pydantic_ai.providers.openai import OpenAIProvider
 
 from app.lib.config import config
 from app.lib.repositories import ReportRepository
-from app.services import agent_tools
+from app.services import agent_tools, incident_memory
+from app.services.incident_memory import PastIncident
 from app.services.report_model import REPORT_SECTIONS, IncidentReport, render_markdown
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,10 @@ AGENT_INSTRUCTIONS = """You are an incident investigation assistant. Read-only t
 - query_logs: log store (query, start, end, limit)
 - query_metrics: derived metrics (metric_name, start, end, step)
 - search_docs: semantic search over docs/knowledge
+- search_past_incidents: find prior incident reports semantically similar to a
+  query. Call this early when the symptoms are concrete (specific error
+  strings, services, root-cause families) — it's how you check "have we seen
+  this before?" before proposing a fix. Excludes the current session.
 - grep_repo: literal/regex search over source code (ripgrep). Use this when you
   have a concrete token to look up — error strings, function names from stack
   traces, service identifiers, file paths. Prefer narrow patterns and globs.
@@ -55,6 +60,11 @@ Guidance for each section:
   unsupported by evidence.
 - uncertainty: What's unknown or ambiguous given the evidence. Use "Not
   determined" only when there is no meaningful uncertainty to state.
+- related_past_incidents: When search_past_incidents returns matches, keep
+  only the ones that are genuinely relevant — same symptoms, same service,
+  same root-cause family. For each kept match, write a short why_relevant
+  explaining the link. Leave empty when no prior incident is similar enough
+  to warrant surfacing; do not pad.
 - Formatting: wrap file paths, env var names, short error strings, and inline
   code in single backticks. Use fenced code blocks for multi-line snippets.
 - Cite evidence in supporting_evidence."""
@@ -133,6 +143,36 @@ def _make_agent() -> Agent[AgentDeps, IncidentReport]:
         with content, source_path, metadata. Limit capped at 10."""
         return agent_tools.search_docs(query=query, limit=limit)
 
+    @agent.tool
+    def search_past_incidents(
+        ctx: RunContext[AgentDeps],
+        query: str,
+        limit: int = 5,
+        min_similarity: float = 0.75,
+    ) -> list[dict[str, Any]]:
+        """Find prior incident reports semantically similar to the query.
+        Excludes the current session. Returns up to ``limit`` matches with
+        session_id, report_id, question, summary, root_cause, created_at,
+        similarity — empty list if nothing crosses ``min_similarity``."""
+        results = incident_memory.search_past_incidents(
+            query,
+            current_session_id=ctx.deps.session_id,
+            limit=limit,
+            min_similarity=min_similarity,
+        )
+        return [
+            {
+                "session_id": r.session_id,
+                "report_id": r.report_id,
+                "question": r.question,
+                "summary": r.summary,
+                "root_cause": r.root_cause,
+                "created_at": r.created_at,
+                "similarity": r.similarity,
+            }
+            for r in results
+        ]
+
     @agent.tool_plain
     def grep_repo(
         pattern: str,
@@ -199,9 +239,25 @@ def generate_incident_report(
     if report_id is not None:
         if not repo.update_content(report_id, session_id, content):
             raise ValueError("Report not found for update")
-        return {"report_id": report_id, "content": content}
-    created = repo.create(session_id=session_id, content=content)
-    return {"report_id": created.id, "content": created.content}
+        existing = repo.get_by_id(report_id, session_id=session_id)
+        final_report_id = report_id
+        final_created_at = existing.created_at if existing else ""
+    else:
+        created = repo.create(session_id=session_id, content=content)
+        final_report_id = created.id
+        final_created_at = created.created_at
+
+    # Post-success indexing into cross-session incident memory. Failure here
+    # must never propagate — the user-visible report has already landed.
+    incident_memory.index_report(
+        session_id=session_id,
+        report_id=final_report_id,
+        question=question,
+        created_at=final_created_at,
+        report=report,
+    )
+
+    return {"report_id": final_report_id, "content": content}
 
 
 # ---------------------------------------------------------------------------

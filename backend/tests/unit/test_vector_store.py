@@ -151,6 +151,18 @@ class TestPgVectorStoreSearch:
         assert "document_type = %s" in select_sql
         assert " AND " in select_sql
 
+    def test_exclude_session_id_filter_uses_jsonb_metadata(self):
+        conn = _FakeConn(rows=[])
+        with _patched_pool(conn):
+            PgVectorStore().search(
+                [0.0], limit=10, filters={"exclude_session_id": "sess-current"}
+            )
+        select_sql, params = conn.executed[1]
+        assert "metadata->>'session_id'" in select_sql
+        assert "IS DISTINCT FROM" in select_sql
+        # Filter value lands in the param tuple alongside the query vector.
+        assert "sess-current" in params
+
 
 class TestPgVectorStoreDelete:
     def test_delete_by_source_only(self):

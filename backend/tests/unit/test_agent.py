@@ -82,10 +82,12 @@ def test_generate_incident_report_creates_new_when_no_report_id(
     fake_agent.run_sync.return_value = fake_run_result
 
     with patch.object(agent_module, "_make_agent", return_value=fake_agent) as make_agent, \
-         patch.object(agent_module, "ReportRepository") as MockRepo:
+         patch.object(agent_module, "ReportRepository") as MockRepo, \
+         patch.object(agent_module.incident_memory, "index_report", return_value=True) as index_report:
         created = MagicMock()
         created.id = "rep-123"
         created.content = "rendered markdown"
+        created.created_at = "2026-05-23T15:00:00Z"
         MockRepo.return_value.create.return_value = created
 
         result = generate_incident_report("sess-1", "Why are payments 503ing?")
@@ -96,7 +98,12 @@ def test_generate_incident_report_creates_new_when_no_report_id(
     _, kwargs = fake_agent.run_sync.call_args
     assert isinstance(kwargs["deps"], AgentDeps)
     assert kwargs["deps"].session_id == "sess-1"
-    assert result == {"report_id": "rep-123", "content": "rendered markdown"}
+    # Indexing happens after persistence with the resolved report_id + created_at
+    index_kwargs = index_report.call_args.kwargs
+    assert index_kwargs["session_id"] == "sess-1"
+    assert index_kwargs["report_id"] == "rep-123"
+    assert index_kwargs["created_at"] == "2026-05-23T15:00:00Z"
+    assert result["report_id"] == "rep-123"
 
 
 def test_generate_incident_report_updates_existing_when_report_id_given(
@@ -112,8 +119,12 @@ def test_generate_incident_report_updates_existing_when_report_id_given(
     fake_agent.run_sync.return_value = fake_run_result
 
     with patch.object(agent_module, "_make_agent", return_value=fake_agent), \
-         patch.object(agent_module, "ReportRepository") as MockRepo:
+         patch.object(agent_module, "ReportRepository") as MockRepo, \
+         patch.object(agent_module.incident_memory, "index_report", return_value=True):
         MockRepo.return_value.update_content.return_value = True
+        existing = MagicMock()
+        existing.created_at = "2024-01-01T00:00:00Z"
+        MockRepo.return_value.get_by_id.return_value = existing
 
         result = generate_incident_report(
             "sess-1", "Why are payments 503ing?", report_id="rep-existing"

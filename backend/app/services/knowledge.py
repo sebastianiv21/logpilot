@@ -12,9 +12,8 @@ import hashlib
 from pathlib import Path
 from typing import Any
 
-from openai import OpenAI
-
 from app.lib.config import config
+from app.lib.embeddings import embed_texts
 from app.lib.repositories import KnowledgeRepository
 from app.lib.vector_store import VectorSearchFilters, get_vector_store
 
@@ -106,30 +105,6 @@ def _document_type(path: Path) -> str:
     return "text"
 
 
-def _get_embeddings(texts: list[str]) -> list[list[float]]:
-    """Call OpenAI-compatible embeddings API; returns list of vectors."""
-    if not texts:
-        return []
-    if not config.LLM_API_KEY:
-        raise ValueError("LLM_API_KEY (or OPENAI_API_KEY) required for embeddings")
-    client = OpenAI(
-        api_key=config.LLM_API_KEY,
-        base_url=config.LLM_BASE_URL or "https://api.openai.com/v1",
-    )
-    # Batch to avoid token limits (e.g. 8192 per input)
-    batch_size = 50
-    all_embeddings: list[list[float]] = []
-    for i in range(0, len(texts), batch_size):
-        batch = texts[i : i + batch_size]
-        resp = client.embeddings.create(
-            input=batch,
-            model=config.EMBEDDING_MODEL,
-        )
-        for d in resp.data:
-            all_embeddings.append(d.embedding)
-    return all_embeddings
-
-
 def _fingerprint_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
@@ -167,7 +142,7 @@ def _chunk_file(
 def _embed_chunks(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
     if not chunks:
         return []
-    embeddings = _get_embeddings([chunk["content"] for chunk in chunks])
+    embeddings = embed_texts([chunk["content"] for chunk in chunks])
     if len(embeddings) != len(chunks):
         raise RuntimeError(f"Embedding count {len(embeddings)} != chunk count {len(chunks)}")
     for idx, chunk in enumerate(chunks):
@@ -255,7 +230,7 @@ def search_knowledge(
         logger.warning("LLM_API_KEY not set; cannot embed search query")
         return []
     texts = [query.strip()]
-    vectors = _get_embeddings(texts)
+    vectors = embed_texts(texts)
     if not vectors:
         return []
 
